@@ -1,0 +1,255 @@
+{
+  "experiment_info": {
+    "timestamp": "2026-02-08 15:46:31",
+    "description": "高维稀疏VAR模型结构性变化检验仿真实验",
+    "version": "v2.0",
+    "total_experiments": 8
+  },
+  "experiments": {
+    "exp1_basic_var": {
+      "parameters": {
+        "N": 3,
+        "T": 200,
+        "p": 1,
+        "B": 200
+      },
+      "Phi": [
+        [
+          0.14901424590336979,
+          -0.0414792903513554,
+          0.19430656143020775
+        ],
+        [
+          0.45690895692240757,
+          -0.07024601241700079,
+          -0.07024108708475416
+        ],
+        [
+          0.47376384465221744,
+          0.23023041874587263,
+          -0.14084231578048562
+        ]
+      ],
+      "sup_lr": 46.501331124052285,
+      "estimated_break": 40,
+      "p_value": 0.13,
+      "critical_values": {
+        "0.1": 48.25051534226943,
+        "0.05": 50.92129612292391,
+        "0.01": 54.88832858237203
+      },
+      "reject_h0": false,
+      "decision": "接受H0：不存在结构性变化"
+    },
+    "exp2_structural_break": {
+      "parameters": {
+        "N": 3,
+        "T": 200,
+        "p": 1,
+        "B": 200,
+        "true_break": 100
+      },
+      "Phi1": [
+        [
+          0.09934283060224654,
+          -0.027652860234236933,
+          0.1295377076201385
+        ],
+        [
+          0.3046059712816051,
+          -0.046830674944667194,
+          -0.04682739138983611
+        ],
+        [
+          0.3158425631014783,
+          0.15348694583058176,
+          -0.09389487718699042
+        ]
+      ],
+      "Phi2": [
+        [
+          -0.4671261206601123,
+          0.44946908931671714,
+          0.3065956996103984
+        ],
+        [
+          -0.5512589427836184,
+          -0.36572005039370725,
+          0.5802873074194302
+        ],
+        [
+          -0.7353358486786148,
+          -0.33578252577123546,
+          0.5031872517411069
+        ]
+      ],
+      "coefficient_change_norm": 1.8730236859952787,
+      "sup_lr": 177.40605008218336,
+      "estimated_break": 93,
+      "break_estimation_error": 7,
+      "p_value": 0.0,
+      "reject_h0": true,
+      "decision": "拒绝H0：存在结构性变化"
+    },
+    "exp3_type1_error": {
+      "parameters": {
+        "N": 2,
+        "T": 100,
+        "p": 1,
+        "M": 50,
+        "B": 100,
+        "alpha": 0.05
+      },
+      "Phi": [
+        [
+          0.14901424590336979,
+          -0.0414792903513554
+        ],
+        [
+          0.19430656143020775,
+          0.45690895692240757
+        ]
+      ],
+      "type1_error": 0.04,
+      "nominal_alpha": 0.05,
+      "size_distortion": -0.010000000000000002,
+      "rejections": 2,
+      "M_effective": 50,
+      "p_values_mean": 0.5328,
+      "p_values_std": 0.2703704125824422
+    },
+    "exp4_power": {
+      "parameters": {
+        "N": 2,
+        "T": 100,
+        "p": 1,
+        "M": 50,
+        "B": 100,
+        "alpha": 0.05,
+        "break_point": 50
+      },
+      "Phi1": [
+        [
+          0.14901424590336979,
+          -0.0414792903513554
+        ],
+        [
+          0.19430656143020775,
+          0.45690895692240757
+        ]
+      ],
+      "power_curve": [
+        {
+          "delta": 0.1,
+          "power": 0.04,
+          "break_estimation_bias": 1.22,
+          "break_estimation_rmse": 19.69416157138963,
+          "skipped": false
+        },
+        {
+          "delta": 0.2,
+          "power": 0.16,
+          "break_estimation_bias": 1.34,
+          "break_estimation_rmse": 18.221415971323413,
+          "skipped": false
+        },
+        {
+          "delta": 0.3,
+          "power": 0.52,
+          "break_estimation_bias": -1.08,
+          "break_estimation_rmse": 12.330450113438681,
+          "skipped": false
+        }
+      ]
+    },
+    "exp5_sparse_var": {
+      "parameters": {
+        "N": 10,
+        "T": 300,
+        "p": 1,
+        "true_sparsity": 0.2
+      },
+      "true_sparsity": 0.81,
+      "true_nonzero_count": 19,
+      "estimated_sparsity": 0.62,
+      "estimated_nonzero_count": 38,
+      "mean_lambda": 0.030893304821532065,
+      "estimation_error": 0.39220375900485804,
+      "log_likelihood": -3135.0545202744065,
+      "skipped": false
+    },
+    "exp5b_sparse_var_test": {
+      "parameters": {
+        "N": 10,
+        "T": 300,
+        "p": 1,
+        "test_point": 150,
+        "B": 50
+      },
+      "lr_statistic": 109.1911839116965,
+      "p_value": 0.62,
+      "reject_h0": false,
+      "decision": "接受H0：不存在结构性变化"
+    },
+    "exp6_lowrank_var": {
+      "parameters": {
+        "N": 8,
+        "T": 250,
+        "p": 1,
+        "true_rank": 2
+      },
+      "true_singular_values": [
+        0.7133726547463434,
+        0.5204802415308377,
+        8.616542351808495e-17,
+        2.466868157918764e-17,
+        1.6814878726681474e-17,
+        4.151685041680811e-18,
+        2.456218367430566e-18,
+        8.410230464266667e-19
+      ],
+      "actual_rank": 2,
+      "ev_selected_rank": 3,
+      "bic_selected_rank": 2,
+      "estimated_rank": 2,
+      "estimation_error": 0.42981160869049284,
+      "log_likelihood": -2066.0219198195095
+    },
+    "exp7_point_lr_test": {
+      "parameters": {
+        "N": 3,
+        "T": 200,
+        "p": 1,
+        "B": 200,
+        "test_point": 100
+      },
+      "h0_result": {
+        "lr_statistic": 29.589514493639626,
+        "p_value": 0.21,
+        "reject_h0": false,
+        "decision": "接受H0：不存在结构性变化"
+      },
+      "h1_result": {
+        "lr_statistic": 101.40902195532999,
+        "p_value": 0.0,
+        "reject_h0": true,
+        "decision": "拒绝H0：在时间点100存在结构性变化",
+        "coefficient_change_norm": 0.8000251396759516
+      }
+    },
+    "exp8_point_mc": {
+      "parameters": {
+        "N": 2,
+        "T": 100,
+        "p": 1,
+        "M": 30,
+        "B": 50,
+        "test_point": 50
+      },
+      "type1_error": 0.06666666666666667,
+      "M_effective_type1": 30,
+      "power": 0.3333333333333333,
+      "M_effective_power": 30
+    }
+  }
+}
