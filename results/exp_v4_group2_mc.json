@@ -1,0 +1,27 @@
+{
+  "type1_error": 0.1,
+  "rejections": 1,
+  "M_effective": 10,
+  "power_curve": [
+    {
+      "delta": 0.2,
+      "power": 0.3
+    },
+    {
+      "delta": 0.4,
+      "power": 1.0
+    },
+    {
+      "delta": 0.6,
+      "power": 0.6
+    }
+  ],
+  "parameters": {
+    "N": 5,
+    "T": 200,
+    "p": 1,
+    "t": 100,
+    "M": 10,
+    "B": 20
+  }
+}

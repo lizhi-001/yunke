@@ -1,0 +1,131 @@
+{
+  "experiment_info": {
+    "timestamp": "2026-02-08",
+    "description": "高维与低秩VAR模型已知断点检验 v4.0",
+    "version": "v4.0"
+  },
+  "group_I_baseline": {
+    "I_1_baseline_type1": {
+      "type1_error": 0.04,
+      "rejections": 2,
+      "M_effective": 50,
+      "parameters": {
+        "N": 2,
+        "T": 100,
+        "p": 1,
+        "t": 50,
+        "M": 50,
+        "B": 100
+      }
+    },
+    "I_2_baseline_power": {
+      "power_curve": [
+        {
+          "delta": 0.1,
+          "power": 0.06
+        },
+        {
+          "delta": 0.2,
+          "power": 0.26
+        },
+        {
+          "delta": 0.3,
+          "power": 0.86
+        }
+      ],
+      "parameters": {
+        "N": 2,
+        "T": 100,
+        "p": 1,
+        "t": 50,
+        "M": 50,
+        "B": 100
+      }
+    }
+  },
+  "group_II_sparse": {
+    "II_1_type1_error": {
+      "type1_error": 0.1,
+      "rejections": 1,
+      "M_effective": 10,
+      "parameters": {
+        "N": 5,
+        "T": 200,
+        "p": 1,
+        "t": 100,
+        "M": 10,
+        "B": 20
+      }
+    },
+    "II_2_power": {
+      "power_curve": [
+        {
+          "delta": 0.2,
+          "power": 0.3
+        },
+        {
+          "delta": 0.4,
+          "power": 1.0
+        },
+        {
+          "delta": 0.6,
+          "power": 0.6
+        }
+      ],
+      "parameters": {
+        "N": 5,
+        "T": 200,
+        "p": 1,
+        "t": 100,
+        "M": 10,
+        "B": 20
+      }
+    },
+    "II_3_lr_demo": {
+      "lr_statistic": 168.92176516539712,
+      "p_value": 0.23333333333333334,
+      "reject_h0": false
+    },
+    "II_4_bootstrap_demo": {
+      "original_lr": 168.92176516539712,
+      "p_value": 0.23333333333333334,
+      "B_effective": 30
+    }
+  },
+  "group_III_lowrank": {
+    "III_1_type1_error": {
+      "type1_error": 0.2,
+      "rejections": 4,
+      "M_effective": 20
+    },
+    "III_2_power": {
+      "power_curve": [
+        {
+          "delta": 0.2,
+          "power": 0.25
+        },
+        {
+          "delta": 0.4,
+          "power": 0.45
+        },
+        {
+          "delta": 0.6,
+          "power": 1.0
+        }
+      ]
+    },
+    "III_3_lr_demo": {
+      "lr_statistic": 150.19394582419318,
+      "test_point": 100,
+      "method": "svd",
+      "rank": 2
+    },
+    "III_4_bootstrap_demo": {
+      "original_lr": 150.19394582419318,
+      "p_value": 0.26,
+      "reject_h0": false,
+      "B_effective": 50,
+      "method": "svd"
+    }
+  }
+}

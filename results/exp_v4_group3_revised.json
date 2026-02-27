@@ -1,0 +1,19 @@
+{
+  "type1_error": 0.2,
+  "rejections": 4,
+  "M_effective": 20,
+  "power_curve": [
+    {
+      "delta": 0.2,
+      "power": 0.25
+    },
+    {
+      "delta": 0.4,
+      "power": 0.45
+    },
+    {
+      "delta": 0.6,
+      "power": 1.0
+    }
+  ]
+}

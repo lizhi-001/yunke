@@ -1,0 +1,46 @@
+{
+  "experiment_info": {
+    "timestamp": "2026-02-08 17:02:48",
+    "description": "高维与低秩VAR模型已知断点检验",
+    "version": "v4.0"
+  },
+  "experiments": {
+    "I_1_baseline_type1": {
+      "type1_error": 0.04,
+      "rejections": 2,
+      "M_effective": 50,
+      "parameters": {
+        "N": 2,
+        "T": 100,
+        "p": 1,
+        "t": 50,
+        "M": 50,
+        "B": 100
+      }
+    },
+    "I_2_baseline_power": {
+      "power_curve": [
+        {
+          "delta": 0.1,
+          "power": 0.06
+        },
+        {
+          "delta": 0.2,
+          "power": 0.26
+        },
+        {
+          "delta": 0.3,
+          "power": 0.86
+        }
+      ],
+      "parameters": {
+        "N": 2,
+        "T": 100,
+        "p": 1,
+        "t": 50,
+        "M": 50,
+        "B": 100
+      }
+    }
+  }
+}
