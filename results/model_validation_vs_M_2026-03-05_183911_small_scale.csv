@@ -1,0 +1,13 @@
+model,M,type1_error,power,M_effective_type1,M_effective_power
+baseline_chow_asym_f,10,0.0,0.9,10,10
+baseline_chow_asym_chi2,10,0.0,0.9,10,10
+baseline_chow_bootstrap_f,10,0.1,0.9,10,10
+baseline_chow_bootstrap_lr,10,0.1,0.8,10,10
+baseline_chow_asym_f,20,0.05,0.8,20,20
+baseline_chow_asym_chi2,20,0.05,0.8,20,20
+baseline_chow_bootstrap_f,20,0.1,0.85,20,20
+baseline_chow_bootstrap_lr,20,0.1,0.9,20,20
+sparse_lasso,10,0.1,0.9,10,10
+sparse_lasso,20,0.1,0.95,20,20
+lowrank_svd,10,0.0,1.0,10,10
+lowrank_svd,20,0.0,1.0,20,20

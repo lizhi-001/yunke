@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(pdf)",
+      "Bash(python3:*)",
+      "Bash(pdftotext:*)",
+      "Bash(pip3 list:*)",
+      "Bash(brew list:*)",
+      "Bash(pip3 install:*)",
+      "Bash(python:*)",
+      "Bash(pip install numpy scipy scikit-learn)",
+      "Bash(PYTHONPATH=/root/workspace/yunke python:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)"
+    ]
+  }
+}
