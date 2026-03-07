@@ -136,9 +136,7 @@ class SparseBootstrapInference:
                 Y_star = self.generate_pseudo_series(Y, p, Phi_r, c_r, residuals_r)
 
                 # 计算伪序列的LR统计量
-                lr_test_b = SparseLRTest(estimator_type=self.estimator_type,
-                                         alpha=self.alpha)
-                result_b = lr_test_b.compute_lr_at_point(Y_star, p, t)
+                result_b = lr_test.compute_lr_at_point(Y_star, p, t)
                 bootstrap_lr_values.append(result_b['lr_statistic'])
             except Exception:
                 continue

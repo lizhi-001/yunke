@@ -7,12 +7,83 @@ import numpy as np
 from typing import Tuple, Optional, Dict, Any, List
 from .data_generator import VARDataGenerator
 from .bootstrap import BootstrapInference
+from .parallel import run_task_map
+
+
+def _iteration_seed(base_seed: Optional[int], iteration: int) -> Optional[int]:
+    return None if base_seed is None else base_seed + iteration
+
+
+def _type1_at_point_worker(task: Tuple) -> Dict[str, Any]:
+    seed, N, T, p, Phi, Sigma, t, alpha, B = task
+    if seed is not None:
+        np.random.seed(seed)
+
+    generator = VARDataGenerator()
+    try:
+        Y = generator.generate_var_series(T, N, p, Phi, Sigma)
+        bootstrap = BootstrapInference(B=B)
+        result = bootstrap.test_at_point(Y, p, t, alpha=alpha)
+        return {'success': True, 'p_value': result['p_value'], 'reject_h0': result['reject_h0']}
+    except Exception:
+        return {'success': False}
+
+
+def _power_at_point_worker(task: Tuple) -> Dict[str, Any]:
+    seed, N, T, p, Phi1, Phi2, Sigma, break_point, t, alpha, B = task
+    if seed is not None:
+        np.random.seed(seed)
+
+    generator = VARDataGenerator()
+    try:
+        Y, _ = generator.generate_var_with_break(T, N, p, Phi1, Phi2, Sigma, break_point)
+        bootstrap = BootstrapInference(B=B)
+        result = bootstrap.test_at_point(Y, p, t, alpha=alpha)
+        return {'success': True, 'p_value': result['p_value'], 'reject_h0': result['reject_h0']}
+    except Exception:
+        return {'success': False}
+
+
+def _type1_sup_worker(task: Tuple) -> Dict[str, Any]:
+    seed, N, T, p, Phi, Sigma, alpha, trim, B = task
+    if seed is not None:
+        np.random.seed(seed)
+
+    generator = VARDataGenerator()
+    try:
+        Y = generator.generate_var_series(T, N, p, Phi, Sigma)
+        bootstrap = BootstrapInference(B=B)
+        result = bootstrap.test(Y, p, alpha=alpha, trim=trim)
+        return {'success': True, 'p_value': result['p_value'], 'reject_h0': result['reject_h0']}
+    except Exception:
+        return {'success': False}
+
+
+def _power_sup_worker(task: Tuple) -> Dict[str, Any]:
+    seed, N, T, p, Phi1, Phi2, Sigma, break_point, alpha, trim, B = task
+    if seed is not None:
+        np.random.seed(seed)
+
+    generator = VARDataGenerator()
+    try:
+        Y, _ = generator.generate_var_with_break(T, N, p, Phi1, Phi2, Sigma, break_point)
+        bootstrap = BootstrapInference(B=B)
+        result = bootstrap.test(Y, p, alpha=alpha, trim=trim)
+        return {
+            'success': True,
+            'p_value': result['p_value'],
+            'reject_h0': result['reject_h0'],
+            'estimated_break': result['estimated_break'],
+        }
+    except Exception:
+        return {'success': False}
 
 
 class MonteCarloSimulation:
     """蒙特卡洛仿真"""
 
-    def __init__(self, M: int = 1000, B: int = 500, seed: Optional[int] = None):
+    def __init__(self, M: int = 1000, B: int = 500,
+                 seed: Optional[int] = None, n_jobs: int = 1):
         """
         初始化蒙特卡洛仿真
 
@@ -28,6 +99,31 @@ class MonteCarloSimulation:
         self.M = M
         self.B = B
         self.seed = seed
+        self.n_jobs = max(1, n_jobs)
+
+    def _run_tasks(self, worker, tasks: List[Tuple], verbose: bool) -> List[Dict[str, Any]]:
+        return run_task_map(
+            worker,
+            tasks,
+            n_jobs=self.n_jobs,
+            verbose=verbose,
+            progress_every=10,
+            progress_label="Monte Carlo iteration",
+        )
+
+    @staticmethod
+    def _collect_binary_results(results: List[Dict[str, Any]]) -> Tuple[int, List[float], int]:
+        rejections = 0
+        p_values: List[float] = []
+        successful_iterations = 0
+        for result in results:
+            if not result.get('success'):
+                continue
+            p_values.append(result['p_value'])
+            successful_iterations += 1
+            if result['reject_h0']:
+                rejections += 1
+        return rejections, p_values, successful_iterations
 
     def evaluate_type1_error_at_point(self, N: int, T: int, p: int,
                                        Phi: np.ndarray, Sigma: np.ndarray,
@@ -60,34 +156,12 @@ class MonteCarloSimulation:
         Dict[str, Any]
             第一类错误评估结果
         """
-        if self.seed is not None:
-            np.random.seed(self.seed)
-
-        generator = VARDataGenerator()
-        rejections = 0
-        p_values = []
-        successful_iterations = 0
-
-        for m in range(self.M):
-            if verbose and (m + 1) % 10 == 0:
-                print(f"Monte Carlo iteration {m + 1}/{self.M}")
-
-            try:
-                # 生成无结构变化的序列（H0为真）
-                Y = generator.generate_var_series(T, N, p, Phi, Sigma)
-
-                # 执行针对特定点的Bootstrap LR检验
-                bootstrap = BootstrapInference(B=self.B)
-                result = bootstrap.test_at_point(Y, p, t, alpha=alpha)
-
-                p_values.append(result['p_value'])
-                successful_iterations += 1
-                if result['reject_h0']:
-                    rejections += 1
-            except Exception as e:
-                if verbose:
-                    print(f"Iteration {m + 1} failed: {e}")
-                continue
+        tasks = [
+            (_iteration_seed(self.seed, m), N, T, p, Phi, Sigma, t, alpha, self.B)
+            for m in range(self.M)
+        ]
+        results = self._run_tasks(_type1_at_point_worker, tasks, verbose)
+        rejections, p_values, successful_iterations = self._collect_binary_results(results)
 
         type1_error = rejections / successful_iterations if successful_iterations > 0 else np.nan
 
@@ -138,36 +212,12 @@ class MonteCarloSimulation:
         Dict[str, Any]
             功效评估结果
         """
-        if self.seed is not None:
-            np.random.seed(self.seed)
-
-        generator = VARDataGenerator()
-        rejections = 0
-        p_values = []
-        successful_iterations = 0
-
-        for m in range(self.M):
-            if verbose and (m + 1) % 10 == 0:
-                print(f"Monte Carlo iteration {m + 1}/{self.M}")
-
-            try:
-                # 生成含断点的序列（H1为真）
-                Y, _ = generator.generate_var_with_break(
-                    T, N, p, Phi1, Phi2, Sigma, break_point
-                )
-
-                # 执行针对特定点的Bootstrap LR检验
-                bootstrap = BootstrapInference(B=self.B)
-                result = bootstrap.test_at_point(Y, p, t, alpha=alpha)
-
-                p_values.append(result['p_value'])
-                successful_iterations += 1
-                if result['reject_h0']:
-                    rejections += 1
-            except Exception as e:
-                if verbose:
-                    print(f"Iteration {m + 1} failed: {e}")
-                continue
+        tasks = [
+            (_iteration_seed(self.seed, m), N, T, p, Phi1, Phi2, Sigma, break_point, t, alpha, self.B)
+            for m in range(self.M)
+        ]
+        results = self._run_tasks(_power_at_point_worker, tasks, verbose)
+        rejections, p_values, successful_iterations = self._collect_binary_results(results)
 
         power = rejections / successful_iterations if successful_iterations > 0 else np.nan
 
@@ -214,34 +264,12 @@ class MonteCarloSimulation:
         Dict[str, Any]
             第一类错误评估结果
         """
-        if self.seed is not None:
-            np.random.seed(self.seed)
-
-        generator = VARDataGenerator()
-        rejections = 0
-        p_values = []
-        successful_iterations = 0  # 跟踪成功迭代次数
-
-        for m in range(self.M):
-            if verbose and (m + 1) % 10 == 0:
-                print(f"Monte Carlo iteration {m + 1}/{self.M}")
-
-            try:
-                # 生成无结构变化的序列（H0为真）
-                Y = generator.generate_var_series(T, N, p, Phi, Sigma)
-
-                # 执行Bootstrap Sup-LR检验
-                bootstrap = BootstrapInference(B=self.B)
-                result = bootstrap.test(Y, p, alpha=alpha, trim=trim)
-
-                p_values.append(result['p_value'])
-                successful_iterations += 1
-                if result['reject_h0']:
-                    rejections += 1
-            except Exception as e:
-                if verbose:
-                    print(f"Iteration {m + 1} failed: {e}")
-                continue
+        tasks = [
+            (_iteration_seed(self.seed, m), N, T, p, Phi, Sigma, alpha, trim, self.B)
+            for m in range(self.M)
+        ]
+        results = self._run_tasks(_type1_sup_worker, tasks, verbose)
+        rejections, p_values, successful_iterations = self._collect_binary_results(results)
 
         # 计算实际第一类错误率（使用成功迭代次数作为分母）
         type1_error = rejections / successful_iterations if successful_iterations > 0 else np.nan
@@ -293,38 +321,13 @@ class MonteCarloSimulation:
         Dict[str, Any]
             功效评估结果
         """
-        if self.seed is not None:
-            np.random.seed(self.seed)
-
-        generator = VARDataGenerator()
-        rejections = 0
-        p_values = []
-        estimated_breaks = []
-        successful_iterations = 0  # 跟踪成功迭代次数
-
-        for m in range(self.M):
-            if verbose and (m + 1) % 10 == 0:
-                print(f"Monte Carlo iteration {m + 1}/{self.M}")
-
-            try:
-                # 生成含断点的序列（H1为真）
-                Y, _ = generator.generate_var_with_break(
-                    T, N, p, Phi1, Phi2, Sigma, break_point
-                )
-
-                # 执行Bootstrap Sup-LR检验
-                bootstrap = BootstrapInference(B=self.B)
-                result = bootstrap.test(Y, p, alpha=alpha, trim=trim)
-
-                p_values.append(result['p_value'])
-                estimated_breaks.append(result['estimated_break'])
-                successful_iterations += 1
-                if result['reject_h0']:
-                    rejections += 1
-            except Exception as e:
-                if verbose:
-                    print(f"Iteration {m + 1} failed: {e}")
-                continue
+        tasks = [
+            (_iteration_seed(self.seed, m), N, T, p, Phi1, Phi2, Sigma, break_point, alpha, trim, self.B)
+            for m in range(self.M)
+        ]
+        results = self._run_tasks(_power_sup_worker, tasks, verbose)
+        rejections, p_values, successful_iterations = self._collect_binary_results(results)
+        estimated_breaks = [result['estimated_break'] for result in results if result.get('success')]
 
         # 计算功效（使用成功迭代次数作为分母）
         power = rejections / successful_iterations if successful_iterations > 0 else np.nan

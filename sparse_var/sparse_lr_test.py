@@ -26,15 +26,20 @@ class SparseLRTest:
         self.estimator_type = estimator_type
         self.alpha = alpha
         self.lr_statistic = None
+        self._estimator = None
 
     def _get_estimator(self):
         """获取估计器实例"""
+        if self._estimator is not None:
+            return self._estimator
+
         if self.estimator_type == 'lasso':
-            return LassoVAREstimator(alpha=self.alpha)
+            self._estimator = LassoVAREstimator(alpha=self.alpha)
         elif self.estimator_type == 'debiased_lasso':
-            return DebiasedLassoVAR(alpha=self.alpha)
+            self._estimator = DebiasedLassoVAR(alpha=self.alpha)
         else:
             raise ValueError(f"未知的估计方法: {self.estimator_type}")
+        return self._estimator
 
     def _get_log_likelihood(self, result: Dict[str, Any], estimator_type: str) -> float:
         """从估计结果中提取对数似然值"""
@@ -81,20 +86,18 @@ class SparseLRTest:
             raise ValueError(f"变点位置t={t}无效，第二段样本量不足")
 
         # H0: 无结构变化（约束模型）
-        estimator_r = self._get_estimator()
-        result_r = estimator_r.fit(Y, p, include_const)
+        estimator = self._get_estimator()
+        result_r = estimator.fit(Y, p, include_const)
         log_lik_r = self._get_log_likelihood(result_r, self.estimator_type)
 
         # H1: 在时间点t发生结构变化（分段拟合）
         Y1 = Y[:t, :]
         Y2 = Y[t:, :]
 
-        estimator1 = self._get_estimator()
-        result1 = estimator1.fit(Y1, p, include_const)
+        result1 = estimator.fit(Y1, p, include_const)
         log_lik_1 = self._get_log_likelihood(result1, self.estimator_type)
 
-        estimator2 = self._get_estimator()
-        result2 = estimator2.fit(Y2, p, include_const)
+        result2 = estimator.fit(Y2, p, include_const)
         log_lik_2 = self._get_log_likelihood(result2, self.estimator_type)
 
         # 非约束模型的总对数似然

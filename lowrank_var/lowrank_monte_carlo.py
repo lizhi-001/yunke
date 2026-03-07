@@ -10,7 +10,42 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from simulation.data_generator import VARDataGenerator
+from simulation.parallel import run_task_map
 from .lowrank_bootstrap import LowRankBootstrapInference
+
+
+def _iteration_seed(base_seed: Optional[int], iteration: int) -> Optional[int]:
+    return None if base_seed is None else base_seed + iteration
+
+
+def _type1_worker(task):
+    seed, N, T, p, Phi, Sigma, t, test_alpha, B, method, rank, lambda_nuc = task
+    if seed is not None:
+        np.random.seed(seed)
+
+    generator = VARDataGenerator()
+    try:
+        Y = generator.generate_var_series(T, N, p, Phi, Sigma)
+        bootstrap = LowRankBootstrapInference(B=B, method=method, rank=rank, lambda_nuc=lambda_nuc)
+        result = bootstrap.test(Y, p, t, alpha=test_alpha)
+        return {'success': True, 'p_value': result['p_value'], 'reject_h0': result['reject_h0']}
+    except Exception:
+        return {'success': False}
+
+
+def _power_worker(task):
+    seed, N, T, p, Phi1, Phi2, Sigma, break_point, t, test_alpha, B, method, rank, lambda_nuc = task
+    if seed is not None:
+        np.random.seed(seed)
+
+    generator = VARDataGenerator()
+    try:
+        Y, _ = generator.generate_var_with_break(T, N, p, Phi1, Phi2, Sigma, break_point)
+        bootstrap = LowRankBootstrapInference(B=B, method=method, rank=rank, lambda_nuc=lambda_nuc)
+        result = bootstrap.test(Y, p, t, alpha=test_alpha)
+        return {'success': True, 'p_value': result['p_value'], 'reject_h0': result['reject_h0']}
+    except Exception:
+        return {'success': False}
 
 
 class LowRankMonteCarloSimulation:
@@ -19,7 +54,8 @@ class LowRankMonteCarloSimulation:
     def __init__(self, M: int = 1000, B: int = 500,
                  seed: Optional[int] = None, method: str = 'svd',
                  rank: Optional[int] = None,
-                 lambda_nuc: Optional[float] = None):
+                 lambda_nuc: Optional[float] = None,
+                 n_jobs: int = 1):
         """
         Parameters
         ----------
@@ -42,6 +78,31 @@ class LowRankMonteCarloSimulation:
         self.method = method
         self.rank = rank
         self.lambda_nuc = lambda_nuc
+        self.n_jobs = max(1, n_jobs)
+
+    def _run_tasks(self, worker, tasks, verbose: bool):
+        return run_task_map(
+            worker,
+            tasks,
+            n_jobs=self.n_jobs,
+            verbose=verbose,
+            progress_every=10,
+            progress_label="Monte Carlo iteration",
+        )
+
+    @staticmethod
+    def _collect_results(results):
+        rejections = 0
+        p_values = []
+        successful_iterations = 0
+        for result in results:
+            if not result.get('success'):
+                continue
+            p_values.append(result['p_value'])
+            successful_iterations += 1
+            if result['reject_h0']:
+                rejections += 1
+        return rejections, p_values, successful_iterations
 
     def evaluate_type1_error(self, N: int, T: int, p: int,
                               Phi: np.ndarray, Sigma: np.ndarray,
@@ -63,35 +124,13 @@ class LowRankMonteCarloSimulation:
         test_alpha : float
             显著性水平
         """
-        if self.seed is not None:
-            np.random.seed(self.seed)
-
-        generator = VARDataGenerator()
-        rejections = 0
-        p_values = []
-        successful_iterations = 0
-
-        for m in range(self.M):
-            if verbose and (m + 1) % 10 == 0:
-                print(f"Monte Carlo iteration {m + 1}/{self.M}")
-
-            try:
-                Y = generator.generate_var_series(T, N, p, Phi, Sigma)
-
-                bootstrap = LowRankBootstrapInference(
-                    B=self.B, method=self.method,
-                    rank=self.rank, lambda_nuc=self.lambda_nuc
-                )
-                result = bootstrap.test(Y, p, t, alpha=test_alpha)
-
-                p_values.append(result['p_value'])
-                successful_iterations += 1
-                if result['reject_h0']:
-                    rejections += 1
-            except Exception as e:
-                if verbose:
-                    print(f"Iteration {m + 1} failed: {e}")
-                continue
+        tasks = [
+            (_iteration_seed(self.seed, m), N, T, p, Phi, Sigma, t, test_alpha,
+             self.B, self.method, self.rank, self.lambda_nuc)
+            for m in range(self.M)
+        ]
+        results = self._run_tasks(_type1_worker, tasks, verbose)
+        rejections, p_values, successful_iterations = self._collect_results(results)
 
         type1_error = rejections / successful_iterations if successful_iterations > 0 else np.nan
 
@@ -126,37 +165,13 @@ class LowRankMonteCarloSimulation:
         t : int
             已知的检验时间点
         """
-        if self.seed is not None:
-            np.random.seed(self.seed)
-
-        generator = VARDataGenerator()
-        rejections = 0
-        p_values = []
-        successful_iterations = 0
-
-        for m in range(self.M):
-            if verbose and (m + 1) % 10 == 0:
-                print(f"Monte Carlo iteration {m + 1}/{self.M}")
-
-            try:
-                Y, _ = generator.generate_var_with_break(
-                    T, N, p, Phi1, Phi2, Sigma, break_point
-                )
-
-                bootstrap = LowRankBootstrapInference(
-                    B=self.B, method=self.method,
-                    rank=self.rank, lambda_nuc=self.lambda_nuc
-                )
-                result = bootstrap.test(Y, p, t, alpha=test_alpha)
-
-                p_values.append(result['p_value'])
-                successful_iterations += 1
-                if result['reject_h0']:
-                    rejections += 1
-            except Exception as e:
-                if verbose:
-                    print(f"Iteration {m + 1} failed: {e}")
-                continue
+        tasks = [
+            (_iteration_seed(self.seed, m), N, T, p, Phi1, Phi2, Sigma, break_point,
+             t, test_alpha, self.B, self.method, self.rank, self.lambda_nuc)
+            for m in range(self.M)
+        ]
+        results = self._run_tasks(_power_worker, tasks, verbose)
+        rejections, p_values, successful_iterations = self._collect_results(results)
 
         power = rejections / successful_iterations if successful_iterations > 0 else np.nan
 

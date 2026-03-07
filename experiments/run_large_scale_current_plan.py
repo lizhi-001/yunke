@@ -38,6 +38,7 @@ class ExperimentConfig:
     alpha: float = 0.05
     deltas: Tuple[float, ...] = (0.10, 0.20, 0.30, 0.40)
     seed: int = 42
+    jobs: int = 1
 
 
 def ensure_stationary(phi: np.ndarray, shrink: float = 0.9, max_attempts: int = 30) -> Tuple[np.ndarray, bool, int]:
@@ -77,7 +78,7 @@ def run_baseline(cfg: ExperimentConfig) -> Dict:
     Sigma = np.eye(N) * 0.5
     phi = generator.generate_stationary_phi(N, p, scale=0.3)
 
-    mc = MonteCarloSimulation(M=cfg.M, B=cfg.B, seed=cfg.seed)
+    mc = MonteCarloSimulation(M=cfg.M, B=cfg.B, seed=cfg.seed, n_jobs=cfg.jobs)
 
     t0 = time.time()
     type1 = mc.evaluate_type1_error_at_point(N, T, p, phi, Sigma, t=t, alpha=cfg.alpha, verbose=False)
@@ -146,6 +147,7 @@ def run_sparse(cfg: ExperimentConfig) -> Dict:
         seed=cfg.seed,
         estimator_type="lasso",
         alpha=lasso_alpha,
+        n_jobs=cfg.jobs,
     )
 
     t0 = time.time()
@@ -224,6 +226,7 @@ def run_lowrank(cfg: ExperimentConfig) -> Dict:
         seed=cfg.seed,
         method="svd",
         rank=rank,
+        n_jobs=cfg.jobs,
     )
 
     t0 = time.time()
@@ -382,10 +385,18 @@ def main() -> None:
     parser.add_argument("--alpha", type=float, default=0.05)
     parser.add_argument("--deltas", type=float, nargs="+", default=[0.10, 0.20, 0.30, 0.40])
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--jobs", type=int, default=1)
     parser.add_argument("--tag", type=str, default="")
     args = parser.parse_args()
 
-    cfg = ExperimentConfig(M=args.M, B=args.B, alpha=args.alpha, deltas=tuple(args.deltas), seed=args.seed)
+    cfg = ExperimentConfig(
+        M=args.M,
+        B=args.B,
+        alpha=args.alpha,
+        deltas=tuple(args.deltas),
+        seed=args.seed,
+        jobs=max(1, args.jobs),
+    )
 
     os.makedirs("results", exist_ok=True)
     stamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
@@ -393,7 +404,10 @@ def main() -> None:
 
     print("=" * 72)
     print("Running large-scale experiment")
-    print(f"Config: M={cfg.M}, B={cfg.B}, alpha={cfg.alpha}, deltas={list(cfg.deltas)}, seed={cfg.seed}")
+    print(
+        f"Config: M={cfg.M}, B={cfg.B}, alpha={cfg.alpha}, "
+        f"deltas={list(cfg.deltas)}, seed={cfg.seed}, jobs={cfg.jobs}"
+    )
     print("=" * 72)
 
     all_start = time.time()

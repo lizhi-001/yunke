@@ -7,6 +7,8 @@ import numpy as np
 from numpy.linalg import svd, det
 from typing import Tuple, Optional, Dict, Any
 
+from simulation.design_matrix import build_var_design_matrix
+
 try:
     import cvxpy as cp
     HAS_CVXPY = True
@@ -49,18 +51,7 @@ class NuclearNormVAR:
         Tuple[np.ndarray, np.ndarray]
             (设计矩阵X, 响应矩阵Y_response)
         """
-        T, N = Y.shape
-        T_eff = T - p
-
-        # 构建滞后矩阵
-        X = np.zeros((T_eff, N * p))
-        for t in range(T_eff):
-            for lag in range(p):
-                X[t, lag*N:(lag+1)*N] = Y[t + p - lag - 1, :]
-
-        Y_response = Y[p:, :]
-
-        return X, Y_response
+        return build_var_design_matrix(Y, p, include_const=False)
 
     def fit_cvxpy(self, Y: np.ndarray, p: int,
                    include_const: bool = True) -> Dict[str, Any]:

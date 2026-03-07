@@ -7,6 +7,8 @@ import numpy as np
 from numpy.linalg import lstsq, det, pinv
 from typing import Tuple, Optional, Dict, Any
 
+from .design_matrix import build_var_design_matrix
+
 
 class VAREstimator:
     """VAR模型估计器"""
@@ -48,22 +50,7 @@ class VAREstimator:
             X形状为 (T_eff, N*p + 1) 或 (T_eff, N*p)
             Y_response形状为 (T_eff, N)
         """
-        T, N = Y.shape
-        T_eff = T - p
-
-        # 构建滞后矩阵
-        X = np.zeros((T_eff, N * p))
-        for t in range(T_eff):
-            for lag in range(p):
-                X[t, lag*N:(lag+1)*N] = Y[t + p - lag - 1, :]
-
-        # 添加常数项
-        if include_const:
-            X = np.column_stack([np.ones(T_eff), X])
-
-        Y_response = Y[p:, :]
-
-        return X, Y_response
+        return build_var_design_matrix(Y, p, include_const)
 
     def fit_ols(self, Y: np.ndarray, p: int,
                 include_const: bool = True) -> Dict[str, Any]:

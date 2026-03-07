@@ -7,6 +7,8 @@ import numpy as np
 from numpy.linalg import inv, det
 from typing import Tuple, Optional, Dict, Any
 
+from simulation.design_matrix import build_var_design_matrix
+
 try:
     from sklearn.linear_model import LassoCV, Lasso
     HAS_SKLEARN = True
@@ -64,18 +66,8 @@ class DebiasedLassoVAR:
             估计结果
         """
         T, N = Y.shape
+        X, Y_response = build_var_design_matrix(Y, p, include_const)
         T_eff = T - p
-
-        # 构建设计矩阵
-        X = np.zeros((T_eff, N * p))
-        for t in range(T_eff):
-            for lag in range(p):
-                X[t, lag*N:(lag+1)*N] = Y[t + p - lag - 1, :]
-
-        if include_const:
-            X = np.column_stack([np.ones(T_eff), X])
-
-        Y_response = Y[p:, :]
         n_features = X.shape[1]
 
         # Step 1: Lasso估计

@@ -7,6 +7,8 @@ import numpy as np
 from numpy.linalg import det
 from typing import Tuple, Optional, Dict, Any
 
+from simulation.design_matrix import build_var_design_matrix
+
 try:
     from sklearn.linear_model import LassoCV, Lasso
     HAS_SKLEARN = True
@@ -42,6 +44,7 @@ class LassoVAREstimator:
         self.Sigma_hat = None
         self.residuals = None
         self.alphas_used = None
+        self._cached_models = {}
 
     def build_design_matrix(self, Y: np.ndarray, p: int,
                             include_const: bool = True) -> Tuple[np.ndarray, np.ndarray]:
@@ -62,22 +65,23 @@ class LassoVAREstimator:
         Tuple[np.ndarray, np.ndarray]
             (设计矩阵X, 响应矩阵Y_response)
         """
-        T, N = Y.shape
-        T_eff = T - p
+        return build_var_design_matrix(Y, p, include_const)
 
-        # 构建滞后矩阵
-        X = np.zeros((T_eff, N * p))
-        for t in range(T_eff):
-            for lag in range(p):
-                X[t, lag*N:(lag+1)*N] = Y[t + p - lag - 1, :]
+    def _get_cached_lasso(self, equation_idx: int):
+        if self.alpha is None:
+            return LassoCV(cv=self.cv, max_iter=self.max_iter)
 
-        # 添加常数项
-        if include_const:
-            X = np.column_stack([np.ones(T_eff), X])
-
-        Y_response = Y[p:, :]
-
-        return X, Y_response
+        cache_key = (equation_idx, self.alpha)
+        model = self._cached_models.get(cache_key)
+        if model is None:
+            model = Lasso(
+                alpha=self.alpha,
+                max_iter=self.max_iter,
+                warm_start=True,
+                selection='random',
+            )
+            self._cached_models[cache_key] = model
+        return model
 
     def fit(self, Y: np.ndarray, p: int,
             include_const: bool = True) -> Dict[str, Any]:
@@ -110,14 +114,11 @@ class LassoVAREstimator:
         for i in range(N):
             y_i = Y_response[:, i]
 
+            model = self._get_cached_lasso(i)
+            model.fit(X, y_i)
             if self.alpha is None:
-                # 使用交叉验证选择alpha
-                model = LassoCV(cv=self.cv, max_iter=self.max_iter)
-                model.fit(X, y_i)
                 self.alphas_used.append(model.alpha_)
             else:
-                model = Lasso(alpha=self.alpha, max_iter=self.max_iter)
-                model.fit(X, y_i)
                 self.alphas_used.append(self.alpha)
 
             B_hat[:, i] = model.coef_
