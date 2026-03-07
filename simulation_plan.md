@@ -1,398 +1,435 @@
-# 高维与低秩VAR模型已知断点检验 — 仿真实验方案
+# 高维与低秩 VAR 已知断点检验 — 新版仿真实验方案
 
-## 一、研究目标与假设框架
+## 一、方案目标
 
-### 1.1 核心研究问题
+本轮仿真实验不再将第一类错误与功效混合在同一块中汇报，而是改为两条独立主线：
 
-给定一个高维时间序列 Y_t 服从 VAR(p) 模型，以及一个**已知**的候选断点时间 t，检验系数矩阵是否在该时间点发生了结构性变化。
+1. **Size 主线**：单独汇报不同场景、不同模型、不同 Monte Carlo 重复次数 `M` 下的 size（即 H0 为真时的拒绝率）。
+2. **Power 主线**：单独汇报不同场景、不同模型、不同变化幅度下的 power（即 H1 为真时的拒绝率），并明确回答：**随着时间序列结构变化幅度增大，power 是否提升。** Power 固定在最大的 `M_max` 上播报，不再随 `M` 变化。
 
-本研究聚焦于**已知断点**的检验场景（如政策变化、市场事件等外生冲击的时间点已知），不涉及断点搜索（Sup-LR）。
+同时保留 baseline 的 p 值比较模块，作为有限样本下渐近推断与 bootstrap 推断差异的辅助说明。
 
-### 1.2 假设框架（统一定义 + baseline的Chow口径）
+---
 
-统一的结构变化假设为：
+## 二、统一假设框架
 
+### 2.1 已知断点检验问题
+
+给定一个 VAR(p) 时间序列 `Y_t`，以及一个**已知**候选断点位置 `t`，检验该时点前后系数矩阵是否发生结构变化。
+
+统一假设写为：
+
+```text
+H0: Φ1 = Φ2
+H1: Φ1 ≠ Φ2
 ```
-H0: Φ₁ = Φ₂ = Φ    序列在整个观测期内结构稳定，不存在结构性变化
-H1: Φ₁ ≠ Φ₂         序列在已知时间点t发生了结构性变化
-```
 
-在baseline（OLS）中，为使用Chow检验，进一步采用“同一有效样本 + 哑变量交互”的等价写法：
+其中：
+- `H0` 表示全样本结构稳定；
+- `H1` 表示在给定断点 `t` 处出现结构变化；
+- 本方案只讨论**已知断点检验**，不包含断点搜索。
 
-```
-H0_baseline: Γ = 0   （等价于断点前后参数相同，B1 = B2）
-H1_baseline: Γ ≠ 0   （断点后参数发生变化）
+### 2.2 baseline 的 Chow / LR 口径
 
+baseline 场景使用同一有效样本上的 Chow / LR 形式：
+
+```text
 受限模型:    y_t = B x_t + u_t
 非受限模型:  y_t = B x_t + Γ(D_t x_t) + u_t
 ```
 
-其中 `D_t = 1(t >= t0)`，`x_t = [1, y_{t-1}', ..., y_{t-p}']'`，两模型都在统一样本 `t = p, ..., T-1` 上估计（有效样本 `n = T-p`）。
+其中 `D_t = 1(t >= t0)`。
 
-### 1.3 三类系数矩阵结构假设
+在该口径下并行输出：
+- `asym-F`
+- `asym-χ²(LR)`
+- `bootstrap-F`
+- `bootstrap-LR`
 
-本研究考虑三种系数矩阵结构，对应三条检验流程：
-
-| 结构假设 | 估计方法 | 适用场景 | 研究定位 |
-|---------|---------|---------|---------|
-| **无约束**（一般矩阵） | OLS | 低维（N较小） | 基准对照 |
-| **稀疏**（多数元素为零） | Lasso / 去偏Lasso | 高维稀疏（N大，Φ稀疏） | **核心贡献一** |
-| **低秩**（秩 r ≪ N） | 核范数正则化 / 截断SVD | 高维低秩（N大，少数潜在因子驱动） | **核心贡献二** |
-
-**核心思想**：三种模型共享同一个“结构变化检验 + Bootstrap + 蒙特卡洛”框架；其中baseline以Chow/F为主，高维稀疏与低秩以LR统计量为主，差异主要在于参数估计与统计量构造。
-
-### 1.4 系数矩阵设计原理
-
-#### 稀疏VAR：随机稀疏矩阵
-
-稀疏矩阵是指大部分元素为零的矩阵。Φ[i,j]≠0 表示变量 j 的滞后值对变量 i 有直接Granger因果影响；稀疏意味着大多数变量对之间没有直接因果关系。
-
-生成方式：
-```
-Φ = randn(N, N) × 0.3              # 随机高斯元素
-mask ~ Bernoulli(0.2)               # 每个位置20%概率保留
-Φ_sparse = Φ ⊙ mask                 # 约80%元素置零
-```
-
-设计理由：
-- 随机稀疏模拟"哪些变量之间有联系是未知的"这一现实情况
-- 与Lasso估计的理论假设一致：Lasso在稀疏条件下具有变量选择一致性
-
-#### 低秩VAR：随机低秩矩阵
-
-矩阵的秩（rank）是做初等行变换（消元）后剩余的非零行数，即线性无关的行的数量。
-
-在VAR模型中，Φ 的每一行对应一个变量的方程。rank(Φ) = r 意味着 N 个方程中只有 r 个是真正独立的"基础方程"，其余 N-r 个都是这 r 个基础方程的线性组合。整个系统的动态行为由 r 个独立方向决定。
-
-低秩矩阵可分解为 Φ = U·V'：V' 的每一行提供一个"基础行模式"（行阶梯形中的非零行），U 的每一行提供"组合权重"（第 i 个变量的方程 = Σ U[i,k]×基础行k）。
-
-生成方式：
-```
-U ∈ R^{N×r}, V ∈ R^{N×r}           # r=2, U为组合权重, V'为基础行模式
-U[i,j], V[i,j] ~ N(0, 0.3²)       # 随机高斯元素
-Φ = U · V'                          # rank(Φ) ≤ r, 参数量从 N² 降至 2Nr
-```
-
-设计理由：
-- 参数降维：N=10, r=2 时，行变换后仅2个非零行，有效参数从 100 降至 40
-- 截断SVD估计利用此结构：SVD本质上是找最优的行列分解，只保留最大的 r 个奇异值，将 Φ̂ 投影到最接近的秩-r 矩阵上，过滤高维噪声
-
-#### 平稳性保证
-
-三类矩阵均通过伴随矩阵特征值检验（max|λ(C)| < 1）确保平稳性，采用拒绝抽样反复生成直到满足条件。
-
-#### 结构变化（Δ）的施加
-
-功效评估中，断点后系数矩阵通过均匀加性扰动构造：Φ₂ = Φ₁ + Δ·𝟙。Δ 越大，结构变化信号越强，检验功效越高。若 Φ₂ 不满足平稳性则跳过该 Δ 值。
+baseline 的定位仍然是：
+- 给出低维基准；
+- 对比渐近推断与 bootstrap 推断；
+- 为高维结果提供参照。
 
 ---
 
-## 二、统一检验方法论
+## 三、场景设置
 
-### 2.1 已知断点统计量构造（baseline并行F与LR）
+本轮实验统一使用 `p = 3`，并保留三类场景：
 
-#### baseline（OLS）：同一有效样本口径下并行构造 F 与 LR
+| 场景 | 模型 | 结构假设 | 定位 |
+|---|---|---|---|
+| baseline | OLS + Chow/LR | 无约束低维 VAR | 基准对照 |
+| sparse | Lasso + bootstrap LR | 稀疏高维 VAR | 核心高维场景一 |
+| lowrank | SVD / 低秩 bootstrap LR | 低秩高维 VAR | 核心高维场景二 |
 
-在统一样本 `t = p, ..., T-1`（`n = T-p`）上构造：
+建议默认维度如下：
 
-- `X = [x_t]`
-- `Z = [D_t x_t]`（断点哑变量与回归量交互）
-- 受限模型：`Y = X B + U`
-- 非受限模型：`Y = X B + Z Γ + U`
+| 场景 | N | T | p | 断点 t |
+|---|---:|---:|---:|---:|
+| baseline | 2 | 150 | 3 | 75 |
+| sparse | 3 | 150 | 3 | 75 |
+| lowrank | 4 | 150 | 3 | 75 |
 
-记受限/非受限残差平方和为 `SSR_R` 与 `SSR_U`，则Chow型统计量为：
+说明：
+- 三个场景统一使用 `T=150` 与断点 `t=75`，以保证横向比较口径一致；
+- baseline 维度较小，用于稳定比较 Chow/F/LR 各种推断方式；
+- sparse 与 lowrank 保持相同 `p=3` 口径，但用不同结构约束完成高维推断。
 
+---
+
+## 四、数据生成原则
+
+### 4.1 H0 数据生成
+
+在 size 主线中，所有数据都从无断点 VAR 生成：
+
+```text
+Y_t ~ VAR(p; Φ1, Σ)
 ```
-F = ((SSR_R - SSR_U) / q) / (SSR_U / (n - k_U))
+
+此时理论上不应拒绝 `H0`，因此拒绝率应接近显著性水平 `α`。
+
+### 4.2 H1 数据生成
+
+在 power 主线中，数据从含已知断点的 VAR 生成：
+
+```text
+断点前: Y_t ~ VAR(p; Φ1, Σ)
+断点后: Y_t ~ VAR(p; Φ2, Σ)
 ```
+
+其中 `Φ2` 由 `Φ1` 加上统一变化幅度构造：
+
+```text
+Φ2 = ensure_stationary(Φ1 + Δ · 1)
+```
+
+这里：
+- `Δ` 表示变化幅度；
+- `ensure_stationary()` 表示若新矩阵不平稳，则按统一缩放规则收缩至平稳区；
+- 最终同时记录名义变化幅度 `change_scale` 与实际变化强度（如 `delta_fro`、`delta_max_abs`）。
+
+### 4.3 至少 5 档变化幅度
+
+本轮 power 试验至少固定 5 档变化幅度，默认建议：
+
+```text
+Δ-grid = {0.04, 0.08, 0.12, 0.16, 0.20}
+```
+
+后续若正式版算力允许，可额外扩展到：
+
+```text
+Δ-grid = {0.02, 0.04, 0.08, 0.12, 0.16, 0.20, 0.24}
+```
+
+本轮正式最少要求：
+- 不少于 5 档；
+- 从弱变化到强变化单调排列；
+- 能够回答“power 是否随着变化幅度增大而提升”。
+
+---
+
+## 五、试验主线 A：Size 单独汇报
+
+### 5.1 目标
+
+单独估计不同场景、不同模型在 `H0` 下的 size：
+
+```text
+Size = P(reject H0 | H0 true)
+```
+
+### 5.2 设计
+
+对于每个场景、每个模型、每个 `M`：
+
+1. 固定一个 seed；
+2. 生成 `M` 次无断点序列；
+3. 每次计算检验 p 值；
+4. 统计 `p <= α` 的比例；
+5. 得到该 seed 下的单次 size 估计；
+6. 跨 seed 仅汇总 size 的均值，不再报告 95%CI。
+
+### 5.3 汇报口径
+
+size 结果按下列维度单独列表：
+
+| 场景 | 模型 | M | Size mean |
+|---|---|---:|---:|
+
+必须能直接回答：
+- baseline 的 size 是否接近显著性水平；
+- sparse / lowrank 的 size 是否偏保守或偏激进；
+- 当 `M` 增大时，size 估计是否更稳定。
+
+### 5.4 建议 M-grid
+
+建议使用：
+
+```text
+M-grid = {50, 100, 200}
+```
+
+若为正式大规模版，可使用：
+
+```text
+M-grid = {300, 500, 800}
+```
+
+原则：
+- size 主线的 `M` 用于控制 Monte Carlo 误差；
+- `M` 越大，size 估计越稳定；
+- `M` 不改变检验本身，只改变估计精度。
+
+---
+
+## 六、试验主线 B：Power 单独汇报
+
+### 6.1 目标
+
+单独估计不同变化幅度下的 power：
+
+```text
+Power(Δ) = P(reject H0 | H1 true under change scale Δ)
+```
+
+重点不是只给一个单点功效，而是回答：
+
+```text
+当变化幅度 Δ 变大时，Power 是否上升？
+```
+
+### 6.2 设计
+
+对于每个场景、每个模型、每个变化幅度 `Δ`：
+
+1. 固定一个 seed；
+2. 构造 `Φ1`；
+3. 用给定变化幅度构造 `Φ2 = ensure_stationary(Φ1 + Δ·1)`；
+4. 固定使用 `M-grid` 中最大的 `M_max` 生成 `M_max` 次含断点序列；
+5. 每次计算 p 值；
+6. 统计 `p <= α` 的比例；
+7. 得到该 seed 下该幅度对应的 power；
+8. 跨 seed 再做均值与区间汇总。
+
+### 6.3 汇报口径
+
+power 结果按下列维度单独列表：
+
+| 场景 | 模型 | change scale | 固定 M_max | Power mean [95%CI] |
+|---|---|---:|---:|---:|
+
+并需额外给出文字判断：
+- 在固定 `M_max` 下，变化幅度从最小档增至最大档时，power 是否整体提升；
+- 哪些模型对弱变化更敏感；
+- 哪些模型只有在中高变化幅度下才出现明显 power。
+
+### 6.4 核心判读标准
+
+若某模型在固定 `M_max` 下满足：
+
+```text
+Power(Δ1) <= Power(Δ2) <= ... <= Power(Δ5)
+```
+
+则说明该模型的检验能力随结构变化增强而提升，结果符合预期。
+
+若出现明显非单调情形，则需检查：
+- `M` 是否太小；
+- seed 数是否太少；
+- 变化幅度虽然名义上变大，但 `ensure_stationary` 收缩后实际增量是否被压缩；
+- 检验器在该场景下是否本身较保守。
+
+---
+
+## 七、跨 seed 汇总规则
+
+本轮统一采用“先按单个 seed 计算，再跨 seed 汇总”的两层结构。
+
+### 7.1 单个 seed 内
+
+- size：
+
+```text
+size_seed = 拒绝 H0 的次数 / H0 下成功模拟次数
+```
+
+- power：
+
+```text
+power_seed(Δ) = 拒绝 H0 的次数 / H1(Δ) 下成功模拟次数
+```
+
+### 7.2 跨 seed 层
+
+对于相同的：
+- `(scenario, model, M)`，汇总 size；
+- `(scenario, model, change_scale)`，汇总 power，其中 `M` 固定为 `M_max = max(M-grid)`。
+
+本轮仅尝试 `3` 个 seed，因此汇报口径调整为：
+- `size`：只播报 `mean across seeds`，不再报告 `95%CI`；
+- `power`：重点看不同变化幅度下的均值变化趋势，必要时再补充区间。
+
+### 7.3 seed 数建议
+
+本轮固定：
+- `n_seed = 3`
+
+原因：
+- 当前主要目标是先看 size 水平与 power 随变化幅度的单调趋势；
+- 只有 3 个 seed 时，`95%CI` 的解释价值有限，尤其不适合放在 size 主表中；
+- 因此本轮优先播报均值，后续如需正式统计区间，再扩展到更多 seed。
+
+---
+
+## 八、baseline p 值比较模块
+
+该模块保留，但定位调整为**辅助分析**，不再与 size / power 混在同一部分汇报。
+
+### 8.1 目的
+
+在同一条 baseline 无断点序列上比较：
+- 渐近 `χ²(LR)` p 值
+- `bootstrap-LR` p 值
+- `bootstrap-F` p 值
+
+### 8.2 关注点
+
+重点观察：
+- 随 `B` 增大，bootstrap p 值是否稳定；
+- bootstrap-LR 与 asym-χ²(LR) 是否接近；
+- 有限样本下 bootstrap 修正是否明显。
+
+### 8.3 推荐 B-grid
+
+```text
+B-grid = {100, 300, 500}
+```
+
+正式版可用：
+
+```text
+B-grid = {200, 500, 1000}
+```
+
+---
+
+## 九、输出文件与报告结构
+
+### 9.1 原始与聚合输出
+
+本轮输出应至少包括：
+
+- `baseline_raw_csv`
+- `baseline_agg_csv`
+- `size_raw_csv`
+- `size_agg_csv`
+- `power_raw_csv`
+- `power_agg_csv`
+- `baseline_png`
+- `size_png`
+- `power_png`
+- `summary_json`
+- 中文主报告
+- 中文详细报告
+
+### 9.2 中文报告结构
+
+新的中文报告结构建议固定为：
+
+1. 配置
+2. baseline p 值比较
+3. **不同情况下的 Size mean**
+4. **固定最大 M 下不同变化幅度的 Power**
+5. 数据背景说明
+6. 输出文件
 
 其中：
-- `q` 为约束个数（检验“截距+滞后系数均稳定”时，`q = K(1+Kp)`；仅检验滞后系数时 `q = K^2 p`）
-- `k_U` 为非受限模型参数数
-
-在经典OLS条件下，`F` 可直接使用F分布临界值计算p值。
-
-同时，在同一口径（同样本 `n=T-p`）下并行构造LR统计量：
-
-```
-LR = n [ln|Σ̂_R| - ln|Σ̂_U|]
-```
-
-并给出卡方近似 p 值（`χ²` 渐近）用于与 `F` 检验和Bootstrap结果对照。
-
-#### 稀疏/低秩：保持LR + Bootstrap构造
-
-高维稀疏与低秩流程仍采用LR统计量：
-
-```
-LR(t) = 2 × [lnL_U(t) - lnL_R]
-```
-
-并通过Bootstrap获取经验零分布与p值，避免非标准渐近分布带来的误判风险。
-
-### 2.2 Bootstrap推断（baseline同时输出F*与LR*）
-
-```
-1. 在H0下拟合全样本，得到 Φ̂_R, ĉ_R, 残差 ε̂_R
-2. 残差居中：centered_ε = ε̂ - mean(ε̂)
-3. 重复 B 次：
-   a. 有放回重抽样残差
-   b. 用 Φ̂_R, ĉ_R 和重抽样残差生成伪序列 Y*
-   c. 计算伪序列统计量：
-      - baseline：同时计算 `F*_Chow` 与 `LR*`
-      - 高维稀疏/低秩：计算 `LR*(t)`
-4. p值 = P(统计量* ≥ 统计量_observed)
-```
-
-### 2.3 蒙特卡洛评估
-
-- **第一类错误（Size）**：H0为真时，重复M次生成序列并检验，计算拒绝率。目标：接近名义水平α
-- **统计功效（Power）**：H1为真时，重复M次生成含断点序列并检验，计算拒绝率。目标：随Δ增大而增大
-
-### 2.4 统一流程图
-
-```
-数据生成 → 参数估计 → baseline: F与LR(同口径并行)；高维: LR(t) → 渐近或Bootstrap p值 → Monte Carlo Size/Power
-```
-
-三条流程仅在**参数估计**环节不同，其余环节结构完全一致。
-
-
-### 2.5 检验统计量分布与高斯假设说明（新增）
-
-当前框架中的“默认高斯”来自两个层面：
-
-1. **DGP误差项**：`ε_t ~ N(0, Σ)`，在代码中通过多元正态抽样实现；
-2. **LR对数似然**：`lnL = -T_eff/2 × [N·ln(2π) + ln|Σ̂| + N]`，属于高斯似然写法。
-
-这表示“噪声与评分规则采用高斯口径”，并不要求观测序列 `Y_t` 本身严格正态。
-
-### 2.6 baseline / 稀疏 / 低秩场景下的分布判定
-
-- **baseline（OLS，同口径Chow）**：经典条件下可直接使用F分布；对应LR/Wald可用渐近 `χ²` 近似；
-- **稀疏（Lasso）**：存在正则化与变量选择，零假设分布通常非标准，不宜直接使用标准 `χ²`；
-- **低秩（秩约束）**：参数受约束，常见非标准渐近，同样不宜直接套用标准 `χ²`。
-
-因此，本文统一以Bootstrap推断为主，渐近分布判定仅作为baseline对照。
-
-### 2.7 旧写法中直接用χ²的偏移来源（适用范围说明）
-
-本节结论**仅适用于旧的baseline实现**（“全样本拟合 vs 两段分别拟合”）：
-
-- `T_eff,R = T - p`
-- `T_eff,U = (t-p) + (T-t-p) = T - 2p`
-
-由于非约束模型较约束模型少 `p` 个有效观测，LR中会引入常数偏移项，影响LR绝对值与标准 `χ²` 临界值的直接比较。
-
-对当前采用的“同一有效样本口径”Chow/LR并行实现（见 2.8 节），该偏移问题已被规避。
-
-### 2.8 baseline-Chow实施细则（同口径条件似然）
-
-建议将baseline改为“**同一有效样本口径**”的条件似然/Chow实现：
-
-- 在统一样本 `s = p, ..., T-1` 上建模（`n = T-p`）；
-- 设断点指示变量 `D_s = 1(s >= t)`，构造
-
-`H0: y_s = c + Φx_s + u_s`
-
-`H1: y_s = c + Φx_s + D_s(Δc + ΔΦx_s) + u_s`
-
-在该口径下可并行构造：
-
-- LR：`LR = n[ln|Σ̂_R| - ln|Σ̂_U|]`（渐近 `χ²`）
-- Chow型F：`F = ((SSR_R - SSR_U)/q) / (SSR_U/(n-k_U))`（经典条件下服从F）
-
-### 2.9 与文献框架一致性（Lütkepohl, 2005）
-
-上述改造与VAR结构稳定性检验的经典写法一致：将已知断点检验转化为线性约束检验（`B1=B2`），构造Wald/LR（或quasi-LR）统计量；
-在有限样本或非标准估计场景下，推荐结合Bootstrap提高推断稳健性。
+- 第 3 节只放 size mean；
+- 第 4 节只放固定最大 `M` 下的 power；
+- 第 4 节必须明确讨论“power 是否随变化幅度上升”。
 
 ---
 
-## 三、三条检验流程
+## 十、实现映射
 
-### 3.1 流程A：基准VAR（OLS估计）— 完整
+本轮方案对应的实现文件建议如下：
 
-**定位**：低维基准，验证检验方法的正确性。
+| 功能 | 文件 |
+|---|---|
+| 主实验脚本 | `experiments/run_next_stage_large_scale_p3.py` |
+| 中文详细报告生成 | `experiments/write_detailed_next_stage_report.py` |
+| baseline Chow 检验 | `simulation/chow_test.py` |
+| baseline bootstrap 推断 | `simulation/chow_bootstrap.py` |
+| 稀疏 bootstrap 推断 | `sparse_var/sparse_bootstrap.py` |
+| 低秩 bootstrap 推断 | `lowrank_var/lowrank_bootstrap.py` |
 
-| 环节 | 模块 | 文件 | 状态 |
-|------|------|------|------|
-| 数据生成 | `VARDataGenerator` | `simulation/data_generator.py` | ✅ |
-| OLS估计 | `VAREstimator.fit_ols()` | `simulation/var_estimator.py` | ✅ |
-| Chow+LR并行检验（同口径） | `ChowTest.compute_at_point()` | `simulation/chow_test.py` | ✅ |
-| baseline并行Bootstrap（F*与LR*） | `ChowBootstrapInference.test_at_point()` | `simulation/chow_bootstrap.py` | ✅ |
-| LR检验（原有实现，保留对照） | `LRTest.compute_lr_at_point()` | `simulation/sup_lr_test.py` | ✅ |
-| Bootstrap | `BootstrapInference.test_at_point()` | `simulation/bootstrap.py` | ✅ |
-| 蒙特卡洛 | `MonteCarloSimulation` | `simulation/monte_carlo.py` | ✅ |
-
-适用范围：N = 2~5，T = 100~500
-
-baseline正式推断采用同口径 **F 与 LR 并行报告**：
-- 渐近：`asym-F` 与 `asym-χ²(LR)`
-- Bootstrap：`boot-F` 与 `boot-LR`
-以便系统对比LR检验在不同推断口径下的表现。
-
-### 3.2 流程B：高维稀疏VAR（Lasso估计）— 完整
-
-**定位**：核心贡献一。系数矩阵稀疏时的高维结构变化检验。
-
-| 环节 | 模块 | 文件 | 状态 |
-|------|------|------|------|
-| 数据生成 | `VARDataGenerator(sparsity=...)` | `simulation/data_generator.py` | ✅ |
-| Lasso估计 | `LassoVAREstimator.fit()` | `sparse_var/lasso_var.py` | ✅ |
-| 去偏Lasso | `DebiasedLassoVAR.fit()` | `sparse_var/debiased_lasso.py` | ✅ |
-| LR检验 | `SparseLRTest.compute_lr_at_point()` | `sparse_var/sparse_lr_test.py` | ✅ |
-| Bootstrap | `SparseBootstrapInference.test()` | `sparse_var/sparse_bootstrap.py` | ✅ |
-| 蒙特卡洛 | `SparseMonteCarloSimulation` | `sparse_var/sparse_monte_carlo.py` | ✅ |
-
-适用范围：N = 10~50，T = 200~1000，Φ稀疏
-
-### 3.3 流程C：高维低秩VAR（核范数/截断SVD估计）— 已补全
-
-**定位**：核心贡献二。系数矩阵低秩时的高维结构变化检验。
-
-| 环节 | 模块 | 文件 | 状态 |
-|------|------|------|------|
-| 数据生成 | `VARDataGenerator.generate_lowrank_phi()` | `simulation/data_generator.py` | ✅ |
-| 核范数估计 | `NuclearNormVAR.fit_cvxpy()` | `lowrank_var/nuclear_norm.py` | ✅ |
-| 截断SVD | `NuclearNormVAR.fit_svd()` | `lowrank_var/nuclear_norm.py` | ✅ |
-| 秩选择 | `RankSelector` | `lowrank_var/rank_selection.py` | ✅ |
-| LR检验 | `LowRankLRTest.compute_lr_at_point()` | `lowrank_var/lowrank_lr_test.py` | ✅ |
-| Bootstrap | `LowRankBootstrapInference.test()` | `lowrank_var/lowrank_bootstrap.py` | ✅ |
-| 蒙特卡洛 | `LowRankMonteCarloSimulation` | `lowrank_var/lowrank_monte_carlo.py` | ✅ |
-
-适用范围：N = 8~50，T = 200~1000，Φ低秩（秩 r ≪ N）
+主脚本中应明确包含：
+- `size` 单独计算函数；
+- `power` 单独计算函数；
+- `power-change-grid` 参数；
+- `size` / `power` 独立 CSV 与图表输出。
 
 ---
 
-## 四、仿真实验设计
+## 十一、正式版建议参数
 
-### 4.1 实验组I：基准VAR检验（验证方法正确性）
+若进入正式运行，本轮统一采用 3 个 seed：
 
-| 实验 | 内容 | 参数 |
-|------|------|------|
-| I-1 | Type I Error（H0为真） | N=2, T=100, t=50, M=50, B=100 |
-| I-2 | Power曲线（H1为真） | N=2, T=100, t=50, Δ=[0.1,0.2,0.3] |
-| I-3 | `χ²/F` vs Bootstrap对照（baseline） | N=2, T=100~300, t=T/2, M≥500, B≥500 |
-
-### 4.2 实验组II：高维稀疏VAR检验（核心贡献一）
-
-| 实验 | 内容 | 参数 |
-|------|------|------|
-| II-1 | Lasso估计精度 | N=10, T=300, sparsity=0.2 |
-| II-2 | LR检验演示（H0为真） | N=10, T=300, t=150, B=50 |
-| II-3 | Type I Error | N=10, T=300, t=150, M=30, B=50 |
-| II-4 | Power评估 | N=10, T=300, t=150, Δ=[0.1,0.2,0.3] |
-
-### 4.3 实验组III：高维低秩VAR检验（核心贡献二）
-
-| 实验 | 内容 | 参数 |
-|------|------|------|
-| III-1 | 低秩估计 + 秩选择 | N=8, T=250, rank=2 |
-| III-2 | LR检验演示（H0为真） | N=8, T=250, t=125, B=50 |
-| III-3 | Type I Error | N=8, T=250, t=125, M=30, B=50 |
-| III-4 | Power评估 | N=8, T=250, t=125, Δ=[0.1,0.2,0.3] |
-
-### 4.4 实验组IV：跨模型对比分析
-
-| 实验 | 内容 |
-|------|------|
-| IV-1 | Size对比：三种模型在相同(N,T)下的第一类错误率 |
-| IV-2 | Power对比：三种模型在相同(N,T,Δ)下的功效曲线 |
-| IV-3 | 维度扩展：N增大时各模型性能变化 |
-
-### 4.5 本轮实施框架（与代码脚本一致）
-
-本轮按两部分实施：
-
-1. **检验流程与p值计算对照（baseline）**
-   - 明确 `H0/H1` 与统计量构造（同口径下 F 与 LR 并行）
-   - 在常规时间序列下并行计算：
-     - 渐近 p 值（`F` 分布 / `χ²` 分布）
-     - Bootstrap p 值（`F*` / `LR*`）
-     - 形成四组对照：`asym-F`、`asym-χ²`、`boot-F`、`boot-LR`
-   - 设置 `B` 网格（如 `B={50,100,200,400}`），绘制
-     - `p值-B` 关系图（`asym-F`、`asym-χ²`、`boot-F`、`boot-LR`）
-     `|p_bootstrap(LR)-p_chi2(LR)|` 随 `B` 的变化图
-
-2. **检验合理性实证验证（三类序列）**
-   - 场景：常规（baseline）、低秩、稀疏
-   - 指标：第一类错误（Type I Error）与统计功效（Power）
-   - 设置 `M` 网格（如 `M={30,60,120}`），绘制不同 `M` 下 Type I Error / Power 曲线
-     - 重点输出：`M-Type I Error` 关系图
-   - 目标：观察 Monte Carlo 采样次数对检验稳定性的影响
-
-对应实现脚本：`experiments/run_revised_validation_framework.py`
-
----
-
-## 五、实验参数设计
-
-### 5.1 仿真控制参数
-
-| 参数 | 演示值 | 正式值 | 说明 |
-|------|--------|--------|------|
-| M（蒙特卡洛次数） | 30-50 | 1000-5000 | 评估Size/Power |
-| B（Bootstrap次数） | 50-100 | 500-1000 | 计算p值 |
-| α（显著性水平） | 0.05 | 0.05 | 标准 |
-| seed | 42 | 42 | 可复现 |
-
-### 5.2 模型参数
-
-| 参数 | 测试值 | 说明 |
-|------|--------|------|
-| N（维度） | 2, 5, 8, 10, 20 | N=2,5为基准；N=8,10,20为高维 |
-| T（样本长度） | 100, 200, 300, 500 | 需满足 T ≫ N×p |
-| p（滞后阶数） | 1, 2 | p=1为主 |
-| t（已知断点） | T/2 | 样本中点 |
-
-### 5.3 结构变化参数
-
-| 参数 | 值 | 说明 |
-|------|-----|------|
-| Δ（变化强度） | 0.05, 0.1, 0.15, 0.2, 0.3, 0.5 | 功效曲线 |
-| sparsity（稀疏度） | 0.1, 0.2, 0.3 | 非零元素比例 |
-| rank（秩） | 1, 2, 3 | 低秩模型的真实秩 |
-
----
-
-## 六、代码结构
-
+```text
+seeds = {42, 2026, 7}
+M-grid = {300, 500, 800}
+Δ-grid = {0.04, 0.08, 0.12, 0.16, 0.20}
+B_mc_baseline = 80
+B_mc_highdim = 100
+B-grid = {200, 500, 1000}
 ```
-yunke/
-├── simulation/                    # 流程A：基准VAR（完整）
-│   ├── data_generator.py         # 数据生成（三条流程共用）
-│   ├── var_estimator.py          # OLS估计
-│   ├── sup_lr_test.py            # LR检验（LRTest类）
-│   ├── chow_test.py              # baseline同口径Chow/F检验
-│   ├── chow_bootstrap.py         # baseline-Chow的Bootstrap推断
-│   ├── bootstrap.py              # LR/Sup-LR Bootstrap推断
-│   └── monte_carlo.py            # 蒙特卡洛仿真
-├── sparse_var/                    # 流程B：高维稀疏VAR（完整）
-│   ├── lasso_var.py              # Lasso估计
-│   ├── debiased_lasso.py         # 去偏Lasso
-│   ├── cv_tuning.py              # 交叉验证调参
-│   ├── sparse_lr_test.py         # 稀疏LR检验
-│   ├── sparse_bootstrap.py       # 稀疏Bootstrap
-│   └── sparse_monte_carlo.py     # 稀疏蒙特卡洛
-├── lowrank_var/                   # 流程C：高维低秩VAR（完整）
-│   ├── nuclear_norm.py           # 核范数正则化估计
-│   ├── rank_selection.py         # 秩选择
-│   ├── lowrank_lr_test.py        # 低秩LR检验
-│   ├── lowrank_bootstrap.py      # 低秩Bootstrap
-│   └── lowrank_monte_carlo.py    # 低秩蒙特卡洛
-├── experiments/                   # 实验脚本
-├── results/                       # 实验结果
-├── main.py                        # 主程序入口
-└── simulation_plan.md            # 本文档
+
+如果算力受限，可先使用：
+
+```text
+seeds = {42, 2026, 7}
+M-grid = {100, 200, 300}
+Δ-grid = {0.04, 0.08, 0.12, 0.16, 0.20}
+B_mc_baseline = 50
+B_mc_highdim = 50
+B-grid = {100, 300, 500}
 ```
 
 ---
 
-## 七、参考文献
+## 十二、验收标准
 
-1. Andrews, D. W. K. (1993). Tests for parameter instability and structural change with unknown change point. *Econometrica*, 61(4), 821-856.
-2. Bai, J., & Perron, P. (1998). Estimating and testing linear models with multiple structural changes. *Econometrica*, 66(1), 47-78.
-3. Tibshirani, R. (1996). Regression shrinkage and selection via the lasso. *JRSS-B*, 58(1), 267-288.
-4. Krampe, J., Kreiss, J. P., & Paparoditis, E. (2021). Bootstrap based inference for sparse high-dimensional time series models. *Bernoulli*, 27(3), 1441-1466.
-5. Hou, J. & Zhang, Z. (2019). Low-rank VAR estimation via nuclear norm regularization.
+本轮方案修改完成后，应满足以下验收条件：
+
+### 12.1 结构要求
+
+- [ ] size 与 power 完全分开汇报；
+- [ ] power 至少包含 5 档变化幅度；
+- [ ] baseline / sparse / lowrank 三类场景均有独立 size 结果；
+- [ ] baseline / sparse / lowrank 三类场景均有独立 power 结果；
+- [ ] 报告中能直接看出不同 `M` 下的 size mean；
+- [ ] size 主表不再强制展示 95%CI；
+- [ ] 报告中能直接看出固定最大 `M` 下不同变化幅度的 power。
+
+### 12.2 分析要求
+
+- [ ] 明确讨论 size mean 是否接近 `α`；
+- [ ] 明确讨论 power 是否随变化幅度增大而提升；
+- [ ] 若未提升，要在报告中解释可能原因；
+- [ ] 不再使用“单一 power 数值”代表整个 H1 表现。
+
+### 12.3 输出要求
+
+- [ ] `summary_json` 中分别保存 `size_agg_rows` 与 `power_agg_rows`；
+- [ ] 图文件分别对应 `size vs M` 与 `power vs change scale (fixed max M)`；
+- [ ] 中文主报告中 size 主表默认只播报 mean；
+- [ ] 中文主报告与中文详细报告都采用新结构。
+
+---
+
+## 十三、一句话总结
+
+**新版方案的核心变化是：把“是否控 size”与“是否有 power”拆开看，并把 power 从单点检验改成“随变化幅度变化的整条响应曲线”来评估。**

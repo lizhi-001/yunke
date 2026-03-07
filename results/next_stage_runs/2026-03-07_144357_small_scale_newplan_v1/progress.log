@@ -1,0 +1,9 @@
+Running 3 seeds with seed_workers=2...
+[Seed 42] submitted.
+[Seed 2026] submitted.
+[Progress 1/12] [Seed 42] completed baseline p-value comparison
+[Progress 2/12] [Seed 2026] completed baseline p-value comparison
+[Progress 3/12] [Seed 42] completed baseline size + power sweep
+[Progress 4/12] [Seed 2026] completed baseline size + power sweep
+[Progress 5/12] [Seed 42] completed sparse_lasso size + power sweep
+[Progress 6/12] [Seed 2026] completed sparse_lasso size + power sweep

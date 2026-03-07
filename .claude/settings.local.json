@@ -11,7 +11,8 @@
       "Bash(pip install numpy scipy scikit-learn)",
       "Bash(PYTHONPATH=/root/workspace/yunke python:*)",
       "Bash(find:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(ps aux --sort=-%mem)"
     ]
   }
 }

@@ -1,0 +1,7 @@
+{
+  "run_dir": "results/next_stage_runs/2026-03-07_152751_medium_scale_newplan_v1",
+  "progress_log": "results/next_stage_runs/2026-03-07_152751_medium_scale_newplan_v1/progress.log",
+  "error_log": "results/next_stage_runs/2026-03-07_152751_medium_scale_newplan_v1/errors.log",
+  "worker_log_dir": "results/next_stage_runs/2026-03-07_152751_medium_scale_newplan_v1/worker_logs",
+  "state_dir": "results/next_stage_runs/2026-03-07_152751_medium_scale_newplan_v1/state"
+}

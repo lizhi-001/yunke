@@ -1,0 +1,7 @@
+scenario,model,M,n_seed,size_mean,size_ci95_low,size_ci95_high,size_sd,size_n,M_effective_avg
+baseline,baseline_chow_asym_chi2,1,1,0.0,0.0,0.0,0.0,1,1.0
+baseline,baseline_chow_asym_f,1,1,0.0,0.0,0.0,0.0,1,1.0
+baseline,baseline_chow_bootstrap_f,1,1,1.0,1.0,1.0,0.0,1,1.0
+baseline,baseline_chow_bootstrap_lr,1,1,1.0,1.0,1.0,0.0,1,1.0
+lowrank,lowrank_svd,1,1,0.0,0.0,0.0,0.0,1,1.0
+sparse,sparse_lasso,1,1,0.0,0.0,0.0,0.0,1,1.0
