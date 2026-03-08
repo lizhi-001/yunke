@@ -134,6 +134,77 @@ results/next_stage_runs/
 
 **核心瓶颈**：sparse/lowrank 的单次迭代包含 Lasso/SVD 优化求解，比 baseline 的 OLS 慢 1-2 个数量级。
 
+### 并行后端优化（loky）
+
+Monte Carlo 外层并行已从标准库 `ProcessPoolExecutor` 切换为 **loky**（`joblib.externals.loky`）。
+
+| 项目 | 改动前 | 改动后 |
+|---|---|---|
+| 进程池后端 | `ProcessPoolExecutor`，受限环境自动回退 `ThreadPoolExecutor` | `loky.get_reusable_executor`（优先），回退链：loky → ProcessPool → ThreadPool |
+| 受限环境表现 | 回退线程池，CPU ~130%，GIL 限制真并行 | loky 绕过 POSIX semaphore 限制，真多进程并行 |
+| Worker 进程复用 | 每次 `run_task_map` 创建新进程池 | loky 复用已有 worker 进程，减少 fork/spawn 开销 |
+| 改动文件 | — | `simulation/parallel.py` |
+| 依赖 | 无额外依赖 | `joblib`（已作为 scikit-learn 的依赖存在） |
+
+验证运行（M_grid=[20,50], B=50, seeds=[42], jobs=4）：12/12 stages 完成，三模型并行正常，62.62 秒。
+
+### Worker 动态回收（baseline 先跑完）
+
+`run_all_models_for_seed` 的模型调度已从"三模型同时启动、预分配 worker"改为**两阶段调度**：
+
+1. **Phase 1**：baseline_ols 串行跑完（~0.5s，无需多进程）；
+2. **Phase 2**：全部 jobs 预算分给 sparse_lasso 和 lowrank_svd 并行执行，按 2/3 : 1/3 分配（sparse 是瓶颈，优先拿更多 worker）。
+
+| jobs | 改前分配 (baseline/sparse/lowrank) | 改后分配 (baseline → sparse/lowrank) |
+|---|---|---|
+| 4 | 1 / 2 / 1 同时启动 | 1 串行 → 3 / 1 并行 |
+| 6 | 1 / 3 / 2 同时启动 | 1 串行 → 4 / 2 并行 |
+| 8 | 1 / 4 / 3 同时启动 | 1 串行 → 6 / 2 并行 |
+
+验证结果（同参数 jobs=4）：sparse 从 62.6s 降至 56.4s，总 wall time 从 62.6s 降至 **56.9s（~9% 加速）**。
+
+改动文件：`experiments/run_large_scale_mgrid_multiseed.py`（`run_all_models_for_seed` 函数）。
+
+### 向量化伪序列生成
+
+Bootstrap 伪序列生成函数 `generate_pseudo_series` 中的内层滞后向量组装循环已向量化：
+
+```python
+# 改前：Python 双层循环
+for t in range(p, T):
+    Y_lag_ordered = np.zeros(N * p)
+    for lag in range(p):
+        Y_lag_ordered[lag*N:(lag+1)*N] = Y_star[t-lag-1, :]
+
+# 改后：numpy 切片一行替代
+for t in range(p, T):
+    Y_lag_ordered = Y_star[t-p:t, :][::-1].ravel()
+```
+
+- 数值结果 **bit-for-bit 相同**（已验证 sum、元素值完全一致）；
+- 单次伪序列生成加速 ~22%（500 次计时：0.971s → 0.760s）；
+- 统计方案零影响。
+
+改动文件（共 6 处，逻辑相同）：
+
+| 文件 | 函数 |
+|---|---|
+| `simulation/bootstrap.py` | `generate_pseudo_series` |
+| `sparse_var/sparse_bootstrap.py` | `generate_pseudo_series` |
+| `lowrank_var/lowrank_bootstrap.py` | `generate_pseudo_series` |
+| `simulation/chow_bootstrap.py` | `generate_pseudo_series` |
+| `simulation/data_generator.py` | `generate_var_series` |
+| `simulation/data_generator.py` | `generate_var_with_break` |
+
+### 三项优化累计效果
+
+| 版本 | wall time | 相对初始加速 |
+|---|---|---|
+| 初始（ThreadPool 回退） | 62.6s | — |
+| +loky 真多进程 | 62.6s | (小规模测试，大 M 时收益更显著) |
+| +worker 动态回收 | 56.9s | 9% |
+| +向量化伪序列 | **54.5s** | **13%** |
+
 ### 参数调整对运行时间的影响
 
 | 调整 | 时间缩减倍数 | 对结果影响 |
@@ -170,6 +241,18 @@ results/next_stage_runs/
 ## 6. 当前主实验脚本（M_grid + 多 seed / 单 seed）
 
 `experiments/run_large_scale_mgrid_multiseed.py` — 当前主用的大规模结构断裂实验脚本。
+
+### 已修复的问题
+
+当前版本相较于前一版，已经补全以下机制：
+
+- 结构断裂检验口径统一；
+- `size` 与 `power` 的 `M` 使用逻辑分离：`size` 看 `M_grid`，`power` 固定看 `M_max`；
+- 多 seed 并行；
+- 按维度缩放的效应量网格；
+- `baseline_ols` 的渐近 / bootstrap p 值口径切换；
+- `progress/` 目录下的持久化进度日志；
+- 失败 / 中断必须写日志，避免无感退出。
 
 ### 实验逻辑
 
@@ -220,6 +303,7 @@ results/large_scale_runs/
 - `progress/progress.log`
   - 全实验的人类可读进度日志；
   - 记录 `run / seed / model / stage` 的 started/completed/failed 事件。
+  - 若收到终止信号或出现异常，日志中会明确出现 `failed` 事件。
 
 - `progress/progress.jsonl`
   - 全实验的结构化事件流；
@@ -228,10 +312,74 @@ results/large_scale_runs/
 - `progress/summary.json`
   - 全实验总进度摘要；
   - 包含 `completed_stage_count / total_stage_count / progress_ratio / active_stages`。
+  - 若实验失败或被中断，也会同步更新状态。
 
 - `progress/seed_<seed>_summary.json`
   - 单个 seed 的独立进度摘要；
   - 只反映该 seed 自己的完成情况，不混入其他 seed。
+
+
+### 长实验的正确后台运行方式（避免无感退出）
+
+对于 1 小时以上的大实验，**不建议只靠一次性 `nohup ... &` 从临时代理命令中启动**。在当前 Codex / CLI 使用方式下，这种启动方式可能会随着外层会话结束而被回收，表现为：
+
+- 启动日志只写了开头几行；
+- `progress/summary.json` 长时间不再更新；
+- 进程消失，但目录里没有明确结果文件。
+
+更稳妥的做法有两种：
+
+#### 方式 A：使用 `tmux`（推荐）
+
+```bash
+tmux new -s var_exp
+python3 -u experiments/run_large_scale_mgrid_multiseed.py \
+  --M-grid 50 100 300 \
+  --B 500 \
+  --alpha 0.05 \
+  --deltas 0.04 0.08 0.12 0.16 \
+  --seeds 42 \
+  --jobs 4 \
+  --seed-workers 1 \
+  --baseline-pvalue-method asymptotic_chi2 \
+  --tag single_seed_m300_b500
+```
+
+启动后：
+
+```bash
+# 退出 tmux，但不终止实验
+Ctrl-b d
+
+# 重新进入会话
+tmux attach -t var_exp
+```
+
+#### 方式 B：在一个持久的交互式终端里直接运行
+
+如果不使用 `tmux`，也应保证启动实验的终端会话本身持续存在，不要在启动后立即销毁该 shell 会话。
+
+### 启动后如何确认实验真的在跑
+
+至少同时检查以下三项：
+
+```bash
+# 1) 进程是否存在
+ps -ef | grep run_large_scale_mgrid_multiseed.py | grep -v grep
+
+# 2) 总进度是否在更新
+cat results/large_scale_runs/<run_name>/progress/summary.json
+
+# 3) 进度日志是否持续追加
+tail -f results/large_scale_runs/<run_name>/progress/progress.log
+```
+
+如果出现以下现象之一，通常说明实验已经退出：
+
+- 进程不存在；
+- `progress/summary.json` 的 `updated_at` 长时间不变；
+- `progress.log` 长时间没有新记录；
+- 目录里没有最终 JSON / CSV / MD 输出。
 
 ### 监控命令
 

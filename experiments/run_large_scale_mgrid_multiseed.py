@@ -559,23 +559,36 @@ def run_model_for_seed(model_name: str, cfg: ExperimentConfig, seed: int, model_
 
 
 def run_all_models_for_seed(cfg: ExperimentConfig, seed: int, seed_jobs: int, tracker: ProgressTracker | None = None) -> Dict[str, Dict[str, Any]]:
-    model_jobs = allocate_model_jobs(seed_jobs)
-    max_workers = min(len(MODEL_EXECUTION_ORDER), max(1, seed_jobs))
-    if max_workers <= 1:
-        return {
-            model_name: run_model_for_seed(model_name, cfg, seed, model_jobs[model_name], tracker)
-            for model_name in MODEL_EXECUTION_ORDER
-        }
-
+    # Phase 1: run baseline_ols serially (very fast, ~2s) so that all
+    # jobs are free for the slow models.
     results: Dict[str, Dict[str, Any]] = {}
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        future_to_model = {
-            executor.submit(run_model_for_seed, model_name, cfg, seed, model_jobs[model_name], tracker): model_name
-            for model_name in MODEL_EXECUTION_ORDER
-        }
-        for future in as_completed(future_to_model):
-            model_name = future_to_model[future]
-            results[model_name] = future.result()
+    results["baseline_ols"] = run_model_for_seed("baseline_ols", cfg, seed, 1, tracker)
+
+    # Phase 2: run sparse_lasso and lowrank_svd in parallel.
+    # Allocate jobs by priority: sparse_lasso is consistently the slowest
+    # model, so it gets the majority of workers.  lowrank_svd gets the rest
+    # (at least 1).
+    slow_models = ("sparse_lasso", "lowrank_svd")
+    lowrank_jobs = max(1, seed_jobs // 3)           # ~1/3 of budget
+    sparse_jobs = max(1, seed_jobs - lowrank_jobs)   # ~2/3 of budget
+    slow_job_map: Dict[str, int] = {
+        "sparse_lasso": sparse_jobs,
+        "lowrank_svd": lowrank_jobs,
+    }
+
+    if seed_jobs <= 1:
+        for model_name in slow_models:
+            results[model_name] = run_model_for_seed(model_name, cfg, seed, slow_job_map[model_name], tracker)
+    else:
+        with ThreadPoolExecutor(max_workers=len(slow_models)) as executor:
+            future_to_model = {
+                executor.submit(run_model_for_seed, model_name, cfg, seed, slow_job_map[model_name], tracker): model_name
+                for model_name in slow_models
+            }
+            for future in as_completed(future_to_model):
+                model_name = future_to_model[future]
+                results[model_name] = future.result()
+
     return {name: results[name] for name in MODEL_EXECUTION_ORDER}
 
 

@@ -50,10 +50,7 @@ class LowRankBootstrapInference:
         Y_star[:p, :] = Y[:p, :]
 
         for t in range(p, T):
-            Y_lag_ordered = np.zeros(N * p)
-            for lag in range(p):
-                Y_lag_ordered[lag*N:(lag+1)*N] = Y_star[t-lag-1, :]
-
+            Y_lag_ordered = Y_star[t-p:t, :][::-1].ravel()
             epsilon_t = resampled_residuals[t - p, :] if t - p < T_eff else np.zeros(N)
             Y_star[t, :] = c + Phi @ Y_lag_ordered + epsilon_t
 

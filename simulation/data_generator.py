@@ -165,11 +165,7 @@ class VARDataGenerator:
 
         # 迭代生成序列
         for t in range(p, total_length):
-            Y_lag = Y[t-p:t, :].flatten()[::-1]  # 滞后值向量
-            # 重新排列滞后值以匹配Phi的结构
-            Y_lag_ordered = np.zeros(N * p)
-            for lag in range(p):
-                Y_lag_ordered[lag*N:(lag+1)*N] = Y[t-lag-1, :]
+            Y_lag_ordered = Y[t-p:t, :][::-1].ravel()
             Y[t, :] = c + Phi @ Y_lag_ordered + epsilon[t, :]
 
         return Y[burn_in:, :]
@@ -220,11 +216,7 @@ class VARDataGenerator:
 
         # 迭代生成序列
         for t in range(p, total_length):
-            Y_lag_ordered = np.zeros(N * p)
-            for lag in range(p):
-                Y_lag_ordered[lag*N:(lag+1)*N] = Y[t-lag-1, :]
-
-            # 根据断点选择系数矩阵
+            Y_lag_ordered = Y[t-p:t, :][::-1].ravel()
             Phi = Phi1 if t < actual_break else Phi2
             Y[t, :] = c + Phi @ Y_lag_ordered + epsilon[t, :]
 

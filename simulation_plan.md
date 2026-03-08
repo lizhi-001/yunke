@@ -17,6 +17,18 @@
 
 ## 2. 对应代码
 
+### 2.1 当前版本已修复的问题
+
+相较于前一版实验脚本，当前版本已明确修复或补全以下机制：
+
+- **结构断裂口径统一**：三类模型统一采用“已知点结构断裂检验”口径，`H0/H1` 使用相同的有效样本量 `T-p`；
+- **第一类错误与功效拆分**：`size` 在 `M_grid` 下评估，`power` 固定在 `M_max = max(M_grid)` 下评估；
+- **多 seed 并行**：支持多个 seed 并行运行，并输出逐 seed 结果与跨 seed 聚合结果；
+- **效应量网格修正**：`delta` 解释为统一的基准单元素变化尺度，各模型内部按 `target_fro = delta * sqrt(#coefficients)` 换算为对应的 Frobenius 强度，避免高维模型信号过弱；
+- **baseline p 值口径可选**：`baseline_ols` 支持 `bootstrap_lr`、`asymptotic_chi2`、`asymptotic_f` 三种 p 值计算方式；
+- **进度日志持久化**：每个实验目录下单独提供 `progress/` 子目录；
+- **异常/中断可追踪**：实验若异常退出、被中断或收到终止信号，会在进度日志中显式记录 `failed` 事件，避免“无感退出”。
+
 核心脚本与模块：
 
 - 主脚本：`experiments/run_large_scale_mgrid_multiseed.py`
@@ -30,10 +42,25 @@
 
 - 多 seed 并行；
 - 三模型并行；
-- Monte Carlo 外层并行；
+- Monte Carlo 外层并行（loky 真多进程）；
 - 向量化设计矩阵构造；
+- 向量化伪序列滞后向量组装；
 - `--jobs` 控制总并行预算；
 - `--seed-workers` 控制并发 seed 数。
+
+### 2.2 并行后端：loky 替代 ProcessPoolExecutor
+
+`simulation/parallel.py` 的 Monte Carlo 外层并行使用 **loky**（通过 `joblib.externals.loky`）作为默认进程池后端，替代标准库 `ProcessPoolExecutor`。
+
+**背景**：标准库 `ProcessPoolExecutor` 在受限环境（容器、部分云 VM）中会因 POSIX semaphore 权限问题抛出 `PermissionError`/`OSError`，导致自动回退到 `ThreadPoolExecutor`。Python 线程受 GIL 限制，对 CPU 密集型 Monte Carlo + Bootstrap 任务无法实现真正的多核并行，实测 CPU 利用率仅 ~130%。
+
+**改动**：
+
+- 优先使用 loky 的 `get_reusable_executor`（绕过 POSIX semaphore 问题，复用 worker 进程减少 fork 开销）；
+- 若 loky 不可用，回退到标准库 `ProcessPoolExecutor`；
+- 若仍失败，最终回退到 `ThreadPoolExecutor`。
+
+**验证结果**：loky 验证运行（M_grid=[20,50], B=50, seeds=[42], jobs=4）12/12 stages 全部完成，三模型并行正常，总耗时 62.62 秒。
 
 ---
 
@@ -327,8 +354,34 @@ python3 experiments/run_large_scale_mgrid_multiseed.py \
 - `大规模试验分析报告_*.md`：中文简要分析报告
 - `seed_results/seed_<seed>.json`：各 seed 单独结果
 - `run_meta.json`：路径元信息
+- `progress/`：进度目录，专门存放实验过程日志，不与结果文件混放
 
 ---
+
+### 10.1 `progress/` 目录说明
+
+当前版本中，每个实验目录下都会单独创建 `progress/` 子目录，包含：
+
+- `progress.log`：全实验的人类可读进度日志；
+- `progress.jsonl`：全实验的结构化事件流；
+- `summary.json`：全实验总进度摘要；
+- `seed_<seed>_summary.json`：单个 seed 的独立进度摘要。
+
+说明：
+
+- `summary.json` 反映整个实验 run 的总进度；
+- `seed_<seed>_summary.json` 只反映单个 seed 自己的完成情况；
+- 当前版本已移除易混淆的 `seed_<seed>_events.log`，避免把事件流水误当成单 seed 进度看板。
+
+### 10.2 失败与中断日志
+
+若实验异常退出、被中断或收到终止信号，当前版本会在：
+
+- `progress.log`
+- `progress.jsonl`
+- `summary.json`
+
+中显式记录 `failed` 事件。也就是说，当前版本不允许长实验“无感退出”。
 
 ## 11. 结果解释规则
 
