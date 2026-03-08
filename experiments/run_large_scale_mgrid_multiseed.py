@@ -62,18 +62,19 @@ def _install_signal_handlers(tracker):
 
 @dataclass
 class ExperimentConfig:
-    M_grid: Tuple[int, ...] = (30, 50, 100, 150, 200, 300)
+    M_grid: Tuple[int, ...] = (100, 300, 500, 1000, 2000)
     B: int = 200
     alpha: float = 0.05
-    deltas: Tuple[float, ...] = (0.04, 0.08, 0.12, 0.16)
+    deltas: Tuple[float, ...] = (0.1, 0.2, 0.4, 0.8, 1.2)
     seeds: Tuple[int, ...] = (42, 2026, 7)
     jobs: int = 4
     seed_workers: int = 0
     baseline_pvalue_method: str = "bootstrap_lr"
+    _power_M: int = 0  # 0 means use max(M_grid)
 
     @property
     def power_M(self) -> int:
-        return max(self.M_grid)
+        return self._power_M if self._power_M > 0 else max(self.M_grid)
 
 
 @dataclass
@@ -339,14 +340,14 @@ def build_phi2_with_target_frobenius(
 
 
 def scale_base_delta_to_target_fro(phi: np.ndarray, base_delta: float) -> float:
-    """Convert a common per-entry change scale into a model-specific Frobenius target.
+    """Convert base delta directly to Frobenius norm target.
 
-    When the perturbation direction is the normalized all-ones matrix, a common
-    per-entry shift `base_delta` corresponds to `target_fro = base_delta * sqrt(phi.size)`.
-    This keeps the average coefficient perturbation comparable across models of
-    different dimensionality.
+    The base_delta is used directly as the target Frobenius norm ||ΔΦ||_F,
+    keeping the total signal strength comparable across models of different
+    dimensionality.  This aligns with the thesis definition where the effect
+    size Δ is measured by ||Φ₂ − Φ₁||_F.
     """
-    return float(base_delta * np.sqrt(phi.size))
+    return float(base_delta)
 def summarize_pvalues(pvalues: np.ndarray) -> Dict[str, float]:
     if pvalues is None or len(pvalues) == 0:
         result = {
@@ -585,31 +586,19 @@ def run_model_for_seed(model_name: str, cfg: ExperimentConfig, seed: int, model_
 
 
 def run_all_models_for_seed(cfg: ExperimentConfig, seed: int, seed_jobs: int, tracker: ProgressTracker | None = None) -> Dict[str, Dict[str, Any]]:
-    # Phase 1: run baseline models serially (fast) so that all
-    # jobs are free for the slow models.
+    # Phase 1: run baseline models serially.  Each model gets the full
+    # job budget since nothing else runs concurrently.
     results: Dict[str, Dict[str, Any]] = {}
-    results["baseline_ols"] = run_model_for_seed("baseline_ols", cfg, seed, 1, tracker)
-    results["baseline_ols_f"] = run_model_for_seed("baseline_ols_f", cfg, seed, 1, tracker)
+    results["baseline_ols"] = run_model_for_seed("baseline_ols", cfg, seed, seed_jobs, tracker)
+    results["baseline_ols_f"] = run_model_for_seed("baseline_ols_f", cfg, seed, seed_jobs, tracker)
 
-    # Phase 2: run sparse_lasso and lowrank_svd in parallel.
-    # Even split: at large M both models have comparable total runtime
-    # (lowrank is actually slower due to N=10 vs N=5).
+    # Phase 2: run sparse_lasso and lowrank_svd sequentially, each using
+    # the full job budget.  This avoids loky worker-pool sharing that occurs
+    # when both models run in parallel threads, ensuring all CPU cores are
+    # utilised by each model in turn.
     slow_models = ("sparse_lasso", "lowrank_svd")
-    slow_budgets = allocate_job_budgets(seed_jobs, len(slow_models))
-    slow_job_map: Dict[str, int] = dict(zip(slow_models, slow_budgets))
-
-    if seed_jobs <= 1:
-        for model_name in slow_models:
-            results[model_name] = run_model_for_seed(model_name, cfg, seed, slow_job_map[model_name], tracker)
-    else:
-        with ThreadPoolExecutor(max_workers=len(slow_models)) as executor:
-            future_to_model = {
-                executor.submit(run_model_for_seed, model_name, cfg, seed, slow_job_map[model_name], tracker): model_name
-                for model_name in slow_models
-            }
-            for future in as_completed(future_to_model):
-                model_name = future_to_model[future]
-                results[model_name] = future.result()
+    for model_name in slow_models:
+        results[model_name] = run_model_for_seed(model_name, cfg, seed, seed_jobs, tracker)
 
     return {name: results[name] for name in MODEL_EXECUTION_ORDER}
 
@@ -898,7 +887,7 @@ def write_markdown_report(results: Dict[str, Any], report_path: str) -> None:
     lines.append(f"- M_grid: {cfg['M_grid']}")
     lines.append(f"- power 使用的 M: {cfg['power_M']}")
     lines.append(f"- B: {cfg['B']}; alpha: {cfg['alpha']}; base deltas: {cfg['deltas']}; baseline_pvalue_method: {cfg.get('baseline_pvalue_method', 'bootstrap_lr')}")
-    lines.append("- 断点构造: 对所有系数施加统一基准单元素变化尺度 `delta`，再按 `target_fro = delta * sqrt(#coefficients)` 换算为模型特定的 Frobenius 目标强度。")
+    lines.append("- 断点构造: delta 直接作为 Frobenius 范数目标 `||ΔΦ||_F = delta`，各模型在相同总信号强度下比较检测力。")
     lines.append(f"- 总耗时(秒): {info['total_runtime_sec']:.2f}")
     lines.append("")
 
@@ -946,10 +935,11 @@ def write_markdown_report(results: Dict[str, Any], report_path: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run multi-seed known-breakpoint experiments with M-grid size checks.")
-    parser.add_argument("--M-grid", type=int, nargs="+", default=[30, 50, 100, 150, 200, 300])
+    parser.add_argument("--M-grid", type=int, nargs="+", default=[100, 300, 500, 1000, 2000])
+    parser.add_argument("--power-M", type=int, default=0, help="Monte Carlo size for power evaluation. 0 = use max(M_grid).")
     parser.add_argument("--B", type=int, default=200)
     parser.add_argument("--alpha", type=float, default=0.05)
-    parser.add_argument("--deltas", type=float, nargs="+", default=[0.04, 0.08, 0.12, 0.16])
+    parser.add_argument("--deltas", type=float, nargs="+", default=[0.1, 0.2, 0.4, 0.8, 1.2])
     parser.add_argument("--seeds", type=int, nargs="+", default=[42, 2026, 7])
     parser.add_argument("--jobs", type=int, default=4)
     parser.add_argument("--seed-workers", type=int, default=0)
@@ -966,6 +956,7 @@ def main() -> None:
         jobs=max(1, int(args.jobs)),
         seed_workers=max(0, int(args.seed_workers)),
         baseline_pvalue_method=args.baseline_pvalue_method,
+        _power_M=max(0, int(args.power_M)),
     )
 
     stamp, run_dir = make_run_dir(args.tag)
@@ -1006,9 +997,9 @@ def main() -> None:
             "config": {
                 **asdict(cfg),
                 "power_M": cfg.power_M,
-                "effect_size_mode": "dimension_scaled_frobenius_from_base_delta",
+                "effect_size_mode": "direct_frobenius",
                 "effect_direction": "normalized_all_ones",
-                "delta_interpretation": "common per-entry shift scale",
+                "delta_interpretation": "frobenius_norm_of_break",
             },
             "total_runtime_sec": float(total_runtime),
         },

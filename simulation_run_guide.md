@@ -7,7 +7,7 @@
 ### 实验逻辑
 
 - 第一类错误（size）：在 `M_grid` 下逐个评估；
-- 功效（power）：固定使用 `M_max = max(M_grid)` 评估；
+- 功效（power）：固定使用 `power_M`（默认 `max(M_grid)`，可通过 `--power-M` 独立指定）评估；
 - 支持单 seed 或多 seed；
 - 支持 seed 并行、模型并行、Monte Carlo 外层并行；
 - `baseline_ols` 默认使用 `bootstrap_lr` p 值；`baseline_ols_f` 始终使用 `asymptotic_f` 作为对照；
@@ -26,24 +26,26 @@
 
 ```bash
 python3 -u experiments/run_large_scale_mgrid_multiseed.py \
-  --M-grid 30 50 100 150 200 300 \
+  --M-grid 100 300 500 1000 2000 \
+  --power-M 300 \
   --B 500 \
   --alpha 0.05 \
-  --deltas 0.04 0.08 0.12 0.16 \
+  --deltas 0.1 0.2 0.4 0.8 1.2 \
   --seeds 42 \
   --jobs 4 \
   --seed-workers 1 \
-  --tag single_seed_bootstrap_v3
+  --tag v4_direct_fro
 ```
 
 ### 命令行参数
 
 | 参数 | 默认值 | 说明 |
 |---|---|---|
-| `--M-grid` | [30, 50, 100, 150, 200, 300] | 第一类错误评估的 Monte Carlo 重复次数网格 |
+| `--M-grid` | [100, 300, 500, 1000, 2000] | 第一类错误评估的 Monte Carlo 重复次数网格 |
+| `--power-M` | 0 (= max(M_grid)) | 功效评估的 MC 重复次数，独立于 M_grid |
 | `--B` | 200 | 每次检验的 bootstrap 重复次数 |
 | `--alpha` | 0.05 | 显著性水平 |
-| `--deltas` | [0.04, 0.08, 0.12, 0.16] | 基准单元素变化尺度网格 |
+| `--deltas` | [0.1, 0.2, 0.4, 0.8, 1.2] | Frobenius 范数目标网格（`||ΔΦ||_F = delta`） |
 | `--seeds` | [42, 2026, 7] | 随机种子列表 |
 | `--jobs` | 4 | 总并行预算 |
 | `--seed-workers` | 0 (自动) | 并发 seed 数 |
@@ -88,14 +90,15 @@ results/large_scale_runs/
 
 ### 两阶段调度
 
-1. **Phase 1**：baseline_ols 和 baseline_ols_f 串行跑完（baseline_ols 使用 bootstrap 较慢，baseline_ols_f 使用渐近 F 极快）；
-2. **Phase 2**：全部 jobs 预算在 sparse_lasso 和 lowrank_svd 之间均分并行执行。
+1. **Phase 1**：baseline_ols 和 baseline_ols_f 顺序执行，每个模型独占全部 `--jobs` 个 worker；
+2. **Phase 2**：sparse_lasso 和 lowrank_svd 顺序执行，每个模型独占全部 `--jobs` 个 worker。
 
-| jobs | 分配方式 |
+所有模型均顺序执行、独占全部 worker 的原因：loky 在同一进程内维护全局共享 worker pool，多线程并行时无法为每个模型创建独立 pool，实际并行度 = max(各请求 n_jobs) 而非求和。顺序独占让每个模型使用全部 worker，CPU 利用率从 ~25% 提升到 ~100%。
+
+| jobs | 执行方式 |
 |---|---|
-| 4 | baseline 串行 → sparse 2 / lowrank 2 并行 |
-| 6 | baseline 串行 → sparse 3 / lowrank 3 并行 |
-| 8 | baseline 串行 → sparse 4 / lowrank 4 并行 |
+| 4 | baseline_ols(4w) → baseline_ols_f(4w) → sparse(4w) → lowrank(4w) |
+| 8 | baseline_ols(8w) → baseline_ols_f(8w) → sparse(8w) → lowrank(8w) |
 
 ### 并行后端
 
@@ -110,14 +113,15 @@ Monte Carlo 外层并行使用 **loky**（`joblib.externals.loky`），回退链
 ```bash
 tmux new -s var_exp
 python3 -u experiments/run_large_scale_mgrid_multiseed.py \
-  --M-grid 30 50 100 150 200 300 \
+  --M-grid 100 300 500 1000 2000 \
+  --power-M 300 \
   --B 500 \
   --alpha 0.05 \
-  --deltas 0.04 0.08 0.12 0.16 \
+  --deltas 0.1 0.2 0.4 0.8 1.2 \
   --seeds 42 \
   --jobs 4 \
   --seed-workers 1 \
-  --tag single_seed_bootstrap_v3
+  --tag v4_direct_fro
 ```
 
 ```bash

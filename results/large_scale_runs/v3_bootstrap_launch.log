@@ -4,3 +4,14 @@ Config: M_grid=[30, 50, 100, 150, 200, 300], power_M=300, B=500, alpha=0.05, del
 ========================================================================
 Running seeds in parallel with total_jobs=4; seed_workers=1; seed_job_split=[4]
 [seed 42] start (jobs=4, power_M=300, M_grid=[30, 50, 100, 150, 200, 300])
+[seed 42] done in 5963.61s
+
+Outputs:
+- RUN     : results/large_scale_runs/2026-03-08_152104_v3_bootstrap
+- JSON    : results/large_scale_runs/2026-03-08_152104_v3_bootstrap/large_scale_experiment_2026-03-08_152104_v3_bootstrap.json
+- RAW CSV : results/large_scale_runs/2026-03-08_152104_v3_bootstrap/large_scale_raw_2026-03-08_152104_v3_bootstrap.csv
+- AGG CSV : results/large_scale_runs/2026-03-08_152104_v3_bootstrap/large_scale_agg_2026-03-08_152104_v3_bootstrap.csv
+- MD      : results/large_scale_runs/2026-03-08_152104_v3_bootstrap/大规模试验分析报告_2026-03-08_152104_v3_bootstrap.md
+- PROGRESS: results/large_scale_runs/2026-03-08_152104_v3_bootstrap/progress
+- META    : results/large_scale_runs/2026-03-08_152104_v3_bootstrap/run_meta.json
+Total runtime: 5963.61s

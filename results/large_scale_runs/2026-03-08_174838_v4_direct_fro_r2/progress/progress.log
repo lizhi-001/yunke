@@ -1,0 +1,14 @@
+[2026-03-08 17:48:38] | event=run | status=started | progress=0/40 | B=500 | M_grid=[100, 300, 500, 1000, 2000] | alpha=0.05 | baseline_pvalue_method=bootstrap_lr | deltas=[0.1, 0.2, 0.4, 0.8, 1.2] | jobs=4 | power_M=300 | seed_workers=1 | seeds=[42]
+[2026-03-08 17:48:38] | event=seed | status=started | progress=0/40 | seed=42 | jobs=4
+[2026-03-08 17:48:38] | event=model | status=started | progress=0/40 | seed=42 | model=baseline_ols | jobs=4
+[2026-03-08 17:48:38] | event=stage | status=started | progress=0/40 | seed=42 | model=baseline_ols | stage=type1_M_100 | M=100 | task=type1_error
+[2026-03-08 17:49:10] | event=stage | status=completed | progress=1/40 | seed=42 | model=baseline_ols | stage=type1_M_100 | runtime_sec=31.47 | M=100 | metric_value=0.05 | task=type1_error
+[2026-03-08 17:49:10] | event=stage | status=started | progress=1/40 | seed=42 | model=baseline_ols | stage=type1_M_300 | M=300 | task=type1_error
+[2026-03-08 17:50:41] | event=stage | status=completed | progress=2/40 | seed=42 | model=baseline_ols | stage=type1_M_300 | runtime_sec=91.18 | M=300 | metric_value=0.056666666666666664 | task=type1_error
+[2026-03-08 17:50:41] | event=stage | status=started | progress=2/40 | seed=42 | model=baseline_ols | stage=type1_M_500 | M=500 | task=type1_error
+[2026-03-08 17:53:05] | event=stage | status=completed | progress=3/40 | seed=42 | model=baseline_ols | stage=type1_M_500 | runtime_sec=144.00 | M=500 | metric_value=0.064 | task=type1_error
+[2026-03-08 17:53:05] | event=stage | status=started | progress=3/40 | seed=42 | model=baseline_ols | stage=type1_M_1000 | M=1000 | task=type1_error
+[2026-03-08 17:57:50] | event=stage | status=completed | progress=4/40 | seed=42 | model=baseline_ols | stage=type1_M_1000 | runtime_sec=285.21 | M=1000 | metric_value=0.057 | task=type1_error
+[2026-03-08 17:57:50] | event=stage | status=started | progress=4/40 | seed=42 | model=baseline_ols | stage=type1_M_2000 | M=2000 | task=type1_error
+[2026-03-08 18:07:09] | event=stage | status=completed | progress=5/40 | seed=42 | model=baseline_ols | stage=type1_M_2000 | runtime_sec=558.30 | M=2000 | metric_value=0.053 | task=type1_error
+[2026-03-08 18:07:09] | event=stage | status=started | progress=5/40 | seed=42 | model=baseline_ols | stage=power_delta_0.10 | M=300 | base_delta=0.1 | target_fro=0.1 | task=power

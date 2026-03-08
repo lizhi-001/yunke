@@ -5,7 +5,7 @@
 当前方案对应一个**多 seed、已知点结构断裂、单脚本输出**的仿真实验。目标分为两部分：
 
 1. **第一类错误（size）**：在多个 `M` 下考察四类模型的 `type1_error` 是否稳定、是否接近名义显著性水平；
-2. **检验功效（power）**：固定使用 `M_max = max(M_grid)`，比较四类模型在不同断裂强度下的 `power(delta)`。
+2. **检验功效（power）**：固定使用 `power_M`（默认 `max(M_grid)`，可通过 `--power-M` 独立指定），比较四类模型在不同断裂强度下的 `power(delta)`。
 
 因此，当前版本不再是“同一个 `M` 同时看 size 和 power”，而是：
 
@@ -24,7 +24,7 @@
 - **结构断裂口径统一**：四类模型统一采用”已知点结构断裂检验”口径，`H0/H1` 使用相同的有效样本量 `T-p`；
 - **第一类错误与功效拆分**：`size` 在 `M_grid` 下评估，`power` 固定在 `M_max = max(M_grid)` 下评估；
 - **多 seed 并行**：支持多个 seed 并行运行，并输出逐 seed 结果与跨 seed 聚合结果；
-- **效应量网格修正**：`delta` 解释为统一的基准单元素变化尺度，各模型内部按 `target_fro = delta * sqrt(#coefficients)` 换算为对应的 Frobenius 强度，避免高维模型信号过弱；
+- **效应量统一 Frobenius 目标**：`delta` 直接作为 Frobenius 范数目标 `||ΔΦ||_F = delta`，各模型在相同总信号强度下比较检测力，符合开题报告中效应量 Δ 以 ‖Φ₂ − Φ₁‖_F 度量的定义；
 - **baseline p 值双轨对照**：`baseline_ols` 默认使用 `bootstrap_lr`，`baseline_ols_f` 始终使用 `asymptotic_f` 作为对照；
 - **进度日志持久化**：每个实验目录下单独提供 `progress/` 子目录；
 - **异常/中断可追踪**：实验若异常退出、被中断或收到终止信号，会在进度日志中显式记录 `failed` 事件，避免“无感退出”。
@@ -41,7 +41,7 @@
 当前实现已支持：
 
 - 多 seed 并行；
-- 四模型并行（baseline 串行 + sparse/lowrank 并行）；
+- 四模型顺序调度（每个模型独占全部 workers，避免 loky pool 共享导致 CPU 利用不足）；
 - Monte Carlo 外层并行（loky 真多进程）；
 - 向量化设计矩阵构造；
 - 向量化伪序列滞后向量组装；
@@ -136,10 +136,10 @@ H1: Φ1 ≠ Φ2
 统一记号如下：
 
 - `M_grid`：用于考察第一类错误的 Monte Carlo 网格
-- `M_max`：`max(M_grid)`，用于计算功效
+- `M_max`：`max(M_grid)`（默认），或通过 `--power-M` 独立指定，用于计算功效
 - `B`：每次检验中的 bootstrap 重复次数
 - `alpha`：显著性水平
-- `deltas`：统一基准单元素变化尺度网格；各模型内部按 `target_fro = delta * sqrt(#coefficients)` 换算为对应的 Frobenius 目标强度
+- `deltas`：Frobenius 范数目标网格；`delta` 直接作为 `||ΔΦ||_F`，各模型在相同总信号强度下比较
 - `seeds`：多 seed 重复列表
 - `jobs`：总并行预算
 - `seed_workers`：并发 seed 数
@@ -238,15 +238,9 @@ Y_t ~ VAR(p; Φ, Σ)
 
 ### 7.3 `delta` 的解释
 
-当前 `delta` 表示统一的**基准单元素变化尺度**。
+当前 `delta` 直接作为 **Frobenius 范数目标** `||ΔΦ||_F = delta`，即断点前后系数矩阵差的 Frobenius 范数。
 
-在实际构造断点后参数时，各模型会先按
-
-```text
-target_fro = delta * sqrt(#coefficients)
-```
-
-将其换算为模型特定的 Frobenius 目标强度，再沿归一化全 1 方向施加扰动。这样做的目的是让不同维度模型具有更接近的平均单系数变化幅度，而不至于在高维模型中因固定总 Frobenius 强度过小而导致信号过弱。
+这一设计符合开题报告中对效应量 Δ 的定义（以 ‖Φ₂ − Φ₁‖_F 度量），使得不同维度的模型在**相同总信号强度**下比较检测力。扰动方向为归一化全 1 矩阵，缩放到目标 Frobenius 范数。
 
 解释结果时要同时看：
 
@@ -313,10 +307,11 @@ power(delta; M_max) = rejections / successful_iterations
 ### 9.1 默认参数
 
 ```text
-M_grid = [30, 50, 100, 150, 200, 300]
+M_grid = [100, 300, 500, 1000, 2000]
+power_M = 300 (通过 --power-M 独立指定，不受 M_grid 影响)
 B = 200
 alpha = 0.05
-deltas = [0.04, 0.08, 0.12, 0.16]
+deltas = [0.1, 0.2, 0.4, 0.8, 1.2]
 seeds = [42, 2026, 7]
 jobs = 4
 seed_workers = 0 (自动)
@@ -327,14 +322,15 @@ baseline_pvalue_method = bootstrap_lr
 
 ```bash
 python3 experiments/run_large_scale_mgrid_multiseed.py \
-  --M-grid 30 50 100 150 200 300 \
+  --M-grid 100 300 500 1000 2000 \
+  --power-M 300 \
   --B 500 \
   --alpha 0.05 \
-  --deltas 0.04 0.08 0.12 0.16 \
-  --seeds 42 2026 7 \
-  --jobs 8 \
-  --seed-workers 2 \
-  --tag formal_mgrid_multiseed
+  --deltas 0.1 0.2 0.4 0.8 1.2 \
+  --seeds 42 \
+  --jobs 4 \
+  --seed-workers 1 \
+  --tag v4_direct_fro
 ```
 
 ### 9.3 推荐理解方式

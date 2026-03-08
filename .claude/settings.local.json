@@ -12,7 +12,9 @@
       "Bash(PYTHONPATH=/root/workspace/yunke python:*)",
       "Bash(find:*)",
       "Bash(ls:*)",
-      "Bash(ps aux --sort=-%mem)"
+      "Bash(ps aux --sort=-%mem)",
+      "Bash(top -bn1 | head -12)",
+      "Bash(top -bn1 | head -15)"
     ]
   }
 }
