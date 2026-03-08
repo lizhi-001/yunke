@@ -11,41 +11,41 @@
 - 支持单 seed 或多 seed；
 - 支持 seed 并行、模型并行、Monte Carlo 外层并行；
 - `baseline_ols` 默认使用 `bootstrap_lr` p 值；`baseline_ols_f` 始终使用 `asymptotic_f` 作为对照；
-- 四个模型统一 `T = 200`、`t = 100`，保证每段有效样本量一致。
+- 四个模型统一 `T = 500`、`t = 250`，保证每段有效样本量一致，同时避免高维模型（lowrank_svd, N=10）在短样本下 SVD 截断导致的 size distortion。
 
 ### 四类模型
 
 | 模型 | N | T | t | p | p 值方法 | 说明 |
 |---|---|---|---|---|---|---|
-| baseline_ols | 2 | 200 | 100 | 1 | bootstrap_lr | 低维 OLS，主检验 |
-| baseline_ols_f | 2 | 200 | 100 | 1 | asymptotic_f | 渐近 F 对照组 |
-| sparse_lasso | 5 | 200 | 100 | 1 | bootstrap_lr | 稀疏 Lasso (sparsity=0.2) |
-| lowrank_svd | 10 | 200 | 100 | 1 | bootstrap_lr | 低秩 SVD (rank=2) |
+| baseline_ols | 2 | 500 | 250 | 1 | bootstrap_lr | 低维 OLS，主检验 |
+| baseline_ols_f | 2 | 500 | 250 | 1 | asymptotic_f | 渐近 F 对照组 |
+| sparse_lasso | 5 | 500 | 250 | 1 | bootstrap_lr | 稀疏 Lasso (sparsity=0.2) |
+| lowrank_svd | 10 | 500 | 250 | 1 | bootstrap_lr | 低秩 SVD (rank=2) |
 
 ### 启动命令示例
 
 ```bash
 python3 -u experiments/run_large_scale_mgrid_multiseed.py \
-  --M-grid 100 300 500 1000 2000 \
+  --M-grid 50 100 300 500 1000 2000 \
   --power-M 300 \
   --B 500 \
   --alpha 0.05 \
-  --deltas 0.1 0.2 0.4 0.8 1.2 \
+  --deltas 0.05 0.1 0.15 0.2 0.3 0.5 \
   --seeds 42 \
   --jobs 4 \
   --seed-workers 1 \
-  --tag v4_direct_fro
+  --tag v5_t500_fro
 ```
 
 ### 命令行参数
 
 | 参数 | 默认值 | 说明 |
 |---|---|---|
-| `--M-grid` | [100, 300, 500, 1000, 2000] | 第一类错误评估的 Monte Carlo 重复次数网格 |
+| `--M-grid` | [50, 100, 300, 500, 1000, 2000] | 第一类错误评估的 Monte Carlo 重复次数网格 |
 | `--power-M` | 0 (= max(M_grid)) | 功效评估的 MC 重复次数，独立于 M_grid |
 | `--B` | 200 | 每次检验的 bootstrap 重复次数 |
 | `--alpha` | 0.05 | 显著性水平 |
-| `--deltas` | [0.1, 0.2, 0.4, 0.8, 1.2] | Frobenius 范数目标网格（`||ΔΦ||_F = delta`） |
+| `--deltas` | [0.05, 0.1, 0.15, 0.2, 0.3, 0.5] | Frobenius 范数目标网格（`||ΔΦ||_F = delta`） |
 | `--seeds` | [42, 2026, 7] | 随机种子列表 |
 | `--jobs` | 4 | 总并行预算 |
 | `--seed-workers` | 0 (自动) | 并发 seed 数 |
@@ -113,15 +113,15 @@ Monte Carlo 外层并行使用 **loky**（`joblib.externals.loky`），回退链
 ```bash
 tmux new -s var_exp
 python3 -u experiments/run_large_scale_mgrid_multiseed.py \
-  --M-grid 100 300 500 1000 2000 \
+  --M-grid 50 100 300 500 1000 2000 \
   --power-M 300 \
   --B 500 \
   --alpha 0.05 \
-  --deltas 0.1 0.2 0.4 0.8 1.2 \
+  --deltas 0.05 0.1 0.15 0.2 0.3 0.5 \
   --seeds 42 \
   --jobs 4 \
   --seed-workers 1 \
-  --tag v4_direct_fro
+  --tag v5_t500_fro
 ```
 
 ```bash

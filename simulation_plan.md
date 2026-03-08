@@ -159,9 +159,9 @@ H1: Φ1 ≠ Φ2
 
 ```text
 N = 2
-T = 200
+T = 500
 p = 1
-t = 100
+t = 250
 Sigma = 0.5 * I
 ```
 
@@ -171,9 +171,9 @@ Sigma = 0.5 * I
 
 ```text
 N = 5
-T = 200
+T = 500
 p = 1
-t = 100
+t = 250
 Sigma = 0.5 * I
 sparsity = 0.2
 lasso_alpha = 0.02
@@ -183,16 +183,16 @@ lasso_alpha = 0.02
 
 ```text
 N = 10
-T = 200
+T = 500
 p = 1
-t = 100
+t = 250
 Sigma = 0.5 * I
 rank = 2
 ```
 
 ### 6.4 解释口径
 
-四个模型统一使用 `T = 200`、`t = 100`，保证每段有效样本量一致（均为 `T - t = 99`），使 size 和 power 的比较具有公平性。各模型的维度 `N` 不同（2 / 5 / 10），反映不同复杂度场景下的检验表现。
+四个模型统一使用 `T = 500`、`t = 250`，保证每段有效样本量一致（均为 `T - t = 249`），使 size 和 power 的比较具有公平性。选择 T=500 而非更小值的原因：lowrank_svd（N=10, 100 参数）在 T=200 时每段仅 99 个观测，SVD 截断在此高参数/观测比下会产生不对称偏差，导致 LR 统计量系统性偏大（Type I error ≈ 0.074）。T=500 时参数/观测比降至 0.40，size distortion 消失。各模型的维度 `N` 不同（2 / 5 / 10），反映不同复杂度场景下的检验表现。
 
 ---
 
@@ -307,11 +307,11 @@ power(delta; M_max) = rejections / successful_iterations
 ### 9.1 默认参数
 
 ```text
-M_grid = [100, 300, 500, 1000, 2000]
+M_grid = [50, 100, 300, 500, 1000, 2000]
 power_M = 300 (通过 --power-M 独立指定，不受 M_grid 影响)
 B = 200
 alpha = 0.05
-deltas = [0.1, 0.2, 0.4, 0.8, 1.2]
+deltas = [0.05, 0.1, 0.15, 0.2, 0.3, 0.5]
 seeds = [42, 2026, 7]
 jobs = 4
 seed_workers = 0 (自动)
@@ -322,15 +322,15 @@ baseline_pvalue_method = bootstrap_lr
 
 ```bash
 python3 experiments/run_large_scale_mgrid_multiseed.py \
-  --M-grid 100 300 500 1000 2000 \
+  --M-grid 50 100 300 500 1000 2000 \
   --power-M 300 \
   --B 500 \
   --alpha 0.05 \
-  --deltas 0.1 0.2 0.4 0.8 1.2 \
+  --deltas 0.05 0.1 0.15 0.2 0.3 0.5 \
   --seeds 42 \
   --jobs 4 \
   --seed-workers 1 \
-  --tag v4_direct_fro
+  --tag v5_t500_fro
 ```
 
 ### 9.3 推荐理解方式

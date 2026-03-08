@@ -62,10 +62,10 @@ def _install_signal_handlers(tracker):
 
 @dataclass
 class ExperimentConfig:
-    M_grid: Tuple[int, ...] = (100, 300, 500, 1000, 2000)
+    M_grid: Tuple[int, ...] = (50, 100, 300, 500, 1000, 2000)
     B: int = 200
     alpha: float = 0.05
-    deltas: Tuple[float, ...] = (0.1, 0.2, 0.4, 0.8, 1.2)
+    deltas: Tuple[float, ...] = (0.05, 0.1, 0.15, 0.2, 0.3, 0.5)
     seeds: Tuple[int, ...] = (42, 2026, 7)
     jobs: int = 4
     seed_workers: int = 0
@@ -388,7 +388,7 @@ def _lowrank_mc(M: int, B: int, seed: int, jobs: int, baseline_pvalue_method: st
 def get_model_setup(model_name: str, seed: int) -> Dict[str, Any]:
     generator = VARDataGenerator(seed=seed)
     if model_name == "baseline_ols":
-        N, T, p, t = 2, 200, 1, 100
+        N, T, p, t = 2, 500, 1, 250
         Sigma = np.eye(N) * 0.5
         phi = generator.generate_stationary_phi(N, p, scale=0.3)
         return {
@@ -409,7 +409,7 @@ def get_model_setup(model_name: str, seed: int) -> Dict[str, Any]:
             ),
         }
     if model_name == "baseline_ols_f":
-        N, T, p, t = 2, 200, 1, 100
+        N, T, p, t = 2, 500, 1, 250
         Sigma = np.eye(N) * 0.5
         phi = generator.generate_stationary_phi(N, p, scale=0.3)
         return {
@@ -430,7 +430,7 @@ def get_model_setup(model_name: str, seed: int) -> Dict[str, Any]:
             ),
         }
     if model_name == "sparse_lasso":
-        N, T, p, t = 5, 200, 1, 100
+        N, T, p, t = 5, 500, 1, 250
         Sigma = np.eye(N) * 0.5
         phi = generator.generate_stationary_phi(N, p, sparsity=0.2, scale=0.3)
         return {
@@ -451,7 +451,7 @@ def get_model_setup(model_name: str, seed: int) -> Dict[str, Any]:
             ),
         }
     if model_name == "lowrank_svd":
-        N, T, p, t = 10, 200, 1, 100
+        N, T, p, t = 10, 500, 1, 250
         Sigma = np.eye(N) * 0.5
         phi = generator.generate_lowrank_phi(N, p, rank=2, scale=0.3)
         return {
@@ -935,11 +935,11 @@ def write_markdown_report(results: Dict[str, Any], report_path: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run multi-seed known-breakpoint experiments with M-grid size checks.")
-    parser.add_argument("--M-grid", type=int, nargs="+", default=[100, 300, 500, 1000, 2000])
+    parser.add_argument("--M-grid", type=int, nargs="+", default=[50, 100, 300, 500, 1000, 2000])
     parser.add_argument("--power-M", type=int, default=0, help="Monte Carlo size for power evaluation. 0 = use max(M_grid).")
     parser.add_argument("--B", type=int, default=200)
     parser.add_argument("--alpha", type=float, default=0.05)
-    parser.add_argument("--deltas", type=float, nargs="+", default=[0.1, 0.2, 0.4, 0.8, 1.2])
+    parser.add_argument("--deltas", type=float, nargs="+", default=[0.05, 0.1, 0.15, 0.2, 0.3, 0.5])
     parser.add_argument("--seeds", type=int, nargs="+", default=[42, 2026, 7])
     parser.add_argument("--jobs", type=int, default=4)
     parser.add_argument("--seed-workers", type=int, default=0)

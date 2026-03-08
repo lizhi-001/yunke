@@ -1,0 +1,6 @@
+========================================================================
+Running large-scale multi-seed M-grid experiment
+Config: M_grid=[50, 100, 300, 500, 1000, 2000], power_M=300, B=500, alpha=0.05, deltas=[0.05, 0.1, 0.15, 0.2, 0.3, 0.5], seeds=[42], jobs=4, seed_workers=1, baseline_pvalue_method=bootstrap_lr
+========================================================================
+Running seeds in parallel with total_jobs=4; seed_workers=1; seed_job_split=[4]
+[seed 42] start (jobs=4, power_M=300, M_grid=[50, 100, 300, 500, 1000, 2000])

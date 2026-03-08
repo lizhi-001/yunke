@@ -12,3 +12,77 @@
 [2026-03-08 17:57:50] | event=stage | status=started | progress=4/40 | seed=42 | model=baseline_ols | stage=type1_M_2000 | M=2000 | task=type1_error
 [2026-03-08 18:07:09] | event=stage | status=completed | progress=5/40 | seed=42 | model=baseline_ols | stage=type1_M_2000 | runtime_sec=558.30 | M=2000 | metric_value=0.053 | task=type1_error
 [2026-03-08 18:07:09] | event=stage | status=started | progress=5/40 | seed=42 | model=baseline_ols | stage=power_delta_0.10 | M=300 | base_delta=0.1 | target_fro=0.1 | task=power
+[2026-03-08 18:08:36] | event=stage | status=completed | progress=6/40 | seed=42 | model=baseline_ols | stage=power_delta_0.10 | runtime_sec=87.33 | M=300 | base_delta=0.1 | metric_value=0.08 | target_fro=0.1 | task=power
+[2026-03-08 18:08:36] | event=stage | status=started | progress=6/40 | seed=42 | model=baseline_ols | stage=power_delta_0.20 | M=300 | base_delta=0.2 | target_fro=0.2 | task=power
+[2026-03-08 18:10:04] | event=stage | status=completed | progress=7/40 | seed=42 | model=baseline_ols | stage=power_delta_0.20 | runtime_sec=88.34 | M=300 | base_delta=0.2 | metric_value=0.10666666666666667 | target_fro=0.2 | task=power
+[2026-03-08 18:10:04] | event=stage | status=started | progress=7/40 | seed=42 | model=baseline_ols | stage=power_delta_0.40 | M=300 | base_delta=0.4 | target_fro=0.4 | task=power
+[2026-03-08 18:11:31] | event=stage | status=completed | progress=8/40 | seed=42 | model=baseline_ols | stage=power_delta_0.40 | runtime_sec=86.69 | M=300 | base_delta=0.4 | metric_value=0.5366666666666666 | target_fro=0.4 | task=power
+[2026-03-08 18:11:31] | event=stage | status=started | progress=8/40 | seed=42 | model=baseline_ols | stage=power_delta_0.80 | M=300 | base_delta=0.8 | target_fro=0.8 | task=power
+[2026-03-08 18:12:58] | event=stage | status=completed | progress=9/40 | seed=42 | model=baseline_ols | stage=power_delta_0.80 | runtime_sec=86.53 | M=300 | base_delta=0.8 | metric_value=0.9966666666666667 | target_fro=0.8 | task=power
+[2026-03-08 18:12:58] | event=stage | status=started | progress=9/40 | seed=42 | model=baseline_ols | stage=power_delta_1.20 | M=300 | base_delta=1.2 | target_fro=1.2 | task=power
+[2026-03-08 18:14:25] | event=stage | status=completed | progress=10/40 | seed=42 | model=baseline_ols | stage=power_delta_1.20 | runtime_sec=87.20 | M=300 | base_delta=1.2 | metric_value=1.0 | target_fro=1.2 | task=power
+[2026-03-08 18:14:25] | event=model | status=started | progress=10/40 | seed=42 | model=baseline_ols_f | jobs=4
+[2026-03-08 18:14:25] | event=stage | status=started | progress=10/40 | seed=42 | model=baseline_ols_f | stage=type1_M_100 | M=100 | task=type1_error
+[2026-03-08 18:14:25] | event=stage | status=completed | progress=11/40 | seed=42 | model=baseline_ols_f | stage=type1_M_100 | runtime_sec=0.11 | M=100 | metric_value=0.04 | task=type1_error
+[2026-03-08 18:14:25] | event=stage | status=started | progress=11/40 | seed=42 | model=baseline_ols_f | stage=type1_M_300 | M=300 | task=type1_error
+[2026-03-08 18:14:25] | event=stage | status=completed | progress=12/40 | seed=42 | model=baseline_ols_f | stage=type1_M_300 | runtime_sec=0.33 | M=300 | metric_value=0.04 | task=type1_error
+[2026-03-08 18:14:25] | event=stage | status=started | progress=12/40 | seed=42 | model=baseline_ols_f | stage=type1_M_500 | M=500 | task=type1_error
+[2026-03-08 18:14:26] | event=stage | status=completed | progress=13/40 | seed=42 | model=baseline_ols_f | stage=type1_M_500 | runtime_sec=0.48 | M=500 | metric_value=0.07 | task=type1_error
+[2026-03-08 18:14:26] | event=stage | status=started | progress=13/40 | seed=42 | model=baseline_ols_f | stage=type1_M_1000 | M=1000 | task=type1_error
+[2026-03-08 18:14:27] | event=stage | status=completed | progress=14/40 | seed=42 | model=baseline_ols_f | stage=type1_M_1000 | runtime_sec=0.94 | M=1000 | metric_value=0.05 | task=type1_error
+[2026-03-08 18:14:27] | event=stage | status=started | progress=14/40 | seed=42 | model=baseline_ols_f | stage=type1_M_2000 | M=2000 | task=type1_error
+[2026-03-08 18:14:29] | event=stage | status=completed | progress=15/40 | seed=42 | model=baseline_ols_f | stage=type1_M_2000 | runtime_sec=1.91 | M=2000 | metric_value=0.0525 | task=type1_error
+[2026-03-08 18:14:29] | event=stage | status=started | progress=15/40 | seed=42 | model=baseline_ols_f | stage=power_delta_0.10 | M=300 | base_delta=0.1 | target_fro=0.1 | task=power
+[2026-03-08 18:14:29] | event=stage | status=completed | progress=16/40 | seed=42 | model=baseline_ols_f | stage=power_delta_0.10 | runtime_sec=0.30 | M=300 | base_delta=0.1 | metric_value=0.06 | target_fro=0.1 | task=power
+[2026-03-08 18:14:29] | event=stage | status=started | progress=16/40 | seed=42 | model=baseline_ols_f | stage=power_delta_0.20 | M=300 | base_delta=0.2 | target_fro=0.2 | task=power
+[2026-03-08 18:14:29] | event=stage | status=completed | progress=17/40 | seed=42 | model=baseline_ols_f | stage=power_delta_0.20 | runtime_sec=0.30 | M=300 | base_delta=0.2 | metric_value=0.17333333333333334 | target_fro=0.2 | task=power
+[2026-03-08 18:14:29] | event=stage | status=started | progress=17/40 | seed=42 | model=baseline_ols_f | stage=power_delta_0.40 | M=300 | base_delta=0.4 | target_fro=0.4 | task=power
+[2026-03-08 18:14:29] | event=stage | status=completed | progress=18/40 | seed=42 | model=baseline_ols_f | stage=power_delta_0.40 | runtime_sec=0.30 | M=300 | base_delta=0.4 | metric_value=0.5566666666666666 | target_fro=0.4 | task=power
+[2026-03-08 18:14:29] | event=stage | status=started | progress=18/40 | seed=42 | model=baseline_ols_f | stage=power_delta_0.80 | M=300 | base_delta=0.8 | target_fro=0.8 | task=power
+[2026-03-08 18:14:30] | event=stage | status=completed | progress=19/40 | seed=42 | model=baseline_ols_f | stage=power_delta_0.80 | runtime_sec=0.29 | M=300 | base_delta=0.8 | metric_value=1.0 | target_fro=0.8 | task=power
+[2026-03-08 18:14:30] | event=stage | status=started | progress=19/40 | seed=42 | model=baseline_ols_f | stage=power_delta_1.20 | M=300 | base_delta=1.2 | target_fro=1.2 | task=power
+[2026-03-08 18:14:30] | event=stage | status=completed | progress=20/40 | seed=42 | model=baseline_ols_f | stage=power_delta_1.20 | runtime_sec=0.30 | M=300 | base_delta=1.2 | metric_value=1.0 | target_fro=1.2 | task=power
+[2026-03-08 18:14:30] | event=model | status=started | progress=20/40 | seed=42 | model=sparse_lasso | jobs=4
+[2026-03-08 18:14:30] | event=stage | status=started | progress=20/40 | seed=42 | model=sparse_lasso | stage=type1_M_100 | M=100 | task=type1_error
+[2026-03-08 18:17:09] | event=stage | status=completed | progress=21/40 | seed=42 | model=sparse_lasso | stage=type1_M_100 | runtime_sec=159.07 | M=100 | metric_value=0.05 | task=type1_error
+[2026-03-08 18:17:09] | event=stage | status=started | progress=21/40 | seed=42 | model=sparse_lasso | stage=type1_M_300 | M=300 | task=type1_error
+[2026-03-08 18:25:10] | event=stage | status=completed | progress=22/40 | seed=42 | model=sparse_lasso | stage=type1_M_300 | runtime_sec=481.31 | M=300 | metric_value=0.04666666666666667 | task=type1_error
+[2026-03-08 18:25:10] | event=stage | status=started | progress=22/40 | seed=42 | model=sparse_lasso | stage=type1_M_500 | M=500 | task=type1_error
+[2026-03-08 18:37:54] | event=stage | status=completed | progress=23/40 | seed=42 | model=sparse_lasso | stage=type1_M_500 | runtime_sec=763.77 | M=500 | metric_value=0.068 | task=type1_error
+[2026-03-08 18:37:54] | event=stage | status=started | progress=23/40 | seed=42 | model=sparse_lasso | stage=type1_M_1000 | M=1000 | task=type1_error
+[2026-03-08 19:03:14] | event=stage | status=completed | progress=24/40 | seed=42 | model=sparse_lasso | stage=type1_M_1000 | runtime_sec=1519.65 | M=1000 | metric_value=0.055 | task=type1_error
+[2026-03-08 19:03:14] | event=stage | status=started | progress=24/40 | seed=42 | model=sparse_lasso | stage=type1_M_2000 | M=2000 | task=type1_error
+[2026-03-08 19:53:48] | event=stage | status=completed | progress=25/40 | seed=42 | model=sparse_lasso | stage=type1_M_2000 | runtime_sec=3034.45 | M=2000 | metric_value=0.048 | task=type1_error
+[2026-03-08 19:53:48] | event=stage | status=started | progress=25/40 | seed=42 | model=sparse_lasso | stage=power_delta_0.10 | M=300 | base_delta=0.1 | target_fro=0.1 | task=power
+[2026-03-08 20:01:49] | event=stage | status=completed | progress=26/40 | seed=42 | model=sparse_lasso | stage=power_delta_0.10 | runtime_sec=480.31 | M=300 | base_delta=0.1 | metric_value=0.06 | target_fro=0.1 | task=power
+[2026-03-08 20:01:49] | event=stage | status=started | progress=26/40 | seed=42 | model=sparse_lasso | stage=power_delta_0.20 | M=300 | base_delta=0.2 | target_fro=0.2 | task=power
+[2026-03-08 20:09:53] | event=stage | status=completed | progress=27/40 | seed=42 | model=sparse_lasso | stage=power_delta_0.20 | runtime_sec=484.61 | M=300 | base_delta=0.2 | metric_value=0.1 | target_fro=0.2 | task=power
+[2026-03-08 20:09:53] | event=stage | status=started | progress=27/40 | seed=42 | model=sparse_lasso | stage=power_delta_0.40 | M=300 | base_delta=0.4 | target_fro=0.4 | task=power
+[2026-03-08 20:17:57] | event=stage | status=completed | progress=28/40 | seed=42 | model=sparse_lasso | stage=power_delta_0.40 | runtime_sec=483.40 | M=300 | base_delta=0.4 | metric_value=0.17666666666666667 | target_fro=0.4 | task=power
+[2026-03-08 20:17:57] | event=stage | status=started | progress=28/40 | seed=42 | model=sparse_lasso | stage=power_delta_0.80 | M=300 | base_delta=0.8 | target_fro=0.8 | task=power
+[2026-03-08 20:25:59] | event=stage | status=completed | progress=29/40 | seed=42 | model=sparse_lasso | stage=power_delta_0.80 | runtime_sec=482.01 | M=300 | base_delta=0.8 | metric_value=0.9166666666666666 | target_fro=0.8 | task=power
+[2026-03-08 20:25:59] | event=stage | status=started | progress=29/40 | seed=42 | model=sparse_lasso | stage=power_delta_1.20 | M=300 | base_delta=1.2 | target_fro=1.2 | task=power
+[2026-03-08 20:33:58] | event=stage | status=completed | progress=30/40 | seed=42 | model=sparse_lasso | stage=power_delta_1.20 | runtime_sec=479.78 | M=300 | base_delta=1.2 | metric_value=0.9366666666666666 | target_fro=1.2 | task=power
+[2026-03-08 20:33:58] | event=model | status=started | progress=30/40 | seed=42 | model=lowrank_svd | jobs=4
+[2026-03-08 20:33:58] | event=stage | status=started | progress=30/40 | seed=42 | model=lowrank_svd | stage=type1_M_100 | M=100 | task=type1_error
+[2026-03-08 20:34:40] | event=stage | status=completed | progress=31/40 | seed=42 | model=lowrank_svd | stage=type1_M_100 | runtime_sec=41.56 | M=100 | metric_value=0.08 | task=type1_error
+[2026-03-08 20:34:40] | event=stage | status=started | progress=31/40 | seed=42 | model=lowrank_svd | stage=type1_M_300 | M=300 | task=type1_error
+[2026-03-08 20:36:41] | event=stage | status=completed | progress=32/40 | seed=42 | model=lowrank_svd | stage=type1_M_300 | runtime_sec=121.16 | M=300 | metric_value=0.08666666666666667 | task=type1_error
+[2026-03-08 20:36:41] | event=stage | status=started | progress=32/40 | seed=42 | model=lowrank_svd | stage=type1_M_500 | M=500 | task=type1_error
+[2026-03-08 20:39:56] | event=stage | status=completed | progress=33/40 | seed=42 | model=lowrank_svd | stage=type1_M_500 | runtime_sec=194.47 | M=500 | metric_value=0.052 | task=type1_error
+[2026-03-08 20:39:56] | event=stage | status=started | progress=33/40 | seed=42 | model=lowrank_svd | stage=type1_M_1000 | M=1000 | task=type1_error
+[2026-03-08 20:46:22] | event=stage | status=completed | progress=34/40 | seed=42 | model=lowrank_svd | stage=type1_M_1000 | runtime_sec=386.21 | M=1000 | metric_value=0.074 | task=type1_error
+[2026-03-08 20:46:22] | event=stage | status=started | progress=34/40 | seed=42 | model=lowrank_svd | stage=type1_M_2000 | M=2000 | task=type1_error
+[2026-03-08 20:59:12] | event=stage | status=completed | progress=35/40 | seed=42 | model=lowrank_svd | stage=type1_M_2000 | runtime_sec=770.56 | M=2000 | metric_value=0.0735 | task=type1_error
+[2026-03-08 20:59:12] | event=stage | status=started | progress=35/40 | seed=42 | model=lowrank_svd | stage=power_delta_0.10 | M=300 | base_delta=0.1 | target_fro=0.1 | task=power
+[2026-03-08 21:01:12] | event=stage | status=completed | progress=36/40 | seed=42 | model=lowrank_svd | stage=power_delta_0.10 | runtime_sec=119.75 | M=300 | base_delta=0.1 | metric_value=0.10333333333333333 | target_fro=0.1 | task=power
+[2026-03-08 21:01:12] | event=stage | status=started | progress=36/40 | seed=42 | model=lowrank_svd | stage=power_delta_0.20 | M=300 | base_delta=0.2 | target_fro=0.2 | task=power
+[2026-03-08 21:03:11] | event=stage | status=completed | progress=37/40 | seed=42 | model=lowrank_svd | stage=power_delta_0.20 | runtime_sec=119.23 | M=300 | base_delta=0.2 | metric_value=0.09333333333333334 | target_fro=0.2 | task=power
+[2026-03-08 21:03:11] | event=stage | status=started | progress=37/40 | seed=42 | model=lowrank_svd | stage=power_delta_0.40 | M=300 | base_delta=0.4 | target_fro=0.4 | task=power
+[2026-03-08 21:05:10] | event=stage | status=completed | progress=38/40 | seed=42 | model=lowrank_svd | stage=power_delta_0.40 | runtime_sec=119.02 | M=300 | base_delta=0.4 | metric_value=0.15 | target_fro=0.4 | task=power
+[2026-03-08 21:05:10] | event=stage | status=started | progress=38/40 | seed=42 | model=lowrank_svd | stage=power_delta_0.80 | M=300 | base_delta=0.8 | target_fro=0.8 | task=power
+[2026-03-08 21:07:10] | event=stage | status=completed | progress=39/40 | seed=42 | model=lowrank_svd | stage=power_delta_0.80 | runtime_sec=120.03 | M=300 | base_delta=0.8 | metric_value=0.8933333333333333 | target_fro=0.8 | task=power
+[2026-03-08 21:07:10] | event=stage | status=started | progress=39/40 | seed=42 | model=lowrank_svd | stage=power_delta_1.20 | M=300 | base_delta=1.2 | target_fro=1.2 | task=power
+[2026-03-08 21:09:11] | event=stage | status=completed | progress=40/40 | seed=42 | model=lowrank_svd | stage=power_delta_1.20 | runtime_sec=120.75 | M=300 | base_delta=1.2 | metric_value=0.97 | target_fro=1.2 | task=power
+[2026-03-08 21:09:11] | event=seed | status=completed | progress=40/40 | seed=42 | runtime_sec=12032.74
+[2026-03-08 21:09:11] | event=run | status=completed | progress=40/40 | runtime_sec=12032.75 | completed_stage_count=40
