@@ -20,8 +20,8 @@ class VARDataGenerator:
         seed : int, optional
             随机种子，用于结果复现
         """
-        if seed is not None:
-            np.random.seed(seed)
+        self.seed = seed
+        self._rng = np.random.default_rng(seed)
 
     @staticmethod
     def check_stationarity(Phi: np.ndarray) -> bool:
@@ -53,8 +53,7 @@ class VARDataGenerator:
 
         return max_eigenvalue < 1
 
-    @staticmethod
-    def generate_stationary_phi(N: int, p: int = 1, sparsity: float = 1.0,
+    def generate_stationary_phi(self, N: int, p: int = 1, sparsity: float = 1.0,
                                  scale: float = 0.3, max_attempts: int = 100) -> np.ndarray:
         """
         生成满足平稳性条件的VAR系数矩阵
@@ -79,11 +78,11 @@ class VARDataGenerator:
         """
         for _ in range(max_attempts):
             # 生成随机系数矩阵
-            Phi = np.random.randn(N, N * p) * scale
+            Phi = self._rng.normal(loc=0.0, scale=scale, size=(N, N * p))
 
             # 应用稀疏性约束
             if sparsity < 1.0:
-                mask = np.random.random((N, N * p)) < sparsity
+                mask = self._rng.random((N, N * p)) < sparsity
                 Phi = Phi * mask
 
             # 检验平稳性
@@ -92,8 +91,7 @@ class VARDataGenerator:
 
         raise ValueError(f"无法在{max_attempts}次尝试内生成平稳的VAR系数矩阵")
 
-    @staticmethod
-    def generate_lowrank_phi(N: int, p: int = 1, rank: int = 2,
+    def generate_lowrank_phi(self, N: int, p: int = 1, rank: int = 2,
                               scale: float = 0.3, max_attempts: int = 100) -> np.ndarray:
         """
         生成低秩的VAR系数矩阵
@@ -118,8 +116,8 @@ class VARDataGenerator:
         """
         for _ in range(max_attempts):
             # 通过低秩分解生成：Phi = U @ V.T
-            U = np.random.randn(N, rank) * scale
-            V = np.random.randn(N * p, rank) * scale
+            U = self._rng.normal(loc=0.0, scale=scale, size=(N, rank))
+            V = self._rng.normal(loc=0.0, scale=scale, size=(N * p, rank))
             Phi = U @ V.T
 
             if VARDataGenerator.check_stationarity(Phi):
@@ -163,7 +161,7 @@ class VARDataGenerator:
         Y = np.zeros((total_length, N))
 
         # 生成残差
-        epsilon = np.random.multivariate_normal(np.zeros(N), Sigma, total_length)
+        epsilon = self._rng.multivariate_normal(np.zeros(N), Sigma, total_length)
 
         # 迭代生成序列
         for t in range(p, total_length):
@@ -218,7 +216,7 @@ class VARDataGenerator:
         Y = np.zeros((total_length, N))
 
         # 生成残差
-        epsilon = np.random.multivariate_normal(np.zeros(N), Sigma, total_length)
+        epsilon = self._rng.multivariate_normal(np.zeros(N), Sigma, total_length)
 
         # 迭代生成序列
         for t in range(p, total_length):

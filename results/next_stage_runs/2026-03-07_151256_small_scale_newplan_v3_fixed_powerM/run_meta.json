@@ -1,7 +1,0 @@
-{
-  "run_dir": "results/next_stage_runs/2026-03-07_151256_small_scale_newplan_v3_fixed_powerM",
-  "progress_log": "results/next_stage_runs/2026-03-07_151256_small_scale_newplan_v3_fixed_powerM/progress.log",
-  "error_log": "results/next_stage_runs/2026-03-07_151256_small_scale_newplan_v3_fixed_powerM/errors.log",
-  "worker_log_dir": "results/next_stage_runs/2026-03-07_151256_small_scale_newplan_v3_fixed_powerM/worker_logs",
-  "state_dir": "results/next_stage_runs/2026-03-07_151256_small_scale_newplan_v3_fixed_powerM/state"
-}

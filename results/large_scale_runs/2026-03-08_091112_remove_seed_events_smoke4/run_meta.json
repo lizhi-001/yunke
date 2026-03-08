@@ -1,0 +1,14 @@
+{
+  "run_dir": "results/large_scale_runs/2026-03-08_091112_remove_seed_events_smoke4",
+  "json": "results/large_scale_runs/2026-03-08_091112_remove_seed_events_smoke4/large_scale_experiment_2026-03-08_091112_remove_seed_events_smoke4.json",
+  "raw_csv": "results/large_scale_runs/2026-03-08_091112_remove_seed_events_smoke4/large_scale_raw_2026-03-08_091112_remove_seed_events_smoke4.csv",
+  "agg_csv": "results/large_scale_runs/2026-03-08_091112_remove_seed_events_smoke4/large_scale_agg_2026-03-08_091112_remove_seed_events_smoke4.csv",
+  "markdown": "results/large_scale_runs/2026-03-08_091112_remove_seed_events_smoke4/大规模试验分析报告_2026-03-08_091112_remove_seed_events_smoke4.md",
+  "run_meta": "results/large_scale_runs/2026-03-08_091112_remove_seed_events_smoke4/run_meta.json",
+  "seed_results_dir": "results/large_scale_runs/2026-03-08_091112_remove_seed_events_smoke4/seed_results",
+  "progress_dir": "results/large_scale_runs/2026-03-08_091112_remove_seed_events_smoke4/progress",
+  "progress_log": "results/large_scale_runs/2026-03-08_091112_remove_seed_events_smoke4/progress/progress.log",
+  "progress_jsonl": "results/large_scale_runs/2026-03-08_091112_remove_seed_events_smoke4/progress/progress.jsonl",
+  "progress_summary": "results/large_scale_runs/2026-03-08_091112_remove_seed_events_smoke4/progress/summary.json",
+  "seed_summary_pattern": "results/large_scale_runs/2026-03-08_091112_remove_seed_events_smoke4/progress/seed_<seed>_summary.json"
+}

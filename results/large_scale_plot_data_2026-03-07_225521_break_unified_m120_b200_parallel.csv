@@ -1,0 +1,16 @@
+model,metric,delta,target_fro,actual_fro,value,size_distortion,rejections,effective_iterations,runtime_sec
+baseline_ols,type1_error,,,,0.058333,0.008333,7,120,507.135
+baseline_ols,power,0.04,0.040000,0.040000,0.050000,,6,120,505.402
+baseline_ols,power,0.08,0.080000,0.080000,0.050000,,6,120,496.309
+baseline_ols,power,0.12,0.120000,0.120000,0.058333,,7,120,514.506
+baseline_ols,power,0.16,0.160000,0.160000,0.066667,,8,120,501.269
+sparse_lasso,type1_error,,,,0.050000,0.000000,6,120,738.150
+sparse_lasso,power,0.04,0.040000,0.040000,0.041667,,5,120,742.550
+sparse_lasso,power,0.08,0.080000,0.080000,0.058333,,7,120,736.843
+sparse_lasso,power,0.12,0.120000,0.120000,0.083333,,10,120,590.268
+sparse_lasso,power,0.16,0.160000,0.160000,0.050000,,6,120,489.868
+lowrank_svd,type1_error,,,,0.091667,0.041667,11,120,1192.125
+lowrank_svd,power,0.04,0.040000,0.040000,0.091667,,11,120,1191.185
+lowrank_svd,power,0.08,0.080000,0.080000,0.133333,,16,120,824.676
+lowrank_svd,power,0.12,0.120000,0.120000,0.075000,,9,120,131.339
+lowrank_svd,power,0.16,0.160000,0.160000,0.075000,,9,120,46.577

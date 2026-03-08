@@ -1,0 +1,7 @@
+{
+  "run_dir": "results/large_scale_runs/2026-03-07_224540_parallel_smoke",
+  "json": "results/large_scale_runs/2026-03-07_224540_parallel_smoke/large_scale_experiment_2026-03-07_224540_parallel_smoke.json",
+  "csv": "results/large_scale_runs/2026-03-07_224540_parallel_smoke/large_scale_plot_data_2026-03-07_224540_parallel_smoke.csv",
+  "markdown": "results/large_scale_runs/2026-03-07_224540_parallel_smoke/大规模试验分析报告_2026-03-07_224540_parallel_smoke.md",
+  "run_meta": "results/large_scale_runs/2026-03-07_224540_parallel_smoke/run_meta.json"
+}

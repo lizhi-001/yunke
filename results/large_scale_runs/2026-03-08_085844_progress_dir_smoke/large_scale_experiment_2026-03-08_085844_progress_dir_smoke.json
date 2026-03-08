@@ -1,0 +1,1190 @@
+{
+  "experiment_info": {
+    "timestamp": "2026-03-08 08:58:51",
+    "description": "Large-scale known-breakpoint structural-break experiments with M-grid size checks and multi-seed aggregation",
+    "config": {
+      "M_grid": [
+        4,
+        6
+      ],
+      "B": 4,
+      "alpha": 0.05,
+      "deltas": [
+        0.04,
+        0.08
+      ],
+      "seeds": [
+        42,
+        2026
+      ],
+      "jobs": 4,
+      "seed_workers": 2,
+      "baseline_pvalue_method": "asymptotic_chi2",
+      "power_M": 6,
+      "effect_size_mode": "dimension_scaled_frobenius_from_base_delta",
+      "effect_direction": "normalized_all_ones",
+      "delta_interpretation": "common per-entry shift scale"
+    },
+    "total_runtime_sec": 7.103888750076294,
+    "output_paths": {
+      "run_dir": "results/large_scale_runs/2026-03-08_085844_progress_dir_smoke",
+      "json": "results/large_scale_runs/2026-03-08_085844_progress_dir_smoke/large_scale_experiment_2026-03-08_085844_progress_dir_smoke.json",
+      "raw_csv": "results/large_scale_runs/2026-03-08_085844_progress_dir_smoke/large_scale_raw_2026-03-08_085844_progress_dir_smoke.csv",
+      "agg_csv": "results/large_scale_runs/2026-03-08_085844_progress_dir_smoke/large_scale_agg_2026-03-08_085844_progress_dir_smoke.csv",
+      "markdown": "results/large_scale_runs/2026-03-08_085844_progress_dir_smoke/大规模试验分析报告_2026-03-08_085844_progress_dir_smoke.md",
+      "run_meta": "results/large_scale_runs/2026-03-08_085844_progress_dir_smoke/run_meta.json",
+      "seed_results_dir": "results/large_scale_runs/2026-03-08_085844_progress_dir_smoke/seed_results",
+      "progress_dir": "results/large_scale_runs/2026-03-08_085844_progress_dir_smoke/progress",
+      "progress_log": "results/large_scale_runs/2026-03-08_085844_progress_dir_smoke/progress/progress.log",
+      "progress_jsonl": "results/large_scale_runs/2026-03-08_085844_progress_dir_smoke/progress/progress.jsonl",
+      "progress_summary": "results/large_scale_runs/2026-03-08_085844_progress_dir_smoke/progress/summary.json"
+    }
+  },
+  "seed_results": {
+    "42": {
+      "seed": 42,
+      "jobs": 2,
+      "runtime_sec": 7.101273059844971,
+      "models": {
+        "baseline_ols": {
+          "model": "baseline_ols",
+          "parameters": {
+            "N": 2,
+            "T": 100,
+            "p": 1,
+            "t": 50,
+            "M_grid": [
+              4,
+              6
+            ],
+            "power_M": 6,
+            "B": 4,
+            "alpha": 0.05,
+            "baseline_pvalue_method": "asymptotic_chi2"
+          },
+          "phi": [
+            [
+              0.0914151239263294,
+              -0.31199523187214867
+            ],
+            [
+              0.22513535874193716,
+              0.28216941491736414
+            ]
+          ],
+          "type1_error_by_M": [
+            {
+              "M": 4,
+              "value": 0.25,
+              "size_distortion": 0.2,
+              "rejections": 1,
+              "M_effective": 4,
+              "runtime_sec": 0.30716705322265625,
+              "pvalue_summary": {
+                "count": 4,
+                "mean": 0.14542093445610343,
+                "std": 0.12483997672770508,
+                "q25": 0.05528735829086985,
+                "q50": 0.1137842220413875,
+                "q75": 0.2039177982066211
+              }
+            },
+            {
+              "M": 6,
+              "value": 0.3333333333333333,
+              "size_distortion": 0.2833333333333333,
+              "rejections": 2,
+              "M_effective": 6,
+              "runtime_sec": 0.38248682022094727,
+              "pvalue_summary": {
+                "count": 6,
+                "mean": 0.18874033213087302,
+                "std": 0.175036386962249,
+                "q25": 0.062464317792970965,
+                "q50": 0.1494727657469702,
+                "q75": 0.23464004175879455
+              }
+            }
+          ],
+          "power_curve": [
+            {
+              "M": 6,
+              "delta": 0.04,
+              "target_fro": 0.08,
+              "actual_fro": 0.07999999999999997,
+              "power": 0.0,
+              "M_effective": 6,
+              "rejections": 0,
+              "runtime_sec": 0.2003335952758789,
+              "stationarity_shrinks": 0,
+              "skipped": false,
+              "pvalue_summary": {
+                "count": 6,
+                "mean": 0.29755342585439787,
+                "std": 0.14245989850059504,
+                "q25": 0.17308574096454346,
+                "q50": 0.33887821542232544,
+                "q75": 0.4045941647299998
+              }
+            },
+            {
+              "M": 6,
+              "delta": 0.08,
+              "target_fro": 0.16,
+              "actual_fro": 0.16,
+              "power": 0.3333333333333333,
+              "M_effective": 6,
+              "rejections": 2,
+              "runtime_sec": 0.2474687099456787,
+              "stationarity_shrinks": 0,
+              "skipped": false,
+              "pvalue_summary": {
+                "count": 6,
+                "mean": 0.20476039233724339,
+                "std": 0.2502783513255381,
+                "q25": 0.04442481777865254,
+                "q50": 0.06530106675309982,
+                "q75": 0.28585972294532414
+              }
+            }
+          ]
+        },
+        "sparse_lasso": {
+          "model": "sparse_lasso",
+          "parameters": {
+            "N": 5,
+            "T": 200,
+            "p": 1,
+            "t": 100,
+            "M_grid": [
+              4,
+              6
+            ],
+            "power_M": 6,
+            "B": 4,
+            "alpha": 0.05,
+            "baseline_pvalue_method": "asymptotic_chi2",
+            "sparsity": 0.2,
+            "lasso_alpha": 0.02
+          },
+          "phi": [
+            [
+              0.0914151239263294,
+              -0.0,
+              0.22513535874193716,
+              0.28216941491736414,
+              -0.0
+            ],
+            [
+              -0.0,
+              0.0,
+              -0.0,
+              -0.0,
+              -0.0
+            ],
+            [
+              0.26381939245884856,
+              0.23333758062868448,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              -0.0,
+              0.0,
+              -0.0,
+              0.0,
+              -0.0
+            ],
+            [
+              -0.0,
+              -0.0,
+              0.0,
+              -0.0,
+              -0.12849834664893217
+            ]
+          ],
+          "type1_error_by_M": [
+            {
+              "M": 4,
+              "value": 0.25,
+              "size_distortion": 0.2,
+              "rejections": 1,
+              "M_effective": 4,
+              "runtime_sec": 1.277709722518921,
+              "pvalue_summary": {
+                "count": 4,
+                "mean": 0.5,
+                "std": 0.39528470752104744,
+                "q25": 0.1875,
+                "q50": 0.5,
+                "q75": 0.8125
+              }
+            },
+            {
+              "M": 6,
+              "value": 0.0,
+              "size_distortion": -0.05,
+              "rejections": 0,
+              "M_effective": 6,
+              "runtime_sec": 1.8075122833251953,
+              "pvalue_summary": {
+                "count": 6,
+                "mean": 0.625,
+                "std": 0.3145764348029479,
+                "q25": 0.3125,
+                "q50": 0.625,
+                "q75": 0.9375
+              }
+            }
+          ],
+          "power_curve": [
+            {
+              "M": 6,
+              "delta": 0.04,
+              "target_fro": 0.2,
+              "actual_fro": 0.2,
+              "power": 0.3333333333333333,
+              "M_effective": 6,
+              "rejections": 2,
+              "runtime_sec": 1.7719686031341553,
+              "stationarity_shrinks": 0,
+              "skipped": false,
+              "pvalue_summary": {
+                "count": 6,
+                "mean": 0.2916666666666667,
+                "std": 0.22438186696393767,
+                "q25": 0.0625,
+                "q50": 0.375,
+                "q75": 0.5
+              }
+            },
+            {
+              "M": 6,
+              "delta": 0.08,
+              "target_fro": 0.4,
+              "actual_fro": 0.4,
+              "power": 0.3333333333333333,
+              "M_effective": 6,
+              "rejections": 2,
+              "runtime_sec": 1.981156826019287,
+              "stationarity_shrinks": 0,
+              "skipped": false,
+              "pvalue_summary": {
+                "count": 6,
+                "mean": 0.2916666666666667,
+                "std": 0.22438186696393767,
+                "q25": 0.0625,
+                "q50": 0.375,
+                "q75": 0.5
+              }
+            }
+          ]
+        },
+        "lowrank_svd": {
+          "model": "lowrank_svd",
+          "parameters": {
+            "N": 10,
+            "T": 200,
+            "p": 1,
+            "t": 100,
+            "M_grid": [
+              4,
+              6
+            ],
+            "power_M": 6,
+            "B": 4,
+            "alpha": 0.05,
+            "baseline_pvalue_method": "asymptotic_chi2",
+            "rank": 2
+          },
+          "phi": [
+            [
+              0.05866426656663003,
+              0.04799136887072583,
+              0.021212504337120876,
+              -0.01960670862992646,
+              -0.02900522876740535,
+              0.09677355843400215,
+              0.062119943544747556,
+              -0.08877724109816343,
+              0.07551248816286027,
+              -0.08350557005971819
+            ],
+            [
+              -0.07012696370371563,
+              0.0694901367949166,
+              -0.058737916744764494,
+              0.06688762718334512,
+              0.06434556447870171,
+              0.1102448140601707,
+              -0.10348371755336408,
+              0.1371720598722464,
+              -0.07881601899012373,
+              -0.0006127463942048916
+            ],
+            [
+              0.1122628927206986,
+              -0.19655964419228625,
+              0.11648013717997123,
+              -0.13629849513998618,
+              -0.12296359169743533,
+              -0.3284284072839459,
+              0.18531735835666205,
+              -0.2404729901095177,
+              0.11847150417604962,
+              0.06852629417219568
+            ],
+            [
+              0.017253544071559806,
+              0.018464308346493888,
+              0.005094182284600542,
+              -0.004276652164225347,
+              -0.007513204262450156,
+              0.03620833479777235,
+              0.017267785214004218,
+              -0.025045386012839635,
+              0.02260135559901551,
+              -0.028003244471958892
+            ],
+            [
+              0.052557184318118906,
+              0.010015229405098407,
+              0.02768236111282862,
+              -0.028861492539694233,
+              -0.03369992634914526,
+              0.027963693282663585,
+              0.06325111395255553,
+              -0.08760709134022235,
+              0.06467443470609928,
+              -0.048701878939158456
+            ],
+            [
+              -0.06229701867264765,
+              0.08594177332292163,
+              -0.05855015296362147,
+              0.06771159593003287,
+              0.06282407920952704,
+              0.14105288168047267,
+              -0.09750699754982377,
+              0.12778169412339943,
+              -0.06783048862040847,
+              -0.019711915899572666
+            ],
+            [
+              -0.07018005890806203,
+              -0.00841200682403812,
+              -0.03827000100137374,
+              0.04023831195300578,
+              0.04616029887009568,
+              -0.0285041941725191,
+              -0.08560277073981551,
+              0.11819678767525621,
+              -0.0859124728122776,
+              0.06110405366346012
+            ],
+            [
+              0.04488234689453587,
+              0.06339019647189631,
+              0.009210460270961203,
+              -0.005864743161063122,
+              -0.015952040006693483,
+              0.12154226594404399,
+              0.041381145948753334,
+              -0.061392712252500564,
+              0.06018017645852207,
+              -0.0850051934847844
+            ],
+            [
+              0.05262870159132281,
+              0.05390898379921868,
+              0.016173766301787743,
+              -0.013871567281305045,
+              -0.02348201607421665,
+              0.10614946679786029,
+              0.0532280341944312,
+              -0.07698680939292188,
+              0.06872338920408437,
+              -0.08350831792956373
+            ],
+            [
+              -0.011555673402139898,
+              0.09734911492367854,
+              -0.032281570452646874,
+              0.04044258329490653,
+              0.030695036037178835,
+              0.17114594581891338,
+              -0.03684162914116271,
+              0.04362681052513753,
+              -0.005233644092409092,
+              -0.06810724889634509
+            ]
+          ],
+          "type1_error_by_M": [
+            {
+              "M": 4,
+              "value": 0.5,
+              "size_distortion": 0.45,
+              "rejections": 2,
+              "M_effective": 4,
+              "runtime_sec": 1.298647403717041,
+              "pvalue_summary": {
+                "count": 4,
+                "mean": 0.375,
+                "std": 0.375,
+                "q25": 0.0,
+                "q50": 0.375,
+                "q75": 0.75
+              }
+            },
+            {
+              "M": 6,
+              "value": 0.16666666666666666,
+              "size_distortion": 0.11666666666666665,
+              "rejections": 1,
+              "M_effective": 6,
+              "runtime_sec": 1.7838504314422607,
+              "pvalue_summary": {
+                "count": 6,
+                "mean": 0.4583333333333333,
+                "std": 0.3033379120533549,
+                "q25": 0.25,
+                "q50": 0.5,
+                "q75": 0.75
+              }
+            }
+          ],
+          "power_curve": [
+            {
+              "M": 6,
+              "delta": 0.04,
+              "target_fro": 0.4,
+              "actual_fro": 0.4,
+              "power": 0.3333333333333333,
+              "M_effective": 6,
+              "rejections": 2,
+              "runtime_sec": 1.4859778881072998,
+              "stationarity_shrinks": 0,
+              "skipped": false,
+              "pvalue_summary": {
+                "count": 6,
+                "mean": 0.16666666666666666,
+                "std": 0.11785113019775792,
+                "q25": 0.0625,
+                "q50": 0.25,
+                "q75": 0.25
+              }
+            },
+            {
+              "M": 6,
+              "delta": 0.08,
+              "target_fro": 0.8,
+              "actual_fro": 0.8,
+              "power": 1.0,
+              "M_effective": 6,
+              "rejections": 6,
+              "runtime_sec": 1.0787088871002197,
+              "stationarity_shrinks": 0,
+              "skipped": false,
+              "pvalue_summary": {
+                "count": 6,
+                "mean": 0.0,
+                "std": 0.0,
+                "q25": 0.0,
+                "q50": 0.0,
+                "q75": 0.0
+              }
+            }
+          ]
+        }
+      }
+    },
+    "2026": {
+      "seed": 2026,
+      "jobs": 2,
+      "runtime_sec": 7.092123508453369,
+      "models": {
+        "baseline_ols": {
+          "model": "baseline_ols",
+          "parameters": {
+            "N": 2,
+            "T": 100,
+            "p": 1,
+            "t": 50,
+            "M_grid": [
+              4,
+              6
+            ],
+            "power_M": 6,
+            "B": 4,
+            "alpha": 0.05,
+            "baseline_pvalue_method": "asymptotic_chi2"
+          },
+          "phi": [
+            [
+              -0.23793674254736974,
+              0.07217138506148246
+            ],
+            [
+              -0.5688979048797197,
+              0.41873151303260825
+            ]
+          ],
+          "type1_error_by_M": [
+            {
+              "M": 4,
+              "value": 0.25,
+              "size_distortion": 0.2,
+              "rejections": 1,
+              "M_effective": 4,
+              "runtime_sec": 0.1668708324432373,
+              "pvalue_summary": {
+                "count": 4,
+                "mean": 0.18191513377583604,
+                "std": 0.14836388306608878,
+                "q25": 0.06913347448748976,
+                "q50": 0.14667052448605047,
+                "q75": 0.25945218377439677
+              }
+            },
+            {
+              "M": 6,
+              "value": 0.3333333333333333,
+              "size_distortion": 0.2833333333333333,
+              "rejections": 2,
+              "M_effective": 6,
+              "runtime_sec": 0.3872356414794922,
+              "pvalue_summary": {
+                "count": 6,
+                "mean": 0.15741815784102034,
+                "std": 0.15794425402286394,
+                "q25": 0.024228155141160466,
+                "q50": 0.13211293565265333,
+                "q75": 0.2040672693312612
+              }
+            }
+          ],
+          "power_curve": [
+            {
+              "M": 6,
+              "delta": 0.04,
+              "target_fro": 0.08,
+              "actual_fro": 0.08000000000000002,
+              "power": 0.3333333333333333,
+              "M_effective": 6,
+              "rejections": 2,
+              "runtime_sec": 0.22949934005737305,
+              "stationarity_shrinks": 0,
+              "skipped": false,
+              "pvalue_summary": {
+                "count": 6,
+                "mean": 0.15335468544913874,
+                "std": 0.17677616329503848,
+                "q25": 0.04108263405772117,
+                "q50": 0.055159955876671184,
+                "q75": 0.20718003556787806
+              }
+            },
+            {
+              "M": 6,
+              "delta": 0.08,
+              "target_fro": 0.16,
+              "actual_fro": 0.16000000000000003,
+              "power": 0.0,
+              "M_effective": 6,
+              "rejections": 0,
+              "runtime_sec": 0.2274312973022461,
+              "stationarity_shrinks": 0,
+              "skipped": false,
+              "pvalue_summary": {
+                "count": 6,
+                "mean": 0.4032341118428604,
+                "std": 0.3013076954066663,
+                "q25": 0.19321001229563067,
+                "q50": 0.32064996637699233,
+                "q75": 0.5301360824953625
+              }
+            }
+          ]
+        },
+        "sparse_lasso": {
+          "model": "sparse_lasso",
+          "parameters": {
+            "N": 5,
+            "T": 200,
+            "p": 1,
+            "t": 100,
+            "M_grid": [
+              4,
+              6
+            ],
+            "power_M": 6,
+            "B": 4,
+            "alpha": 0.05,
+            "baseline_pvalue_method": "asymptotic_chi2",
+            "sparsity": 0.2,
+            "lasso_alpha": 0.02
+          },
+          "phi": [
+            [
+              -0.0,
+              0.07217138506148246,
+              -0.0,
+              0.0,
+              0.0
+            ],
+            [
+              -0.0,
+              -0.0,
+              0.0,
+              -0.0,
+              -0.0
+            ],
+            [
+              0.0,
+              0.0,
+              -0.0,
+              -0.0,
+              0.0
+            ],
+            [
+              -0.0,
+              -0.0,
+              0.0,
+              -0.0,
+              -0.0
+            ],
+            [
+              -0.0,
+              0.0,
+              -0.06968483162498339,
+              -0.0,
+              0.0
+            ]
+          ],
+          "type1_error_by_M": [
+            {
+              "M": 4,
+              "value": 0.25,
+              "size_distortion": 0.2,
+              "rejections": 1,
+              "M_effective": 4,
+              "runtime_sec": 1.3032519817352295,
+              "pvalue_summary": {
+                "count": 4,
+                "mean": 0.4375,
+                "std": 0.3247595264191645,
+                "q25": 0.1875,
+                "q50": 0.5,
+                "q75": 0.75
+              }
+            },
+            {
+              "M": 6,
+              "value": 0.16666666666666666,
+              "size_distortion": 0.11666666666666665,
+              "rejections": 1,
+              "M_effective": 6,
+              "runtime_sec": 1.9347140789031982,
+              "pvalue_summary": {
+                "count": 6,
+                "mean": 0.5,
+                "std": 0.3818813079129867,
+                "q25": 0.25,
+                "q50": 0.375,
+                "q75": 0.875
+              }
+            }
+          ],
+          "power_curve": [
+            {
+              "M": 6,
+              "delta": 0.04,
+              "target_fro": 0.2,
+              "actual_fro": 0.2,
+              "power": 0.0,
+              "M_effective": 6,
+              "rejections": 0,
+              "runtime_sec": 1.9006938934326172,
+              "stationarity_shrinks": 0,
+              "skipped": false,
+              "pvalue_summary": {
+                "count": 6,
+                "mean": 0.625,
+                "std": 0.3145764348029479,
+                "q25": 0.3125,
+                "q50": 0.625,
+                "q75": 0.9375
+              }
+            },
+            {
+              "M": 6,
+              "delta": 0.08,
+              "target_fro": 0.4,
+              "actual_fro": 0.4,
+              "power": 0.16666666666666666,
+              "M_effective": 6,
+              "rejections": 1,
+              "runtime_sec": 1.7901158332824707,
+              "stationarity_shrinks": 0,
+              "skipped": false,
+              "pvalue_summary": {
+                "count": 6,
+                "mean": 0.5833333333333334,
+                "std": 0.37267799624996495,
+                "q25": 0.3125,
+                "q50": 0.625,
+                "q75": 0.9375
+              }
+            }
+          ]
+        },
+        "lowrank_svd": {
+          "model": "lowrank_svd",
+          "parameters": {
+            "N": 10,
+            "T": 200,
+            "p": 1,
+            "t": 100,
+            "M_grid": [
+              4,
+              6
+            ],
+            "power_M": 6,
+            "B": 4,
+            "alpha": 0.05,
+            "baseline_pvalue_method": "asymptotic_chi2",
+            "rank": 2
+          },
+          "phi": [
+            [
+              0.04828543036560997,
+              0.013360305966157851,
+              -0.0063095590954353005,
+              0.08009872274426755,
+              0.09158808313318634,
+              0.1127431959642334,
+              -0.03489309756546872,
+              0.0780318475657989,
+              0.027144662887704393,
+              -0.01717494535078624
+            ],
+            [
+              0.1639413065752409,
+              0.020959820312994832,
+              0.11966469618913435,
+              0.29108046602398496,
+              0.23190610067491849,
+              0.36937230712299657,
+              0.0005942474931540365,
+              0.23712681537103486,
+              0.031123185770131373,
+              0.023682493094152383
+            ],
+            [
+              -0.044676826673895643,
+              -0.009434504576687089,
+              -0.011087271608318017,
+              -0.07640684891659316,
+              -0.07525912144184459,
+              -0.10270750552457697,
+              0.018001920356458617,
+              -0.06886383562416958,
+              -0.017793472410324744,
+              0.006054895471477108
+            ],
+            [
+              0.031355247859643005,
+              0.002454314994234058,
+              0.03187445742730142,
+              0.05689004760574252,
+              0.03931794443618881,
+              0.06979092681932852,
+              0.00769831911946834,
+              0.04358101505280325,
+              0.0020642422798422626,
+              0.009752767807369498
+            ],
+            [
+              -0.0018529265460869872,
+              0.008619564307568767,
+              -0.05255908397210142,
+              -0.010231161335496421,
+              0.02607269361123071,
+              0.00069572207326826,
+              -0.04322055460180098,
+              0.007413752299452755,
+              0.02180219935188251,
+              -0.030027444448776044
+            ],
+            [
+              -0.0005135839843419405,
+              -0.021943161091590977,
+              0.12611720916879335,
+              0.01623463678141229,
+              -0.07160676519635487,
+              -0.013188420774154466,
+              0.10674628794544834,
+              -0.025676990360188213,
+              -0.05482290578943214,
+              0.07343932120942825
+            ],
+            [
+              -0.0022966973209684436,
+              0.0024848085698155773,
+              -0.01774089683970348,
+              -0.006255429086836006,
+              0.005752952483394415,
+              -0.0036466638436129573,
+              -0.013565329279973793,
+              -0.0001553397977497831,
+              0.006514108007179784,
+              -0.009667983014030131
+            ],
+            [
+              -0.04319817123048366,
+              0.004855193266623227,
+              -0.09153560700804549,
+              -0.08483287333572848,
+              -0.02748317504681098,
+              -0.09162149168137924,
+              -0.050794849036161084,
+              -0.050654350488380746,
+              0.017759275018148873,
+              -0.041112990053473034
+            ],
+            [
+              0.049743080011114084,
+              0.0011015958024849142,
+              0.06670975194802749,
+              0.0924406402955021,
+              0.05332961218948185,
+              0.10918337047237427,
+              0.025836136087581413,
+              0.06595636564324434,
+              -0.003709294545342391,
+              0.02485396650262316
+            ],
+            [
+              -0.07561811352472848,
+              0.021125805522362144,
+              -0.23323867195222436,
+              -0.15839566962009582,
+              -0.0071998490094089375,
+              -0.15343884231735863,
+              -0.15052682980915924,
+              -0.07427911556628226,
+              0.06267281876736892,
+              -0.1143970900093631
+            ]
+          ],
+          "type1_error_by_M": [
+            {
+              "M": 4,
+              "value": 0.5,
+              "size_distortion": 0.45,
+              "rejections": 2,
+              "M_effective": 4,
+              "runtime_sec": 1.0649170875549316,
+              "pvalue_summary": {
+                "count": 4,
+                "mean": 0.3125,
+                "std": 0.3247595264191645,
+                "q25": 0.0,
+                "q50": 0.25,
+                "q75": 0.5625
+              }
+            },
+            {
+              "M": 6,
+              "value": 0.5,
+              "size_distortion": 0.45,
+              "rejections": 3,
+              "M_effective": 6,
+              "runtime_sec": 1.8928415775299072,
+              "pvalue_summary": {
+                "count": 6,
+                "mean": 0.2916666666666667,
+                "std": 0.3656235161413384,
+                "q25": 0.0,
+                "q50": 0.125,
+                "q75": 0.4375
+              }
+            }
+          ],
+          "power_curve": [
+            {
+              "M": 6,
+              "delta": 0.04,
+              "target_fro": 0.4,
+              "actual_fro": 0.4,
+              "power": 0.3333333333333333,
+              "M_effective": 6,
+              "rejections": 2,
+              "runtime_sec": 1.653310775756836,
+              "stationarity_shrinks": 0,
+              "skipped": false,
+              "pvalue_summary": {
+                "count": 6,
+                "mean": 0.2916666666666667,
+                "std": 0.22438186696393767,
+                "q25": 0.0625,
+                "q50": 0.375,
+                "q75": 0.5
+              }
+            },
+            {
+              "M": 6,
+              "delta": 0.08,
+              "target_fro": 0.8,
+              "actual_fro": 0.8,
+              "power": 0.8333333333333334,
+              "M_effective": 6,
+              "rejections": 5,
+              "runtime_sec": 1.146785020828247,
+              "stationarity_shrinks": 0,
+              "skipped": false,
+              "pvalue_summary": {
+                "count": 6,
+                "mean": 0.041666666666666664,
+                "std": 0.09316949906249125,
+                "q25": 0.0,
+                "q50": 0.0,
+                "q75": 0.0
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "aggregates": {
+    "models": {
+      "baseline_ols": {
+        "parameters": {
+          "N": 2,
+          "T": 100,
+          "p": 1,
+          "t": 50,
+          "M_grid": [
+            4,
+            6
+          ],
+          "power_M": 6,
+          "B": 4,
+          "alpha": 0.05,
+          "baseline_pvalue_method": "asymptotic_chi2"
+        },
+        "type1_error_by_M": [
+          {
+            "M": 4,
+            "value_mean": 0.25,
+            "value_std": 0.0,
+            "value_min": 0.25,
+            "value_max": 0.25,
+            "size_distortion_mean": 0.2,
+            "rejections_mean": 1.0,
+            "M_effective_mean": 4.0,
+            "runtime_sec_mean": 0.23701894283294678,
+            "seed_count": 2
+          },
+          {
+            "M": 6,
+            "value_mean": 0.3333333333333333,
+            "value_std": 0.0,
+            "value_min": 0.3333333333333333,
+            "value_max": 0.3333333333333333,
+            "size_distortion_mean": 0.2833333333333333,
+            "rejections_mean": 2.0,
+            "M_effective_mean": 6.0,
+            "runtime_sec_mean": 0.3848612308502197,
+            "seed_count": 2
+          }
+        ],
+        "power_curve": [
+          {
+            "M": 6,
+            "delta": 0.04,
+            "target_fro_mean": 0.08,
+            "actual_fro_mean": 0.07999999999999999,
+            "power_mean": 0.16666666666666666,
+            "power_std": 0.16666666666666666,
+            "power_min": 0.0,
+            "power_max": 0.3333333333333333,
+            "rejections_mean": 1.0,
+            "M_effective_mean": 6.0,
+            "runtime_sec_mean": 0.21491646766662598,
+            "seed_count": 2,
+            "skipped_count": 0
+          },
+          {
+            "M": 6,
+            "delta": 0.08,
+            "target_fro_mean": 0.16,
+            "actual_fro_mean": 0.16000000000000003,
+            "power_mean": 0.16666666666666666,
+            "power_std": 0.16666666666666666,
+            "power_min": 0.0,
+            "power_max": 0.3333333333333333,
+            "rejections_mean": 1.0,
+            "M_effective_mean": 6.0,
+            "runtime_sec_mean": 0.2374500036239624,
+            "seed_count": 2,
+            "skipped_count": 0
+          }
+        ]
+      },
+      "sparse_lasso": {
+        "parameters": {
+          "N": 5,
+          "T": 200,
+          "p": 1,
+          "t": 100,
+          "M_grid": [
+            4,
+            6
+          ],
+          "power_M": 6,
+          "B": 4,
+          "alpha": 0.05,
+          "baseline_pvalue_method": "asymptotic_chi2",
+          "sparsity": 0.2,
+          "lasso_alpha": 0.02
+        },
+        "type1_error_by_M": [
+          {
+            "M": 4,
+            "value_mean": 0.25,
+            "value_std": 0.0,
+            "value_min": 0.25,
+            "value_max": 0.25,
+            "size_distortion_mean": 0.2,
+            "rejections_mean": 1.0,
+            "M_effective_mean": 4.0,
+            "runtime_sec_mean": 1.2904808521270752,
+            "seed_count": 2
+          },
+          {
+            "M": 6,
+            "value_mean": 0.08333333333333333,
+            "value_std": 0.08333333333333333,
+            "value_min": 0.0,
+            "value_max": 0.16666666666666666,
+            "size_distortion_mean": 0.033333333333333326,
+            "rejections_mean": 0.5,
+            "M_effective_mean": 6.0,
+            "runtime_sec_mean": 1.8711131811141968,
+            "seed_count": 2
+          }
+        ],
+        "power_curve": [
+          {
+            "M": 6,
+            "delta": 0.04,
+            "target_fro_mean": 0.2,
+            "actual_fro_mean": 0.2,
+            "power_mean": 0.16666666666666666,
+            "power_std": 0.16666666666666666,
+            "power_min": 0.0,
+            "power_max": 0.3333333333333333,
+            "rejections_mean": 1.0,
+            "M_effective_mean": 6.0,
+            "runtime_sec_mean": 1.8363312482833862,
+            "seed_count": 2,
+            "skipped_count": 0
+          },
+          {
+            "M": 6,
+            "delta": 0.08,
+            "target_fro_mean": 0.4,
+            "actual_fro_mean": 0.4,
+            "power_mean": 0.25,
+            "power_std": 0.08333333333333333,
+            "power_min": 0.16666666666666666,
+            "power_max": 0.3333333333333333,
+            "rejections_mean": 1.5,
+            "M_effective_mean": 6.0,
+            "runtime_sec_mean": 1.885636329650879,
+            "seed_count": 2,
+            "skipped_count": 0
+          }
+        ]
+      },
+      "lowrank_svd": {
+        "parameters": {
+          "N": 10,
+          "T": 200,
+          "p": 1,
+          "t": 100,
+          "M_grid": [
+            4,
+            6
+          ],
+          "power_M": 6,
+          "B": 4,
+          "alpha": 0.05,
+          "baseline_pvalue_method": "asymptotic_chi2",
+          "rank": 2
+        },
+        "type1_error_by_M": [
+          {
+            "M": 4,
+            "value_mean": 0.5,
+            "value_std": 0.0,
+            "value_min": 0.5,
+            "value_max": 0.5,
+            "size_distortion_mean": 0.45,
+            "rejections_mean": 2.0,
+            "M_effective_mean": 4.0,
+            "runtime_sec_mean": 1.1817822456359863,
+            "seed_count": 2
+          },
+          {
+            "M": 6,
+            "value_mean": 0.3333333333333333,
+            "value_std": 0.16666666666666669,
+            "value_min": 0.16666666666666666,
+            "value_max": 0.5,
+            "size_distortion_mean": 0.2833333333333333,
+            "rejections_mean": 2.0,
+            "M_effective_mean": 6.0,
+            "runtime_sec_mean": 1.838346004486084,
+            "seed_count": 2
+          }
+        ],
+        "power_curve": [
+          {
+            "M": 6,
+            "delta": 0.04,
+            "target_fro_mean": 0.4,
+            "actual_fro_mean": 0.4,
+            "power_mean": 0.3333333333333333,
+            "power_std": 0.0,
+            "power_min": 0.3333333333333333,
+            "power_max": 0.3333333333333333,
+            "rejections_mean": 2.0,
+            "M_effective_mean": 6.0,
+            "runtime_sec_mean": 1.5696443319320679,
+            "seed_count": 2,
+            "skipped_count": 0
+          },
+          {
+            "M": 6,
+            "delta": 0.08,
+            "target_fro_mean": 0.8,
+            "actual_fro_mean": 0.8,
+            "power_mean": 0.9166666666666667,
+            "power_std": 0.08333333333333331,
+            "power_min": 0.8333333333333334,
+            "power_max": 1.0,
+            "rejections_mean": 5.5,
+            "M_effective_mean": 6.0,
+            "runtime_sec_mean": 1.1127469539642334,
+            "seed_count": 2,
+            "skipped_count": 0
+          }
+        ]
+      }
+    }
+  }
+}

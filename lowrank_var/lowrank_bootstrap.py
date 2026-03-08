@@ -33,6 +33,7 @@ class LowRankBootstrapInference:
         self.method = method
         self.rank = rank
         self.lambda_nuc = lambda_nuc
+        self.rng = np.random.default_rng(seed)
 
     def generate_pseudo_series(self, Y: np.ndarray, p: int,
                                 Phi: np.ndarray, c: np.ndarray,
@@ -42,7 +43,7 @@ class LowRankBootstrapInference:
         T_eff = len(residuals)
 
         centered_residuals = residuals - np.mean(residuals, axis=0)
-        indices = np.random.choice(T_eff, size=T_eff, replace=True)
+        indices = self.rng.choice(T_eff, size=T_eff, replace=True)
         resampled_residuals = centered_residuals[indices, :]
 
         Y_star = np.zeros((T, N))
@@ -76,9 +77,6 @@ class LowRankBootstrapInference:
         verbose : bool
             是否显示进度
         """
-        if self.seed is not None:
-            np.random.seed(self.seed)
-
         # Step 1: 计算原始数据的LR统计量
         lr_test = LowRankLRTest(method=self.method, rank=self.rank,
                                  lambda_nuc=self.lambda_nuc)

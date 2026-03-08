@@ -163,3 +163,88 @@ results/next_stage_runs/
 - 完成时间: 2026-03-07 04:00:02
 - 总耗时: **4 小时 8 分钟**
 - 参数: 3 seeds, M_grid=[50,100,200], B_mc_baseline=50, B_mc_highdim=30, T=150/120
+
+
+---
+
+## 6. 当前主实验脚本（M_grid + 多 seed / 单 seed）
+
+`experiments/run_large_scale_mgrid_multiseed.py` — 当前主用的大规模结构断裂实验脚本。
+
+### 实验逻辑
+
+- 第一类错误（size）：在 `M_grid` 下逐个评估；
+- 功效（power）：固定使用 `M_max = max(M_grid)` 评估；
+- 支持单 seed 或多 seed；
+- 支持 seed 并行、模型并行、Monte Carlo 外层并行；
+- `baseline_ols` 支持 `bootstrap_lr`、`asymptotic_chi2`、`asymptotic_f` 三种 p 值口径。
+
+### 启动命令示例
+
+```bash
+python3 -u experiments/run_large_scale_mgrid_multiseed.py \
+  --M-grid 50 100 300 \
+  --B 500 \
+  --alpha 0.05 \
+  --deltas 0.04 0.08 0.12 0.16 \
+  --seeds 42 \
+  --jobs 4 \
+  --seed-workers 1 \
+  --baseline-pvalue-method asymptotic_chi2 \
+  --tag single_seed_m300_b500
+```
+
+### 输出目录结构
+
+每次运行在 `results/large_scale_runs/<timestamp>_<tag>/` 下输出：
+
+```text
+results/large_scale_runs/
+├── <run_name>/
+│   ├── large_scale_experiment_*.json
+│   ├── large_scale_raw_*.csv
+│   ├── large_scale_agg_*.csv
+│   ├── 大规模试验分析报告_*.md
+│   ├── run_meta.json
+│   ├── seed_results/
+│   │   └── seed_<seed>.json
+│   └── progress/
+│       ├── progress.log
+│       ├── progress.jsonl
+│       ├── summary.json
+│       └── seed_<seed>_summary.json
+```
+
+### 进度日志解释
+
+- `progress/progress.log`
+  - 全实验的人类可读进度日志；
+  - 记录 `run / seed / model / stage` 的 started/completed/failed 事件。
+
+- `progress/progress.jsonl`
+  - 全实验的结构化事件流；
+  - 适合程序化监控。
+
+- `progress/summary.json`
+  - 全实验总进度摘要；
+  - 包含 `completed_stage_count / total_stage_count / progress_ratio / active_stages`。
+
+- `progress/seed_<seed>_summary.json`
+  - 单个 seed 的独立进度摘要；
+  - 只反映该 seed 自己的完成情况，不混入其他 seed。
+
+### 监控命令
+
+```bash
+# 看整个实验总进度
+cat results/large_scale_runs/<run_name>/progress/summary.json
+
+# 看单个 seed 进度
+cat results/large_scale_runs/<run_name>/progress/seed_42_summary.json
+
+# 实时看全局进度日志
+tail -f results/large_scale_runs/<run_name>/progress/progress.log
+
+# 看后台启动日志（如果用 nohup）
+tail -f results/large_scale_runs/<run_name>/launch.log
+```

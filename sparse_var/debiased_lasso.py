@@ -3,11 +3,15 @@
 用于高维稀疏VAR模型的假设检验
 """
 
+import os
+
 import numpy as np
 from numpy.linalg import inv, det
 from typing import Tuple, Optional, Dict, Any
 
 from simulation.design_matrix import build_var_design_matrix
+
+os.environ.setdefault("JOBLIB_MULTIPROCESSING", "0")
 
 try:
     from sklearn.linear_model import LassoCV, Lasso

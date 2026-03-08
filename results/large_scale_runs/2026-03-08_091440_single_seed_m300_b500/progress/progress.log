@@ -1,0 +1,12 @@
+[2026-03-08 09:14:40] | event=run | status=started | progress=0/21 | B=500 | M_grid=[50, 100, 300] | alpha=0.05 | baseline_pvalue_method=asymptotic_chi2 | deltas=[0.04, 0.08, 0.12, 0.16] | jobs=4 | power_M=300 | seed_workers=1 | seeds=[42]
+[2026-03-08 09:14:40] | event=seed | status=started | progress=0/21 | seed=42 | jobs=4
+[2026-03-08 09:14:40] | event=model | status=started | progress=0/21 | seed=42 | model=baseline_ols | jobs=1
+[2026-03-08 09:14:40] | event=stage | status=started | progress=0/21 | seed=42 | model=baseline_ols | stage=type1_M_50 | M=50 | task=type1_error
+[2026-03-08 09:14:40] | event=model | status=started | progress=0/21 | seed=42 | model=lowrank_svd | jobs=1
+[2026-03-08 09:14:40] | event=stage | status=started | progress=0/21 | seed=42 | model=lowrank_svd | stage=type1_M_50 | M=50 | task=type1_error
+[2026-03-08 09:14:40] | event=model | status=started | progress=0/21 | seed=42 | model=sparse_lasso | jobs=2
+[2026-03-08 09:14:40] | event=stage | status=started | progress=0/21 | seed=42 | model=sparse_lasso | stage=type1_M_50 | M=50 | task=type1_error
+[2026-03-08 09:14:44] | event=stage | status=completed | progress=1/21 | seed=42 | model=baseline_ols | stage=type1_M_50 | runtime_sec=3.90 | M=50 | metric_value=0.14 | task=type1_error
+[2026-03-08 09:14:44] | event=stage | status=started | progress=1/21 | seed=42 | model=baseline_ols | stage=type1_M_100 | M=100 | task=type1_error
+[2026-03-08 09:14:53] | event=stage | status=completed | progress=2/21 | seed=42 | model=baseline_ols | stage=type1_M_100 | runtime_sec=8.79 | M=100 | metric_value=0.24 | task=type1_error
+[2026-03-08 09:14:53] | event=stage | status=started | progress=2/21 | seed=42 | model=baseline_ols | stage=type1_M_300 | M=300 | task=type1_error

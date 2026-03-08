@@ -1,0 +1,9 @@
+{
+  "run_dir": "results/large_scale_runs/2026-03-08_004221_mgrid_effectscale_smoke3",
+  "json": "results/large_scale_runs/2026-03-08_004221_mgrid_effectscale_smoke3/large_scale_experiment_2026-03-08_004221_mgrid_effectscale_smoke3.json",
+  "raw_csv": "results/large_scale_runs/2026-03-08_004221_mgrid_effectscale_smoke3/large_scale_raw_2026-03-08_004221_mgrid_effectscale_smoke3.csv",
+  "agg_csv": "results/large_scale_runs/2026-03-08_004221_mgrid_effectscale_smoke3/large_scale_agg_2026-03-08_004221_mgrid_effectscale_smoke3.csv",
+  "markdown": "results/large_scale_runs/2026-03-08_004221_mgrid_effectscale_smoke3/大规模试验分析报告_2026-03-08_004221_mgrid_effectscale_smoke3.md",
+  "run_meta": "results/large_scale_runs/2026-03-08_004221_mgrid_effectscale_smoke3/run_meta.json",
+  "seed_results_dir": "results/large_scale_runs/2026-03-08_004221_mgrid_effectscale_smoke3/seed_results"
+}

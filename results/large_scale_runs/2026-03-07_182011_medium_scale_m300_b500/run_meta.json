@@ -1,0 +1,7 @@
+{
+  "run_dir": "results/large_scale_runs/2026-03-07_182011_medium_scale_m300_b500",
+  "json": "results/large_scale_runs/2026-03-07_182011_medium_scale_m300_b500/large_scale_experiment_2026-03-07_182011_medium_scale_m300_b500.json",
+  "csv": "results/large_scale_runs/2026-03-07_182011_medium_scale_m300_b500/large_scale_plot_data_2026-03-07_182011_medium_scale_m300_b500.csv",
+  "markdown": "results/large_scale_runs/2026-03-07_182011_medium_scale_m300_b500/大规模试验分析报告_2026-03-07_182011_medium_scale_m300_b500.md",
+  "run_meta": "results/large_scale_runs/2026-03-07_182011_medium_scale_m300_b500/run_meta.json"
+}

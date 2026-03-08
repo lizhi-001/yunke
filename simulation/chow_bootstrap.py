@@ -18,17 +18,19 @@ class ChowBootstrapInference:
     def __init__(self, B: int = 500, seed: Optional[int] = None):
         self.B = B
         self.seed = seed
+        self.rng = np.random.default_rng(seed)
 
     @staticmethod
     def generate_pseudo_series(Y: np.ndarray, p: int,
                                Phi: np.ndarray, c: np.ndarray,
-                               residuals: np.ndarray) -> np.ndarray:
+                               residuals: np.ndarray,
+                               rng: np.random.Generator) -> np.ndarray:
         """在 H0 受限估计下通过残差重抽样生成伪序列。"""
         T, N = Y.shape
         T_eff = len(residuals)
 
         centered_residuals = residuals - np.mean(residuals, axis=0)
-        indices = np.random.choice(T_eff, size=T_eff, replace=True)
+        indices = rng.choice(T_eff, size=T_eff, replace=True)
         resampled_residuals = centered_residuals[indices, :]
 
         Y_star = np.zeros((T, N))
@@ -49,9 +51,6 @@ class ChowBootstrapInference:
         """
         对已知断点 t 执行同口径 Chow Bootstrap 检验。
         """
-        if self.seed is not None:
-            np.random.seed(self.seed)
-
         chow = ChowTest()
         original = chow.compute_at_point(Y, p, t)
 
@@ -71,7 +70,7 @@ class ChowBootstrapInference:
                 print(f"Bootstrap iteration {b + 1}/{self.B}")
 
             try:
-                Y_star = self.generate_pseudo_series(Y, p, Phi_r, c_r, residuals_r)
+                Y_star = self.generate_pseudo_series(Y, p, Phi_r, c_r, residuals_r, self.rng)
                 stat_b = ChowTest().compute_at_point(Y_star, p, t)
                 f_stars.append(stat_b['f_statistic'])
                 lr_stars.append(stat_b['lr_statistic'])
@@ -106,4 +105,3 @@ class ChowBootstrapInference:
             'B_effective': int(len(lr_stars)),
             'design_info': original['design_info'],
         }
-

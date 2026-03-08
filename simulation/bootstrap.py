@@ -28,6 +28,7 @@ class BootstrapInference:
         self.bootstrap_statistics = None
         self.p_value = None
         self.critical_values = None
+        self.rng = np.random.default_rng(seed)
 
     def generate_pseudo_series(self, Y: np.ndarray, p: int,
                                 Phi: np.ndarray, c: np.ndarray,
@@ -59,7 +60,7 @@ class BootstrapInference:
         # 残差重抽样（有放回）并居中处理
         # 居中处理确保Bootstrap残差均值为0，减少小样本偏移
         centered_residuals = residuals - np.mean(residuals, axis=0)
-        indices = np.random.choice(T_eff, size=T_eff, replace=True)
+        indices = self.rng.choice(T_eff, size=T_eff, replace=True)
         resampled_residuals = centered_residuals[indices, :]
 
         # 生成伪序列
@@ -99,9 +100,6 @@ class BootstrapInference:
         Dict[str, Any]
             Bootstrap检验结果
         """
-        if self.seed is not None:
-            np.random.seed(self.seed)
-
         # Step 1: 计算原始数据的LR统计量
         lr_test = LRTest()
         original_result = lr_test.compute_lr_at_point(Y, p, t)
@@ -134,14 +132,17 @@ class BootstrapInference:
         self.bootstrap_statistics = np.array(bootstrap_lr_values)
 
         # Step 3: 计算p值
-        self.p_value = np.mean(self.bootstrap_statistics >= original_lr)
+        self.p_value = np.mean(self.bootstrap_statistics >= original_lr) if len(self.bootstrap_statistics) > 0 else np.nan
 
         # Step 4: 计算临界值
-        self.critical_values = {
-            0.10: np.percentile(self.bootstrap_statistics, 90),
-            0.05: np.percentile(self.bootstrap_statistics, 95),
-            0.01: np.percentile(self.bootstrap_statistics, 99)
-        }
+        if len(self.bootstrap_statistics) > 0:
+            self.critical_values = {
+                0.10: np.percentile(self.bootstrap_statistics, 90),
+                0.05: np.percentile(self.bootstrap_statistics, 95),
+                0.01: np.percentile(self.bootstrap_statistics, 99)
+            }
+        else:
+            self.critical_values = {0.10: np.nan, 0.05: np.nan, 0.01: np.nan}
 
         return {
             'original_lr': original_lr,
@@ -208,9 +209,6 @@ class BootstrapInference:
         Dict[str, Any]
             Bootstrap检验结果
         """
-        if self.seed is not None:
-            np.random.seed(self.seed)
-
         # Step 1: 计算原始数据的Sup-LR统计量
         sup_lr_test = SupLRTest(trim=trim)
         original_result = sup_lr_test.compute_sup_lr(Y, p)
@@ -243,14 +241,17 @@ class BootstrapInference:
         self.bootstrap_statistics = np.array(bootstrap_sup_lr_values)
 
         # Step 3: 计算p值
-        self.p_value = np.mean(self.bootstrap_statistics >= original_sup_lr)
+        self.p_value = np.mean(self.bootstrap_statistics >= original_sup_lr) if len(self.bootstrap_statistics) > 0 else np.nan
 
         # Step 4: 计算临界值
-        self.critical_values = {
-            0.10: np.percentile(self.bootstrap_statistics, 90),
-            0.05: np.percentile(self.bootstrap_statistics, 95),
-            0.01: np.percentile(self.bootstrap_statistics, 99)
-        }
+        if len(self.bootstrap_statistics) > 0:
+            self.critical_values = {
+                0.10: np.percentile(self.bootstrap_statistics, 90),
+                0.05: np.percentile(self.bootstrap_statistics, 95),
+                0.01: np.percentile(self.bootstrap_statistics, 99)
+            }
+        else:
+            self.critical_values = {0.10: np.nan, 0.05: np.nan, 0.01: np.nan}
 
         return {
             'original_sup_lr': original_sup_lr,

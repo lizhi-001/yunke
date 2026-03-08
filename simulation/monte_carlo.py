@@ -7,6 +7,7 @@ import numpy as np
 from typing import Tuple, Optional, Dict, Any, List
 from .data_generator import VARDataGenerator
 from .bootstrap import BootstrapInference
+from .chow_test import ChowTest
 from .parallel import run_task_map
 
 
@@ -15,31 +16,51 @@ def _iteration_seed(base_seed: Optional[int], iteration: int) -> Optional[int]:
 
 
 def _type1_at_point_worker(task: Tuple) -> Dict[str, Any]:
-    seed, N, T, p, Phi, Sigma, t, alpha, B = task
+    seed, N, T, p, Phi, Sigma, t, alpha, B, pvalue_method = task
     if seed is not None:
         np.random.seed(seed)
 
     generator = VARDataGenerator()
     try:
         Y = generator.generate_var_series(T, N, p, Phi, Sigma)
-        bootstrap = BootstrapInference(B=B)
-        result = bootstrap.test_at_point(Y, p, t, alpha=alpha)
-        return {'success': True, 'p_value': result['p_value'], 'reject_h0': result['reject_h0']}
+        if pvalue_method == "bootstrap_lr":
+            bootstrap = BootstrapInference(B=B)
+            result = bootstrap.test_at_point(Y, p, t, alpha=alpha)
+            p_value = result["p_value"]
+        elif pvalue_method == "asymptotic_chi2":
+            result = ChowTest().compute_at_point(Y, p, t)
+            p_value = result["chi2_p_value"]
+        elif pvalue_method == "asymptotic_f":
+            result = ChowTest().compute_at_point(Y, p, t)
+            p_value = result["f_p_value"]
+        else:
+            raise ValueError(f"未知的 baseline p 值方法: {pvalue_method}")
+        return {'success': True, 'p_value': p_value, 'reject_h0': p_value <= alpha}
     except Exception:
         return {'success': False}
 
 
 def _power_at_point_worker(task: Tuple) -> Dict[str, Any]:
-    seed, N, T, p, Phi1, Phi2, Sigma, break_point, t, alpha, B = task
+    seed, N, T, p, Phi1, Phi2, Sigma, break_point, t, alpha, B, pvalue_method = task
     if seed is not None:
         np.random.seed(seed)
 
     generator = VARDataGenerator()
     try:
         Y, _ = generator.generate_var_with_break(T, N, p, Phi1, Phi2, Sigma, break_point)
-        bootstrap = BootstrapInference(B=B)
-        result = bootstrap.test_at_point(Y, p, t, alpha=alpha)
-        return {'success': True, 'p_value': result['p_value'], 'reject_h0': result['reject_h0']}
+        if pvalue_method == "bootstrap_lr":
+            bootstrap = BootstrapInference(B=B)
+            result = bootstrap.test_at_point(Y, p, t, alpha=alpha)
+            p_value = result["p_value"]
+        elif pvalue_method == "asymptotic_chi2":
+            result = ChowTest().compute_at_point(Y, p, t)
+            p_value = result["chi2_p_value"]
+        elif pvalue_method == "asymptotic_f":
+            result = ChowTest().compute_at_point(Y, p, t)
+            p_value = result["f_p_value"]
+        else:
+            raise ValueError(f"未知的 baseline p 值方法: {pvalue_method}")
+        return {'success': True, 'p_value': p_value, 'reject_h0': p_value <= alpha}
     except Exception:
         return {'success': False}
 
@@ -83,7 +104,8 @@ class MonteCarloSimulation:
     """蒙特卡洛仿真"""
 
     def __init__(self, M: int = 1000, B: int = 500,
-                 seed: Optional[int] = None, n_jobs: int = 1):
+                 seed: Optional[int] = None, n_jobs: int = 1,
+                 baseline_pvalue_method: str = "bootstrap_lr"):
         """
         初始化蒙特卡洛仿真
 
@@ -100,6 +122,7 @@ class MonteCarloSimulation:
         self.B = B
         self.seed = seed
         self.n_jobs = max(1, n_jobs)
+        self.baseline_pvalue_method = baseline_pvalue_method
 
     def _run_tasks(self, worker, tasks: List[Tuple], verbose: bool) -> List[Dict[str, Any]]:
         return run_task_map(
@@ -157,7 +180,7 @@ class MonteCarloSimulation:
             第一类错误评估结果
         """
         tasks = [
-            (_iteration_seed(self.seed, m), N, T, p, Phi, Sigma, t, alpha, self.B)
+            (_iteration_seed(self.seed, m), N, T, p, Phi, Sigma, t, alpha, self.B, self.baseline_pvalue_method)
             for m in range(self.M)
         ]
         results = self._run_tasks(_type1_at_point_worker, tasks, verbose)
@@ -213,7 +236,7 @@ class MonteCarloSimulation:
             功效评估结果
         """
         tasks = [
-            (_iteration_seed(self.seed, m), N, T, p, Phi1, Phi2, Sigma, break_point, t, alpha, self.B)
+            (_iteration_seed(self.seed, m), N, T, p, Phi1, Phi2, Sigma, break_point, t, alpha, self.B, self.baseline_pvalue_method)
             for m in range(self.M)
         ]
         results = self._run_tasks(_power_at_point_worker, tasks, verbose)

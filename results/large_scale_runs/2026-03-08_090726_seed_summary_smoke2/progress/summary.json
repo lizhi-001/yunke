@@ -1,0 +1,29 @@
+{
+  "updated_at": "2026-03-08 09:07:34",
+  "completed_stage_count": 24,
+  "total_stage_count": 24,
+  "progress_ratio": 1.0,
+  "active_stages": [],
+  "completed_stages": [
+    "seed_42/baseline_ols/power_delta_0.04",
+    "seed_2026/baseline_ols/power_delta_0.04",
+    "seed_42/baseline_ols/power_delta_0.08",
+    "seed_2026/baseline_ols/power_delta_0.08",
+    "seed_42/sparse_lasso/type1_M_4",
+    "seed_2026/sparse_lasso/type1_M_4",
+    "seed_42/lowrank_svd/type1_M_4",
+    "seed_2026/lowrank_svd/type1_M_4",
+    "seed_42/sparse_lasso/type1_M_6",
+    "seed_2026/sparse_lasso/type1_M_6",
+    "seed_42/lowrank_svd/type1_M_6",
+    "seed_2026/lowrank_svd/type1_M_6",
+    "seed_42/sparse_lasso/power_delta_0.04",
+    "seed_2026/sparse_lasso/power_delta_0.04",
+    "seed_2026/lowrank_svd/power_delta_0.04",
+    "seed_42/lowrank_svd/power_delta_0.04",
+    "seed_42/sparse_lasso/power_delta_0.08",
+    "seed_2026/lowrank_svd/power_delta_0.08",
+    "seed_42/lowrank_svd/power_delta_0.08",
+    "seed_2026/sparse_lasso/power_delta_0.08"
+  ]
+}

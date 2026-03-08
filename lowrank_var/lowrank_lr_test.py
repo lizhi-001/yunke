@@ -1,6 +1,11 @@
 """
 低秩VAR的LR检验模块
-使用核范数正则化/截断SVD估计进行已知断点结构变化检验
+使用核范数正则化/截断SVD估计进行已知断点下的结构断裂检验。
+
+口径说明：
+- H0：已知点处不存在结构断裂，整条时间序列共用一套参数；
+- H1：已知点处存在结构断裂，断点前后使用两套参数；
+- 第二段从断点后第一个响应开始生效，但允许其滞后项借用断点前的 p 个观测。
 """
 
 import numpy as np
@@ -79,15 +84,18 @@ class LowRankLRTest:
         result_r = self._fit_model(Y, p, include_const)
         log_lik_r = result_r['log_likelihood']
 
-        # H1: 在已知时间点t发生结构变化（分段拟合）
+        # H1: 在已知时间点t发生结构变化（结构断裂拟合）
         Y1 = Y[:t, :]
-        Y2 = Y[t:, :]
+        Y2 = Y[t - p:, :]
 
         result1 = self._fit_model(Y1, p, include_const)
         log_lik_1 = result1['log_likelihood']
 
         result2 = self._fit_model(Y2, p, include_const)
         log_lik_2 = result2['log_likelihood']
+
+        if result_r['T_eff'] != result1['T_eff'] + result2['T_eff']:
+            raise ValueError('H0 与 H1 的有效样本量不一致')
 
         log_lik_u = log_lik_1 + log_lik_2
 

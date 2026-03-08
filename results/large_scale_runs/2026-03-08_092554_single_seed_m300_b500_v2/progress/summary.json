@@ -1,0 +1,19 @@
+{
+  "updated_at": "2026-03-08 09:27:23",
+  "completed_stage_count": 7,
+  "total_stage_count": 21,
+  "progress_ratio": 0.3333333333333333,
+  "active_stages": [
+    "seed_42/lowrank_svd/type1_M_50",
+    "seed_42/sparse_lasso/type1_M_50"
+  ],
+  "completed_stages": [
+    "seed_42/baseline_ols/type1_M_50",
+    "seed_42/baseline_ols/type1_M_100",
+    "seed_42/baseline_ols/type1_M_300",
+    "seed_42/baseline_ols/power_delta_0.04",
+    "seed_42/baseline_ols/power_delta_0.08",
+    "seed_42/baseline_ols/power_delta_0.12",
+    "seed_42/baseline_ols/power_delta_0.16"
+  ]
+}

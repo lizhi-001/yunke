@@ -3,11 +3,15 @@ Lasso-VAR估计器
 使用L1正则化进行高维稀疏VAR模型估计
 """
 
+import os
+
 import numpy as np
 from numpy.linalg import det
 from typing import Tuple, Optional, Dict, Any
 
 from simulation.design_matrix import build_var_design_matrix
+
+os.environ.setdefault("JOBLIB_MULTIPROCESSING", "0")
 
 try:
     from sklearn.linear_model import LassoCV, Lasso

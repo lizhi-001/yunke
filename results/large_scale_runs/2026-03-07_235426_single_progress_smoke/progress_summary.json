@@ -1,0 +1,36 @@
+{
+  "seed": 42,
+  "timestamp": "2026-03-07 23:54:26",
+  "total_progress": {
+    "completed": 6,
+    "total": 6,
+    "ratio": 1.0
+  },
+  "last_event": {
+    "timestamp": "2026-03-07 23:54:26",
+    "seed": 42,
+    "event_type": "run",
+    "status": "completed",
+    "model": null,
+    "stage": null,
+    "stage_id": null,
+    "total_progress": {
+      "completed": 6,
+      "total": 6,
+      "ratio": 1.0
+    },
+    "runtime_sec": 0.07354259490966797,
+    "message": "[2026-03-07 23:54:26] run completed | seed=42 | runtime_sec=0.07 | total_progress=6/6",
+    "extra": null
+  },
+  "active_stages": [],
+  "completed_stages": [
+    "seed_42/baseline_ols/type1_error",
+    "seed_42/baseline_ols/power_delta_0.10",
+    "seed_42/sparse_lasso/type1_error",
+    "seed_42/sparse_lasso/power_delta_0.10",
+    "seed_42/lowrank_svd/type1_error",
+    "seed_42/lowrank_svd/power_delta_0.10"
+  ],
+  "history_length": 20
+}

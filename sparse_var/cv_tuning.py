@@ -3,8 +3,12 @@
 用于高维稀疏VAR模型的正则化参数选择
 """
 
+import os
+
 import numpy as np
 from typing import Tuple, Optional, Dict, Any, List
+
+os.environ.setdefault("JOBLIB_MULTIPROCESSING", "0")
 
 try:
     from sklearn.linear_model import LassoCV

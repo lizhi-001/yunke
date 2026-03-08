@@ -1,0 +1,10 @@
+{
+  "run_dir": "results/large_scale_runs/2026-03-07_234757_progress_logging_smoke",
+  "json": "results/large_scale_runs/2026-03-07_234757_progress_logging_smoke/large_scale_experiment_2026-03-07_234757_progress_logging_smoke.json",
+  "csv": "results/large_scale_runs/2026-03-07_234757_progress_logging_smoke/large_scale_plot_data_2026-03-07_234757_progress_logging_smoke.csv",
+  "markdown": "results/large_scale_runs/2026-03-07_234757_progress_logging_smoke/大规模试验分析报告_2026-03-07_234757_progress_logging_smoke.md",
+  "run_meta": "results/large_scale_runs/2026-03-07_234757_progress_logging_smoke/run_meta.json",
+  "progress_log": "results/large_scale_runs/2026-03-07_234757_progress_logging_smoke/progress.log",
+  "progress_jsonl": "results/large_scale_runs/2026-03-07_234757_progress_logging_smoke/progress.jsonl",
+  "progress_summary": "results/large_scale_runs/2026-03-07_234757_progress_logging_smoke/progress_summary.json"
+}

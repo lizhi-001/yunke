@@ -1,7 +1,0 @@
-{
-  "run_dir": "results/next_stage_runs/2026-03-07_141139_sanity_tiny",
-  "progress_log": "results/next_stage_runs/2026-03-07_141139_sanity_tiny/progress.log",
-  "error_log": "results/next_stage_runs/2026-03-07_141139_sanity_tiny/errors.log",
-  "worker_log_dir": "results/next_stage_runs/2026-03-07_141139_sanity_tiny/worker_logs",
-  "state_dir": "results/next_stage_runs/2026-03-07_141139_sanity_tiny/state"
-}

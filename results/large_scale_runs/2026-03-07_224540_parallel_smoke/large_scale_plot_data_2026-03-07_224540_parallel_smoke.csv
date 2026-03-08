@@ -1,0 +1,7 @@
+model,metric,delta,target_fro,actual_fro,value,size_distortion,rejections,effective_iterations,runtime_sec
+baseline_ols,type1_error,,,,0.000000,-0.050000,0,2,0.016
+baseline_ols,power,0.04,0.040000,0.040000,0.500000,,1,2,0.123
+sparse_lasso,type1_error,,,,0.000000,-0.050000,0,2,0.207
+sparse_lasso,power,0.04,0.040000,0.040000,0.000000,,0,2,0.128
+lowrank_svd,type1_error,,,,0.000000,-0.050000,0,2,0.197
+lowrank_svd,power,0.04,0.040000,0.040000,0.000000,,0,2,0.146

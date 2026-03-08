@@ -36,6 +36,7 @@ class SparseBootstrapInference:
         self.bootstrap_statistics = None
         self.p_value = None
         self.critical_values = None
+        self.rng = np.random.default_rng(seed)
 
     def _get_phi_and_c(self, result: Dict[str, Any]) -> tuple:
         """从估计结果中提取Phi和c"""
@@ -73,7 +74,7 @@ class SparseBootstrapInference:
 
         # 残差重抽样（有放回）并居中处理
         centered_residuals = residuals - np.mean(residuals, axis=0)
-        indices = np.random.choice(T_eff, size=T_eff, replace=True)
+        indices = self.rng.choice(T_eff, size=T_eff, replace=True)
         resampled_residuals = centered_residuals[indices, :]
 
         # 生成伪序列
@@ -111,9 +112,6 @@ class SparseBootstrapInference:
         Dict[str, Any]
             Bootstrap检验结果
         """
-        if self.seed is not None:
-            np.random.seed(self.seed)
-
         # Step 1: 计算原始数据的LR统计量
         lr_test = SparseLRTest(estimator_type=self.estimator_type, alpha=self.alpha)
         original_result = lr_test.compute_lr_at_point(Y, p, t)
@@ -144,7 +142,7 @@ class SparseBootstrapInference:
         self.bootstrap_statistics = np.array(bootstrap_lr_values)
 
         # Step 3: 计算p值
-        self.p_value = np.mean(self.bootstrap_statistics >= original_lr)
+        self.p_value = np.mean(self.bootstrap_statistics >= original_lr) if len(self.bootstrap_statistics) > 0 else np.nan
 
         # Step 4: 计算临界值
         if len(self.bootstrap_statistics) > 0:

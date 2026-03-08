@@ -1,0 +1,9 @@
+{
+  "run_dir": "results/large_scale_runs/2026-03-08_001244_mgrid_multiseed_smoke2",
+  "json": "results/large_scale_runs/2026-03-08_001244_mgrid_multiseed_smoke2/large_scale_experiment_2026-03-08_001244_mgrid_multiseed_smoke2.json",
+  "raw_csv": "results/large_scale_runs/2026-03-08_001244_mgrid_multiseed_smoke2/large_scale_raw_2026-03-08_001244_mgrid_multiseed_smoke2.csv",
+  "agg_csv": "results/large_scale_runs/2026-03-08_001244_mgrid_multiseed_smoke2/large_scale_agg_2026-03-08_001244_mgrid_multiseed_smoke2.csv",
+  "markdown": "results/large_scale_runs/2026-03-08_001244_mgrid_multiseed_smoke2/大规模试验分析报告_2026-03-08_001244_mgrid_multiseed_smoke2.md",
+  "run_meta": "results/large_scale_runs/2026-03-08_001244_mgrid_multiseed_smoke2/run_meta.json",
+  "seed_results_dir": "results/large_scale_runs/2026-03-08_001244_mgrid_multiseed_smoke2/seed_results"
+}

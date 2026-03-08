@@ -22,6 +22,8 @@ from typing import Dict, Any, List, Optional, Tuple
 
 import numpy as np
 
+os.environ.setdefault("JOBLIB_MULTIPROCESSING", "0")
+
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
@@ -29,6 +31,7 @@ if PROJECT_ROOT not in sys.path:
 os.environ.setdefault("JOBLIB_TEMP_FOLDER", "/tmp")
 
 from simulation import VARDataGenerator, ChowTest, ChowBootstrapInference
+from simulation.parallel import run_task_map
 from sparse_var import SparseBootstrapInference
 from lowrank_var import LowRankBootstrapInference
 
@@ -85,6 +88,117 @@ STAGE_SEQUENCE = [
 ]
 
 DEFAULT_POWER_CHANGE_GRID = [0.04, 0.08, 0.12, 0.16, 0.20]
+
+
+def _iteration_seed(base_seed: Optional[int], stream_id: int, iteration: int) -> Optional[int]:
+    if base_seed is None:
+        return None
+    return int(base_seed + stream_id * 1_000_003 + iteration)
+
+
+def _bootstrap_seed(iteration_seed: Optional[int]) -> Optional[int]:
+    if iteration_seed is None:
+        return None
+    return int(iteration_seed + 97_531)
+
+
+def _run_mc_tasks(worker, tasks: List[Tuple[Any, ...]], mc_workers: int) -> List[Dict[str, Any]]:
+    return run_task_map(
+        worker,
+        tasks,
+        n_jobs=max(1, mc_workers),
+        verbose=False,
+        progress_every=10,
+        progress_label="Monte Carlo iteration",
+    )
+
+
+def _baseline_h0_worker(task: Tuple[Any, ...]) -> Dict[str, Any]:
+    iteration_seed, T, N, p, Phi1, Sigma, t, B_bootstrap_baseline, alpha = task
+    generator = VARDataGenerator(seed=iteration_seed)
+    bootstrap = ChowBootstrapInference(B=B_bootstrap_baseline, seed=_bootstrap_seed(iteration_seed))
+    try:
+        Y = generator.generate_var_series(T, N, p, Phi1, Sigma)
+        result = bootstrap.test_at_point(Y, p, t, alpha=alpha)
+        return {
+            "success": True,
+            "p_values": {
+                "baseline_chow_asym_f": float(result["f_asymptotic_p_value"]),
+                "baseline_chow_asym_chi2": float(result["chi2_asymptotic_p_value"]),
+                "baseline_chow_bootstrap_f": float(result["bootstrap_f_p_value"]),
+                "baseline_chow_bootstrap_lr": float(result["bootstrap_lr_p_value"]),
+            },
+        }
+    except Exception:
+        return {"success": False}
+
+
+def _baseline_h1_worker(task: Tuple[Any, ...]) -> Dict[str, Any]:
+    iteration_seed, T, N, p, Phi1, Phi2, Sigma, t, B_bootstrap_baseline, alpha = task
+    generator = VARDataGenerator(seed=iteration_seed)
+    bootstrap = ChowBootstrapInference(B=B_bootstrap_baseline, seed=_bootstrap_seed(iteration_seed))
+    try:
+        Y, _ = generator.generate_var_with_break(T, N, p, Phi1, Phi2, Sigma, t)
+        result = bootstrap.test_at_point(Y, p, t, alpha=alpha)
+        return {
+            "success": True,
+            "p_values": {
+                "baseline_chow_asym_f": float(result["f_asymptotic_p_value"]),
+                "baseline_chow_asym_chi2": float(result["chi2_asymptotic_p_value"]),
+                "baseline_chow_bootstrap_f": float(result["bootstrap_f_p_value"]),
+                "baseline_chow_bootstrap_lr": float(result["bootstrap_lr_p_value"]),
+            },
+        }
+    except Exception:
+        return {"success": False}
+
+
+def _sparse_h0_worker(task: Tuple[Any, ...]) -> Dict[str, Any]:
+    iteration_seed, T, N, p, Phi1, Sigma, t, B_bootstrap_hd, alpha = task
+    generator = VARDataGenerator(seed=iteration_seed)
+    bootstrap = SparseBootstrapInference(B=B_bootstrap_hd, seed=_bootstrap_seed(iteration_seed), estimator_type="lasso")
+    try:
+        Y = generator.generate_var_series(T, N, p, Phi1, Sigma)
+        result = bootstrap.test(Y, p, t, alpha=alpha)
+        return {"success": True, "p_value": float(result["p_value"])}
+    except Exception:
+        return {"success": False}
+
+
+def _sparse_h1_worker(task: Tuple[Any, ...]) -> Dict[str, Any]:
+    iteration_seed, T, N, p, Phi1, Phi2, Sigma, t, B_bootstrap_hd, alpha = task
+    generator = VARDataGenerator(seed=iteration_seed)
+    bootstrap = SparseBootstrapInference(B=B_bootstrap_hd, seed=_bootstrap_seed(iteration_seed), estimator_type="lasso")
+    try:
+        Y, _ = generator.generate_var_with_break(T, N, p, Phi1, Phi2, Sigma, t)
+        result = bootstrap.test(Y, p, t, alpha=alpha)
+        return {"success": True, "p_value": float(result["p_value"])}
+    except Exception:
+        return {"success": False}
+
+
+def _lowrank_h0_worker(task: Tuple[Any, ...]) -> Dict[str, Any]:
+    iteration_seed, T, N, p, Phi1, Sigma, t, B_bootstrap_hd, alpha = task
+    generator = VARDataGenerator(seed=iteration_seed)
+    bootstrap = LowRankBootstrapInference(B=B_bootstrap_hd, seed=_bootstrap_seed(iteration_seed), method="svd", rank=2)
+    try:
+        Y = generator.generate_var_series(T, N, p, Phi1, Sigma)
+        result = bootstrap.test(Y, p, t, alpha=alpha)
+        return {"success": True, "p_value": float(result["p_value"])}
+    except Exception:
+        return {"success": False}
+
+
+def _lowrank_h1_worker(task: Tuple[Any, ...]) -> Dict[str, Any]:
+    iteration_seed, T, N, p, Phi1, Phi2, Sigma, t, B_bootstrap_hd, alpha = task
+    generator = VARDataGenerator(seed=iteration_seed)
+    bootstrap = LowRankBootstrapInference(B=B_bootstrap_hd, seed=_bootstrap_seed(iteration_seed), method="svd", rank=2)
+    try:
+        Y, _ = generator.generate_var_with_break(T, N, p, Phi1, Phi2, Sigma, t)
+        result = bootstrap.test(Y, p, t, alpha=alpha)
+        return {"success": True, "p_value": float(result["p_value"])}
+    except Exception:
+        return {"success": False}
 
 
 def build_phi2_with_change(Phi1: np.ndarray, change_scale: float) -> Tuple[np.ndarray, Dict[str, float]]:
@@ -186,9 +300,8 @@ def run_baseline_size(
     M_values: List[int],
     B_bootstrap_baseline: int,
     alpha: float,
+    mc_workers: int = 1,
 ) -> List[Dict[str, Any]]:
-    np.random.seed(seed)
-
     Sigma = np.eye(N) * 0.5
     Phi1 = generator.generate_stationary_phi(N, p, scale=0.2)
     rows = []
@@ -198,24 +311,23 @@ def run_baseline_size(
         ("baseline_chow_bootstrap_f", "bootstrap_f_p_value"),
         ("baseline_chow_bootstrap_lr", "bootstrap_lr_p_value"),
     ]
-
-    for M in M_values:
+    for stream_id, M in enumerate(M_values, start=1):
         h0_counts = {name: 0 for name, _ in inference_keys}
+        tasks = [
+            (_iteration_seed(seed, stream_id, iteration), T, N, p, Phi1, Sigma, t, B_bootstrap_baseline, alpha)
+            for iteration in range(M)
+        ]
+        results = _run_mc_tasks(_baseline_h0_worker, tasks, mc_workers)
         succ_h0 = 0
-
-        for _ in range(M):
-            try:
-                Y = generator.generate_var_series(T, N, p, Phi1, Sigma)
-                result = ChowBootstrapInference(B=B_bootstrap_baseline, seed=seed).test_at_point(
-                    Y, p, t, alpha=alpha
-                )
-                succ_h0 += 1
-                for name, key in inference_keys:
-                    p_value = result[key]
-                    if not np.isnan(p_value) and p_value <= alpha:
-                        h0_counts[name] += 1
-            except Exception:
+        for result in results:
+            if not result.get("success"):
                 continue
+            succ_h0 += 1
+            p_values = result["p_values"]
+            for name, _ in inference_keys:
+                p_value = p_values[name]
+                if not np.isnan(p_value) and p_value <= alpha:
+                    h0_counts[name] += 1
 
         for name, _ in inference_keys:
             rows.append(
@@ -243,9 +355,8 @@ def run_baseline_power(
     B_bootstrap_baseline: int,
     alpha: float,
     change_scales: List[float],
+    mc_workers: int = 1,
 ) -> List[Dict[str, Any]]:
-    np.random.seed(seed)
-
     Sigma = np.eye(N) * 0.5
     Phi1 = generator.generate_stationary_phi(N, p, scale=0.2)
 
@@ -256,26 +367,26 @@ def run_baseline_power(
         ("baseline_chow_bootstrap_f", "bootstrap_f_p_value"),
         ("baseline_chow_bootstrap_lr", "bootstrap_lr_p_value"),
     ]
-
-    for change_scale in change_scales:
+    for change_idx, change_scale in enumerate(change_scales, start=1):
         Phi2, delta_info = build_phi2_with_change(Phi1, change_scale)
-        for M in M_values:
+        for m_idx, M in enumerate(M_values, start=1):
             h1_counts = {name: 0 for name, _ in inference_keys}
+            stream_id = 100 + change_idx * 100 + m_idx
+            tasks = [
+                (_iteration_seed(seed, stream_id, iteration), T, N, p, Phi1, Phi2, Sigma, t, B_bootstrap_baseline, alpha)
+                for iteration in range(M)
+            ]
+            results = _run_mc_tasks(_baseline_h1_worker, tasks, mc_workers)
             succ_h1 = 0
-
-            for _ in range(M):
-                try:
-                    Y, _ = generator.generate_var_with_break(T, N, p, Phi1, Phi2, Sigma, t)
-                    result = ChowBootstrapInference(B=B_bootstrap_baseline, seed=seed).test_at_point(
-                        Y, p, t, alpha=alpha
-                    )
-                    succ_h1 += 1
-                    for name, key in inference_keys:
-                        p_value = result[key]
-                        if not np.isnan(p_value) and p_value <= alpha:
-                            h1_counts[name] += 1
-                except Exception:
+            for result in results:
+                if not result.get("success"):
                     continue
+                succ_h1 += 1
+                p_values = result["p_values"]
+                for name, _ in inference_keys:
+                    p_value = p_values[name]
+                    if not np.isnan(p_value) and p_value <= alpha:
+                        h1_counts[name] += 1
 
             for name, _ in inference_keys:
                 rows.append(
@@ -306,27 +417,27 @@ def run_sparse_size(
     M_values: List[int],
     B_bootstrap_hd: int,
     alpha: float,
+    mc_workers: int = 1,
 ) -> List[Dict[str, Any]]:
     Sigma = np.eye(N) * 0.5
     Phi1 = generator.generate_stationary_phi(N, p, sparsity=0.2, scale=0.15)
 
     rows = []
-    for M in M_values:
+    for stream_id, M in enumerate(M_values, start=201):
+        tasks = [
+            (_iteration_seed(seed, stream_id, iteration), T, N, p, Phi1, Sigma, t, B_bootstrap_hd, alpha)
+            for iteration in range(M)
+        ]
+        results = _run_mc_tasks(_sparse_h0_worker, tasks, mc_workers)
         reject_h0 = 0
         succ_h0 = 0
-
-        bootstrap = SparseBootstrapInference(B=B_bootstrap_hd, seed=seed, estimator_type="lasso")
-
-        for _ in range(M):
-            try:
-                Y = generator.generate_var_series(T, N, p, Phi1, Sigma)
-                result = bootstrap.test(Y, p, t, alpha=alpha)
-                succ_h0 += 1
-                pval = result["p_value"]
-                if not np.isnan(pval) and pval <= alpha:
-                    reject_h0 += 1
-            except Exception:
+        for result in results:
+            if not result.get("success"):
                 continue
+            succ_h0 += 1
+            pval = result["p_value"]
+            if not np.isnan(pval) and pval <= alpha:
+                reject_h0 += 1
 
         rows.append(
             {
@@ -352,28 +463,30 @@ def run_sparse_power(
     B_bootstrap_hd: int,
     alpha: float,
     change_scales: List[float],
+    mc_workers: int = 1,
 ) -> List[Dict[str, Any]]:
     Sigma = np.eye(N) * 0.5
     Phi1 = generator.generate_stationary_phi(N, p, sparsity=0.2, scale=0.15)
 
     rows = []
-    bootstrap = SparseBootstrapInference(B=B_bootstrap_hd, seed=seed, estimator_type="lasso")
-    for change_scale in change_scales:
+    for change_idx, change_scale in enumerate(change_scales, start=1):
         Phi2, delta_info = build_phi2_with_change(Phi1, change_scale)
-        for M in M_values:
+        for m_idx, M in enumerate(M_values, start=1):
+            stream_id = 300 + change_idx * 100 + m_idx
+            tasks = [
+                (_iteration_seed(seed, stream_id, iteration), T, N, p, Phi1, Phi2, Sigma, t, B_bootstrap_hd, alpha)
+                for iteration in range(M)
+            ]
+            results = _run_mc_tasks(_sparse_h1_worker, tasks, mc_workers)
             reject_h1 = 0
             succ_h1 = 0
-
-            for _ in range(M):
-                try:
-                    Y, _ = generator.generate_var_with_break(T, N, p, Phi1, Phi2, Sigma, t)
-                    result = bootstrap.test(Y, p, t, alpha=alpha)
-                    succ_h1 += 1
-                    pval = result["p_value"]
-                    if not np.isnan(pval) and pval <= alpha:
-                        reject_h1 += 1
-                except Exception:
+            for result in results:
+                if not result.get("success"):
                     continue
+                succ_h1 += 1
+                pval = result["p_value"]
+                if not np.isnan(pval) and pval <= alpha:
+                    reject_h1 += 1
 
             rows.append(
                 {
@@ -402,27 +515,27 @@ def run_lowrank_size(
     M_values: List[int],
     B_bootstrap_hd: int,
     alpha: float,
+    mc_workers: int = 1,
 ) -> List[Dict[str, Any]]:
     Sigma = np.eye(N) * 0.5
     Phi1 = generator.generate_lowrank_phi(N, p, rank=2, scale=0.15)
 
     rows = []
-    for M in M_values:
+    for stream_id, M in enumerate(M_values, start=401):
+        tasks = [
+            (_iteration_seed(seed, stream_id, iteration), T, N, p, Phi1, Sigma, t, B_bootstrap_hd, alpha)
+            for iteration in range(M)
+        ]
+        results = _run_mc_tasks(_lowrank_h0_worker, tasks, mc_workers)
         reject_h0 = 0
         succ_h0 = 0
-
-        bootstrap = LowRankBootstrapInference(B=B_bootstrap_hd, seed=seed, method="svd", rank=2)
-
-        for _ in range(M):
-            try:
-                Y = generator.generate_var_series(T, N, p, Phi1, Sigma)
-                result = bootstrap.test(Y, p, t, alpha=alpha)
-                succ_h0 += 1
-                pval = result["p_value"]
-                if not np.isnan(pval) and pval <= alpha:
-                    reject_h0 += 1
-            except Exception:
+        for result in results:
+            if not result.get("success"):
                 continue
+            succ_h0 += 1
+            pval = result["p_value"]
+            if not np.isnan(pval) and pval <= alpha:
+                reject_h0 += 1
 
         rows.append(
             {
@@ -448,28 +561,30 @@ def run_lowrank_power(
     B_bootstrap_hd: int,
     alpha: float,
     change_scales: List[float],
+    mc_workers: int = 1,
 ) -> List[Dict[str, Any]]:
     Sigma = np.eye(N) * 0.5
     Phi1 = generator.generate_lowrank_phi(N, p, rank=2, scale=0.15)
 
     rows = []
-    bootstrap = LowRankBootstrapInference(B=B_bootstrap_hd, seed=seed, method="svd", rank=2)
-    for change_scale in change_scales:
+    for change_idx, change_scale in enumerate(change_scales, start=1):
         Phi2, delta_info = build_phi2_with_change(Phi1, change_scale)
-        for M in M_values:
+        for m_idx, M in enumerate(M_values, start=1):
+            stream_id = 500 + change_idx * 100 + m_idx
+            tasks = [
+                (_iteration_seed(seed, stream_id, iteration), T, N, p, Phi1, Phi2, Sigma, t, B_bootstrap_hd, alpha)
+                for iteration in range(M)
+            ]
+            results = _run_mc_tasks(_lowrank_h1_worker, tasks, mc_workers)
             reject_h1 = 0
             succ_h1 = 0
-
-            for _ in range(M):
-                try:
-                    Y, _ = generator.generate_var_with_break(T, N, p, Phi1, Phi2, Sigma, t)
-                    result = bootstrap.test(Y, p, t, alpha=alpha)
-                    succ_h1 += 1
-                    pval = result["p_value"]
-                    if not np.isnan(pval) and pval <= alpha:
-                        reject_h1 += 1
-                except Exception:
+            for result in results:
+                if not result.get("success"):
                     continue
+                succ_h1 += 1
+                pval = result["p_value"]
+                if not np.isnan(pval) and pval <= alpha:
+                    reject_h1 += 1
 
             rows.append(
                 {
@@ -667,6 +782,7 @@ def run_seed_bundle(
     power_M: int,
     B_mc_baseline: int,
     B_mc_highdim: int,
+    mc_workers: int,
     p: int,
     config_dims: Dict[str, Dict[str, int]],
     progress_output: Optional[str] = None,
@@ -702,6 +818,7 @@ def run_seed_bundle(
             M_values=M_grid,
             B_bootstrap_baseline=B_mc_baseline,
             alpha=alpha,
+            mc_workers=mc_workers,
         )
     )
     append_progress(progress_output, seed, "baseline_validation")
@@ -720,6 +837,7 @@ def run_seed_bundle(
             B_bootstrap_baseline=B_mc_baseline,
             alpha=alpha,
             change_scales=power_change_grid,
+            mc_workers=mc_workers,
         )
     )
 
@@ -734,6 +852,7 @@ def run_seed_bundle(
             M_values=M_grid,
             B_bootstrap_hd=B_mc_highdim,
             alpha=alpha,
+            mc_workers=mc_workers,
         )
     )
     append_progress(progress_output, seed, "sparse_validation")
@@ -752,6 +871,7 @@ def run_seed_bundle(
             B_bootstrap_hd=B_mc_highdim,
             alpha=alpha,
             change_scales=power_change_grid,
+            mc_workers=mc_workers,
         )
     )
 
@@ -766,6 +886,7 @@ def run_seed_bundle(
             M_values=M_grid,
             B_bootstrap_hd=B_mc_highdim,
             alpha=alpha,
+            mc_workers=mc_workers,
         )
     )
     append_progress(progress_output, seed, "lowrank_validation")
@@ -784,6 +905,7 @@ def run_seed_bundle(
             B_bootstrap_hd=B_mc_highdim,
             alpha=alpha,
             change_scales=power_change_grid,
+            mc_workers=mc_workers,
         )
     )
 
@@ -805,6 +927,7 @@ def main() -> None:
     parser.add_argument("--B-mc-baseline", type=int, default=50)
     parser.add_argument("--B-mc-highdim", type=int, default=30)
     parser.add_argument("--seed-workers", type=int, default=0, help="并行运行的 seed worker 数；0 表示按 CPU 核数自动选择")
+    parser.add_argument("--mc-workers", type=int, default=0, help="每个 seed 内部 Monte Carlo worker 数；0 表示按 CPU/seed_workers 自动分配")
     parser.add_argument("--single-seed", type=int, default=None, help=argparse.SUPPRESS)
     parser.add_argument("--bundle-output", type=str, default="", help=argparse.SUPPRESS)
     parser.add_argument("--progress-output", type=str, default="", help=argparse.SUPPRESS)
@@ -820,6 +943,7 @@ def main() -> None:
     }
 
     if args.single_seed is not None:
+        mc_workers = args.mc_workers if args.mc_workers > 0 else max(1, os.cpu_count() or 1)
         seed_result = run_seed_bundle(
             seed=args.single_seed,
             alpha=args.alpha,
@@ -829,6 +953,7 @@ def main() -> None:
             power_M=power_M,
             B_mc_baseline=args.B_mc_baseline,
             B_mc_highdim=args.B_mc_highdim,
+            mc_workers=mc_workers,
             p=p,
             config_dims=config_dims,
             progress_output=args.progress_output or None,
@@ -847,8 +972,9 @@ def main() -> None:
 
     seed_workers = args.seed_workers if args.seed_workers > 0 else min(len(args.seeds), os.cpu_count() or 1)
     seed_workers = max(1, min(seed_workers, len(args.seeds)))
+    mc_workers = args.mc_workers if args.mc_workers > 0 else max(1, (os.cpu_count() or 1) // seed_workers)
 
-    log_message(f"Running {len(args.seeds)} seeds with seed_workers={seed_workers}...", progress_log)
+    log_message(f"Running {len(args.seeds)} seeds with seed_workers={seed_workers}, mc_workers={mc_workers}...", progress_log)
 
     seed_results: List[Dict[str, Any]] = []
     if seed_workers == 1:
@@ -864,6 +990,7 @@ def main() -> None:
                     power_M=power_M,
                     B_mc_baseline=args.B_mc_baseline,
                     B_mc_highdim=args.B_mc_highdim,
+                    mc_workers=mc_workers,
                     p=p,
                     config_dims=config_dims,
                     print_progress=True,
@@ -899,6 +1026,8 @@ def main() -> None:
                     str(args.B_mc_baseline),
                     "--B-mc-highdim",
                     str(args.B_mc_highdim),
+                    "--mc-workers",
+                    str(mc_workers),
                     "--seed-workers",
                     "1",
                     "--single-seed",
@@ -1000,6 +1129,7 @@ def main() -> None:
             "B_mc_baseline": args.B_mc_baseline,
             "B_mc_highdim": args.B_mc_highdim,
             "seed_workers": seed_workers,
+            "mc_workers": mc_workers,
             "run_dir": run_dir,
             "state_dir": state_dir,
             "p": p,
@@ -1044,6 +1174,7 @@ def main() -> None:
         f.write(f"- power 固定 M_max：{power_M}\n")
         f.write(f"- B-grid：{args.B_grid}\n")
         f.write(f"- seed_workers：{seed_workers}\n")
+        f.write(f"- mc_workers：{mc_workers}\n")
         f.write(f"- Baseline B_mc：{args.B_mc_baseline}\n")
         f.write(f"- 高维 B_mc：{args.B_mc_highdim}\n")
         f.write("- 高维检验口径：稀疏场景使用 `SparseBootstrapInference` 的 LR+bootstrap；低秩场景使用 `LowRankBootstrapInference` 的 LR+bootstrap。\n")

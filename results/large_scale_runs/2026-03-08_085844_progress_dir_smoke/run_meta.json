@@ -1,0 +1,13 @@
+{
+  "run_dir": "results/large_scale_runs/2026-03-08_085844_progress_dir_smoke",
+  "json": "results/large_scale_runs/2026-03-08_085844_progress_dir_smoke/large_scale_experiment_2026-03-08_085844_progress_dir_smoke.json",
+  "raw_csv": "results/large_scale_runs/2026-03-08_085844_progress_dir_smoke/large_scale_raw_2026-03-08_085844_progress_dir_smoke.csv",
+  "agg_csv": "results/large_scale_runs/2026-03-08_085844_progress_dir_smoke/large_scale_agg_2026-03-08_085844_progress_dir_smoke.csv",
+  "markdown": "results/large_scale_runs/2026-03-08_085844_progress_dir_smoke/大规模试验分析报告_2026-03-08_085844_progress_dir_smoke.md",
+  "run_meta": "results/large_scale_runs/2026-03-08_085844_progress_dir_smoke/run_meta.json",
+  "seed_results_dir": "results/large_scale_runs/2026-03-08_085844_progress_dir_smoke/seed_results",
+  "progress_dir": "results/large_scale_runs/2026-03-08_085844_progress_dir_smoke/progress",
+  "progress_log": "results/large_scale_runs/2026-03-08_085844_progress_dir_smoke/progress/progress.log",
+  "progress_jsonl": "results/large_scale_runs/2026-03-08_085844_progress_dir_smoke/progress/progress.jsonl",
+  "progress_summary": "results/large_scale_runs/2026-03-08_085844_progress_dir_smoke/progress/summary.json"
+}

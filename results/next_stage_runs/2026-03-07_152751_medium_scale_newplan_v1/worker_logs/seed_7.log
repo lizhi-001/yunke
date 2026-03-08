@@ -1,6 +1,0 @@
-/usr/lib/python3/dist-packages/joblib/_multiprocessing_helpers.py:45: UserWarning: [Errno 13] Permission denied.  joblib will operate in serial mode
-  warnings.warn('%s.  joblib will operate in serial mode' % (e,))
-[Seed 7] completed baseline p-value comparison
-[Seed 7] completed baseline size + power sweep
-[Seed 7] completed sparse_lasso size + power sweep
-[Seed 7] completed lowrank_svd size + power sweep

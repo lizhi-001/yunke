@@ -309,11 +309,11 @@ type1_error = rejections / successful_iterations
 可将baseline改为“**同一有效样本口径**”的条件似然/Chow实现：
 
 1. 在统一样本 `s = p, ..., T-1` 上建模（`n = T-p`），不再对两段各自二次损失 `p` 个样本。
-2. 设断点指示变量 `D_s = 1(s >= t)`，构造：
+2. 旧版交互项口径中，可设断点指示变量 `D_s = 1(s >= t)`，构造：
 
 `H0: y_s = c + Φx_s + u_s`
 
-`H1: y_s = c + Φx_s + D_s(Δc + ΔΦx_s) + u_s`
+`H1: y_s = c + Φx_s + D_s(Δc + ΔΦx_s) + u_s`（该写法现仅保留作等价参考）
 
 3. 在该口径下：
    - 可构造LR：`LR = n[ln|Σ̂_R| - ln|Σ̂_U|]`

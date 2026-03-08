@@ -1,7 +1,0 @@
-seed,scenario,model,M,size,M_effective
-42,baseline,baseline_chow_asym_f,1,0.0,1
-42,baseline,baseline_chow_asym_chi2,1,0.0,1
-42,baseline,baseline_chow_bootstrap_f,1,1.0,1
-42,baseline,baseline_chow_bootstrap_lr,1,1.0,1
-42,sparse,sparse_lasso,1,0.0,1
-42,lowrank,lowrank_svd,1,0.0,1
