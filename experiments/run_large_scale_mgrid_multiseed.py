@@ -565,16 +565,11 @@ def run_all_models_for_seed(cfg: ExperimentConfig, seed: int, seed_jobs: int, tr
     results["baseline_ols"] = run_model_for_seed("baseline_ols", cfg, seed, 1, tracker)
 
     # Phase 2: run sparse_lasso and lowrank_svd in parallel.
-    # Allocate jobs by priority: sparse_lasso is consistently the slowest
-    # model, so it gets the majority of workers.  lowrank_svd gets the rest
-    # (at least 1).
+    # Even split: at large M both models have comparable total runtime
+    # (lowrank is actually slower due to N=10 vs N=5).
     slow_models = ("sparse_lasso", "lowrank_svd")
-    lowrank_jobs = max(1, seed_jobs // 3)           # ~1/3 of budget
-    sparse_jobs = max(1, seed_jobs - lowrank_jobs)   # ~2/3 of budget
-    slow_job_map: Dict[str, int] = {
-        "sparse_lasso": sparse_jobs,
-        "lowrank_svd": lowrank_jobs,
-    }
+    slow_budgets = allocate_job_budgets(seed_jobs, len(slow_models))
+    slow_job_map: Dict[str, int] = dict(zip(slow_models, slow_budgets))
 
     if seed_jobs <= 1:
         for model_name in slow_models:

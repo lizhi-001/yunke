@@ -153,15 +153,15 @@ Monte Carlo 外层并行已从标准库 `ProcessPoolExecutor` 切换为 **loky**
 `run_all_models_for_seed` 的模型调度已从"三模型同时启动、预分配 worker"改为**两阶段调度**：
 
 1. **Phase 1**：baseline_ols 串行跑完（~0.5s，无需多进程）；
-2. **Phase 2**：全部 jobs 预算分给 sparse_lasso 和 lowrank_svd 并行执行，按 2/3 : 1/3 分配（sparse 是瓶颈，优先拿更多 worker）。
+2. **Phase 2**：全部 jobs 预算在 sparse_lasso 和 lowrank_svd 之间**均分**并行执行。
 
 | jobs | 改前分配 (baseline/sparse/lowrank) | 改后分配 (baseline → sparse/lowrank) |
 |---|---|---|
-| 4 | 1 / 2 / 1 同时启动 | 1 串行 → 3 / 1 并行 |
-| 6 | 1 / 3 / 2 同时启动 | 1 串行 → 4 / 2 并行 |
-| 8 | 1 / 4 / 3 同时启动 | 1 串行 → 6 / 2 并行 |
+| 4 | 1 / 2 / 1 同时启动 | 1 串行 → 2 / 2 并行 |
+| 6 | 1 / 3 / 2 同时启动 | 1 串行 → 3 / 3 并行 |
+| 8 | 1 / 4 / 3 同时启动 | 1 串行 → 4 / 4 并行 |
 
-验证结果（同参数 jobs=4）：sparse 从 62.6s 降至 56.4s，总 wall time 从 62.6s 降至 **56.9s（~9% 加速）**。
+均分依据：大规模实验（M=300, B=500）实测数据显示，lowrank_svd 单 stage 耗时 ~4,700s 远高于 sparse_lasso 的 ~3,030s（N=10 vs N=5），偏向 sparse 反而让 lowrank 成为瓶颈。均分时 wall time 预计从 ~9.1h 降至 ~5.9h（~35% 加速）。
 
 改动文件：`experiments/run_large_scale_mgrid_multiseed.py`（`run_all_models_for_seed` 函数）。
 
