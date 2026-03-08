@@ -37,8 +37,8 @@ from sparse_var import SparseMonteCarloSimulation
 from lowrank_var import LowRankMonteCarloSimulation
 
 
-MODEL_EXECUTION_ORDER = ("baseline_ols", "sparse_lasso", "lowrank_svd")
-MODEL_JOB_PRIORITY = ("sparse_lasso", "lowrank_svd", "baseline_ols")
+MODEL_EXECUTION_ORDER = ("baseline_ols", "baseline_ols_f", "sparse_lasso", "lowrank_svd")
+MODEL_JOB_PRIORITY = ("sparse_lasso", "lowrank_svd", "baseline_ols", "baseline_ols_f")
 
 
 _ACTIVE_TRACKER = None
@@ -62,7 +62,7 @@ def _install_signal_handlers(tracker):
 
 @dataclass
 class ExperimentConfig:
-    M_grid: Tuple[int, ...] = (50, 120, 300)
+    M_grid: Tuple[int, ...] = (30, 50, 100, 150, 200, 300)
     B: int = 200
     alpha: float = 0.05
     deltas: Tuple[float, ...] = (0.04, 0.08, 0.12, 0.16)
@@ -371,6 +371,11 @@ def _baseline_mc(M: int, B: int, seed: int, jobs: int, baseline_pvalue_method: s
     return MonteCarloSimulation(M=M, B=B, seed=seed, n_jobs=jobs, baseline_pvalue_method=baseline_pvalue_method)
 
 
+def _baseline_f_mc(M: int, B: int, seed: int, jobs: int, baseline_pvalue_method: str = "bootstrap_lr") -> MonteCarloSimulation:
+    """baseline_ols_f 对照组：始终使用 asymptotic_f，忽略传入的 baseline_pvalue_method。"""
+    return MonteCarloSimulation(M=M, B=B, seed=seed, n_jobs=jobs, baseline_pvalue_method="asymptotic_f")
+
+
 def _sparse_mc(M: int, B: int, seed: int, jobs: int, baseline_pvalue_method: str = "bootstrap_lr") -> SparseMonteCarloSimulation:
     return SparseMonteCarloSimulation(M=M, B=B, seed=seed, estimator_type="lasso", alpha=0.02, n_jobs=jobs)
 
@@ -382,7 +387,7 @@ def _lowrank_mc(M: int, B: int, seed: int, jobs: int, baseline_pvalue_method: st
 def get_model_setup(model_name: str, seed: int) -> Dict[str, Any]:
     generator = VARDataGenerator(seed=seed)
     if model_name == "baseline_ols":
-        N, T, p, t = 2, 100, 1, 50
+        N, T, p, t = 2, 200, 1, 100
         Sigma = np.eye(N) * 0.5
         phi = generator.generate_stationary_phi(N, p, scale=0.3)
         return {
@@ -395,6 +400,27 @@ def get_model_setup(model_name: str, seed: int) -> Dict[str, Any]:
             "phi": phi,
             "extra_parameters": {},
             "mc_factory": _baseline_mc,
+            "type1_fn": lambda mc, phi_mat, sigma, alpha: mc.evaluate_type1_error_at_point(
+                N, T, p, phi_mat, sigma, t=t, alpha=alpha, verbose=False
+            ),
+            "power_fn": lambda mc, phi1, phi2, sigma, alpha: mc.evaluate_power_at_point(
+                N, T, p, phi1, phi2, sigma, break_point=t, t=t, alpha=alpha, verbose=False
+            ),
+        }
+    if model_name == "baseline_ols_f":
+        N, T, p, t = 2, 200, 1, 100
+        Sigma = np.eye(N) * 0.5
+        phi = generator.generate_stationary_phi(N, p, scale=0.3)
+        return {
+            "model": model_name,
+            "N": N,
+            "T": T,
+            "p": p,
+            "t": t,
+            "Sigma": Sigma,
+            "phi": phi,
+            "extra_parameters": {"pvalue_method": "asymptotic_f"},
+            "mc_factory": _baseline_f_mc,
             "type1_fn": lambda mc, phi_mat, sigma, alpha: mc.evaluate_type1_error_at_point(
                 N, T, p, phi_mat, sigma, t=t, alpha=alpha, verbose=False
             ),
@@ -559,10 +585,11 @@ def run_model_for_seed(model_name: str, cfg: ExperimentConfig, seed: int, model_
 
 
 def run_all_models_for_seed(cfg: ExperimentConfig, seed: int, seed_jobs: int, tracker: ProgressTracker | None = None) -> Dict[str, Dict[str, Any]]:
-    # Phase 1: run baseline_ols serially (very fast, ~2s) so that all
+    # Phase 1: run baseline models serially (fast) so that all
     # jobs are free for the slow models.
     results: Dict[str, Dict[str, Any]] = {}
     results["baseline_ols"] = run_model_for_seed("baseline_ols", cfg, seed, 1, tracker)
+    results["baseline_ols_f"] = run_model_for_seed("baseline_ols_f", cfg, seed, 1, tracker)
 
     # Phase 2: run sparse_lasso and lowrank_svd in parallel.
     # Even split: at large M both models have comparable total runtime
@@ -919,7 +946,7 @@ def write_markdown_report(results: Dict[str, Any], report_path: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run multi-seed known-breakpoint experiments with M-grid size checks.")
-    parser.add_argument("--M-grid", type=int, nargs="+", default=[50, 120, 300])
+    parser.add_argument("--M-grid", type=int, nargs="+", default=[30, 50, 100, 150, 200, 300])
     parser.add_argument("--B", type=int, default=200)
     parser.add_argument("--alpha", type=float, default=0.05)
     parser.add_argument("--deltas", type=float, nargs="+", default=[0.04, 0.08, 0.12, 0.16])

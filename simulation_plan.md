@@ -75,7 +75,8 @@ H1: Φ1 ≠ Φ2
 
 三类模型分别为：
 
-- `baseline_ols`：低维 OLS + 已知点结构断裂检验；默认使用 bootstrap LR p 值，也支持基于渐近 `χ²` / `F` 分布的 p 值
+- `baseline_ols`：低维 OLS + 已知点结构断裂检验；默认使用 bootstrap LR p 值
+- `baseline_ols_f`：与 `baseline_ols` 参数完全相同的对照组，始终使用渐近 F 检验 p 值，用于对比验证 bootstrap 与渐近方法的 size 差异
 - `sparse_lasso`：稀疏 Lasso + 已知点结构断裂检验 + bootstrap LR at point
 - `lowrank_svd`：低秩 SVD + 已知点结构断裂检验 + bootstrap LR at point
 
@@ -142,7 +143,7 @@ H1: Φ1 ≠ Φ2
 - `seeds`：多 seed 重复列表
 - `jobs`：总并行预算
 - `seed_workers`：并发 seed 数
-- `baseline_pvalue_method`：baseline 的 p 值口径，可选 `bootstrap_lr`、`asymptotic_chi2`、`asymptotic_f`
+- `baseline_pvalue_method`：baseline_ols 的 p 值口径，默认 `bootstrap_lr`；`baseline_ols_f` 始终使用 `asymptotic_f`，不受此参数影响
 
 特别说明：
 
@@ -154,15 +155,17 @@ H1: Φ1 ≠ Φ2
 
 ## 6. 三类模型的默认场景
 
-### 6.1 `baseline_ols`
+### 6.1 `baseline_ols` / `baseline_ols_f`
 
 ```text
 N = 2
-T = 100
+T = 200
 p = 1
-t = 50
+t = 100
 Sigma = 0.5 * I
 ```
+
+`baseline_ols` 默认使用 `bootstrap_lr` p 值；`baseline_ols_f` 始终使用 `asymptotic_f` p 值，作为对照。两者共享相同的数据生成参数。
 
 ### 6.2 `sparse_lasso`
 
@@ -189,10 +192,7 @@ rank = 2
 
 ### 6.4 解释口径
 
-三个模型并未强制使用相同的 `N`、`T`。因此当前结果应理解为：
-
-- 各模型在各自代表性设定下的表现；
-- 而不是完全同维度、同样本量下的逐项公平比较。
+四个模型统一使用 `T = 200`、`t = 100`，保证每段有效样本量一致（均为 `T - t = 99`），使 size 和 power 的比较具有公平性。各模型的维度 `N` 不同（2 / 5 / 10），反映不同复杂度场景下的检验表现。
 
 ---
 
@@ -313,21 +313,22 @@ power(delta; M_max) = rejections / successful_iterations
 ### 9.1 默认参数
 
 ```text
-M_grid = [50, 120, 300]
+M_grid = [30, 50, 100, 150, 200, 300]
 B = 200
 alpha = 0.05
 deltas = [0.04, 0.08, 0.12, 0.16]
 seeds = [42, 2026, 7]
 jobs = 4
 seed_workers = 0 (自动)
+baseline_pvalue_method = bootstrap_lr
 ```
 
 ### 9.2 命令行示例
 
 ```bash
 python3 experiments/run_large_scale_mgrid_multiseed.py \
-  --M-grid 50 120 300 \
-  --B 200 \
+  --M-grid 30 50 100 150 200 300 \
+  --B 500 \
   --alpha 0.05 \
   --deltas 0.04 0.08 0.12 0.16 \
   --seeds 42 2026 7 \
@@ -414,7 +415,8 @@ python3 experiments/run_large_scale_mgrid_multiseed.py \
 
 当前版本的仿真方案应满足：
 
-- [ ] 能成功运行 `baseline_ols`、`sparse_lasso`、`lowrank_svd` 三类模型；
+- [ ] 能成功运行 `baseline_ols`、`baseline_ols_f`、`sparse_lasso`、`lowrank_svd` 四类模型；
+- [ ] `baseline_ols` 使用 `bootstrap_lr`，`baseline_ols_f` 使用 `asymptotic_f` 作为对照；
 - [ ] 每类模型都输出不同 `M` 下的 `type1_error`；
 - [ ] 每类模型都输出固定 `M_max` 下的 `power_curve`；
 - [ ] 三类模型都使用相同的结构断裂检验口径；
@@ -427,4 +429,4 @@ python3 experiments/run_large_scale_mgrid_multiseed.py \
 
 ## 13. 一句话总结
 
-**当前代码版本的仿真方案，是一个“多 seed 并行、不同 `M` 看第一类错误、固定 `M_max` 看功效、统一比较三模型结构断裂检验表现”的可执行版本。**
+**当前代码版本的仿真方案，是一个”多 seed 并行、不同 `M` 看第一类错误、固定 `M_max` 看功效、统一比较四模型（含 F 检验对照）结构断裂检验表现”的可执行版本。**

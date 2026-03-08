@@ -1,13 +1,10 @@
 {
-  "updated_at": "2026-03-08 12:42:30",
+  "updated_at": "2026-03-08 14:15:47",
   "seed": 42,
-  "completed_stage_count": 16,
+  "completed_stage_count": 21,
   "total_stage_count": 21,
-  "progress_ratio": 0.7619047619047619,
-  "active_stages": [
-    "seed_42/sparse_lasso/power_delta_0.12",
-    "seed_42/lowrank_svd/power_delta_0.08"
-  ],
+  "progress_ratio": 1.0,
+  "active_stages": [],
   "completed_stages": [
     "seed_42/baseline_ols/type1_M_50",
     "seed_42/baseline_ols/type1_M_100",
@@ -24,6 +21,11 @@
     "seed_42/lowrank_svd/type1_M_300",
     "seed_42/sparse_lasso/power_delta_0.04",
     "seed_42/sparse_lasso/power_delta_0.08",
-    "seed_42/lowrank_svd/power_delta_0.04"
+    "seed_42/lowrank_svd/power_delta_0.04",
+    "seed_42/sparse_lasso/power_delta_0.12",
+    "seed_42/lowrank_svd/power_delta_0.08",
+    "seed_42/sparse_lasso/power_delta_0.16",
+    "seed_42/lowrank_svd/power_delta_0.12",
+    "seed_42/lowrank_svd/power_delta_0.16"
   ]
 }

@@ -1,0 +1,14 @@
+{
+  "updated_at": "2026-03-08 15:22:54",
+  "completed_stage_count": 3,
+  "total_stage_count": 40,
+  "progress_ratio": 0.075,
+  "active_stages": [
+    "seed_42/baseline_ols/type1_M_150"
+  ],
+  "completed_stages": [
+    "seed_42/baseline_ols/type1_M_30",
+    "seed_42/baseline_ols/type1_M_50",
+    "seed_42/baseline_ols/type1_M_100"
+  ]
+}

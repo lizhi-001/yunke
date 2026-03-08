@@ -1,0 +1,14 @@
+{
+  "run_dir": "results/large_scale_runs/2026-03-08_092554_single_seed_m300_b500_v2",
+  "json": "results/large_scale_runs/2026-03-08_092554_single_seed_m300_b500_v2/large_scale_experiment_2026-03-08_092554_single_seed_m300_b500_v2.json",
+  "raw_csv": "results/large_scale_runs/2026-03-08_092554_single_seed_m300_b500_v2/large_scale_raw_2026-03-08_092554_single_seed_m300_b500_v2.csv",
+  "agg_csv": "results/large_scale_runs/2026-03-08_092554_single_seed_m300_b500_v2/large_scale_agg_2026-03-08_092554_single_seed_m300_b500_v2.csv",
+  "markdown": "results/large_scale_runs/2026-03-08_092554_single_seed_m300_b500_v2/大规模试验分析报告_2026-03-08_092554_single_seed_m300_b500_v2.md",
+  "run_meta": "results/large_scale_runs/2026-03-08_092554_single_seed_m300_b500_v2/run_meta.json",
+  "seed_results_dir": "results/large_scale_runs/2026-03-08_092554_single_seed_m300_b500_v2/seed_results",
+  "progress_dir": "results/large_scale_runs/2026-03-08_092554_single_seed_m300_b500_v2/progress",
+  "progress_log": "results/large_scale_runs/2026-03-08_092554_single_seed_m300_b500_v2/progress/progress.log",
+  "progress_jsonl": "results/large_scale_runs/2026-03-08_092554_single_seed_m300_b500_v2/progress/progress.jsonl",
+  "progress_summary": "results/large_scale_runs/2026-03-08_092554_single_seed_m300_b500_v2/progress/summary.json",
+  "seed_summary_pattern": "results/large_scale_runs/2026-03-08_092554_single_seed_m300_b500_v2/progress/seed_<seed>_summary.json"
+}

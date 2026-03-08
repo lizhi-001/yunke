@@ -37,3 +37,13 @@
 [2026-03-08 12:23:44] | event=stage | status=started | progress=15/21 | seed=42 | model=sparse_lasso | stage=power_delta_0.12 | M=300 | base_delta=0.12 | target_fro=0.6 | task=power
 [2026-03-08 12:42:30] | event=stage | status=completed | progress=16/21 | seed=42 | model=lowrank_svd | stage=power_delta_0.04 | runtime_sec=4648.46 | M=300 | base_delta=0.04 | metric_value=0.15333333333333332 | target_fro=0.4 | task=power
 [2026-03-08 12:42:30] | event=stage | status=started | progress=16/21 | seed=42 | model=lowrank_svd | stage=power_delta_0.08 | M=300 | base_delta=0.08 | target_fro=0.8 | task=power
+[2026-03-08 13:15:36] | event=stage | status=completed | progress=17/21 | seed=42 | model=sparse_lasso | stage=power_delta_0.12 | runtime_sec=3112.69 | M=300 | base_delta=0.12 | metric_value=0.6133333333333333 | target_fro=0.6 | task=power
+[2026-03-08 13:15:36] | event=stage | status=started | progress=17/21 | seed=42 | model=sparse_lasso | stage=power_delta_0.16 | M=300 | base_delta=0.16 | target_fro=0.8 | task=power
+[2026-03-08 14:01:14] | event=stage | status=completed | progress=18/21 | seed=42 | model=lowrank_svd | stage=power_delta_0.08 | runtime_sec=4724.27 | M=300 | base_delta=0.08 | metric_value=0.8966666666666666 | target_fro=0.8 | task=power
+[2026-03-08 14:01:14] | event=stage | status=started | progress=18/21 | seed=42 | model=lowrank_svd | stage=power_delta_0.12 | M=300 | base_delta=0.12 | target_fro=1.2 | task=power
+[2026-03-08 14:06:21] | event=stage | status=completed | progress=19/21 | seed=42 | model=sparse_lasso | stage=power_delta_0.16 | runtime_sec=3044.37 | M=300 | base_delta=0.16 | metric_value=0.9266666666666666 | target_fro=0.8 | task=power
+[2026-03-08 14:10:55] | event=stage | status=completed | progress=20/21 | seed=42 | model=lowrank_svd | stage=power_delta_0.12 | runtime_sec=580.69 | M=300 | base_delta=0.12 | metric_value=0.9433333333333334 | target_fro=1.2 | task=power
+[2026-03-08 14:10:55] | event=stage | status=started | progress=20/21 | seed=42 | model=lowrank_svd | stage=power_delta_0.16 | M=300 | base_delta=0.16 | target_fro=1.6 | task=power
+[2026-03-08 14:15:47] | event=stage | status=completed | progress=21/21 | seed=42 | model=lowrank_svd | stage=power_delta_0.16 | runtime_sec=291.64 | M=300 | base_delta=0.16 | metric_value=0.9333333333333333 | target_fro=1.6 | task=power
+[2026-03-08 14:15:47] | event=seed | status=completed | progress=21/21 | seed=42 | runtime_sec=17393.02
+[2026-03-08 14:15:47] | event=run | status=completed | progress=21/21 | runtime_sec=17393.03 | completed_stage_count=21

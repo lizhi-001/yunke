@@ -67,6 +67,8 @@ tail -f results/next_stage_runs/<run_dir>/worker_logs/seed_*.log
 
 所有场景统一 p=3（VAR 阶数）。
 
+> **注意**：以上为 `run_next_stage_large_scale_p3.py` 的旧场景配置。当前主实验脚本 `run_large_scale_mgrid_multiseed.py` 的场景配置见第 6 节，所有模型统一 T=200、t=100、p=1。
+
 ---
 
 ## 3. 输出目录结构
@@ -152,7 +154,7 @@ Monte Carlo 外层并行已从标准库 `ProcessPoolExecutor` 切换为 **loky**
 
 `run_all_models_for_seed` 的模型调度已从"三模型同时启动、预分配 worker"改为**两阶段调度**：
 
-1. **Phase 1**：baseline_ols 串行跑完（~0.5s，无需多进程）；
+1. **Phase 1**：baseline_ols 和 baseline_ols_f 串行跑完（baseline_ols 使用 bootstrap 较慢，baseline_ols_f 使用渐近 F 极快）；
 2. **Phase 2**：全部 jobs 预算在 sparse_lasso 和 lowrank_svd 之间**均分**并行执行。
 
 | jobs | 改前分配 (baseline/sparse/lowrank) | 改后分配 (baseline → sparse/lowrank) |
@@ -260,21 +262,21 @@ for t in range(p, T):
 - 功效（power）：固定使用 `M_max = max(M_grid)` 评估；
 - 支持单 seed 或多 seed；
 - 支持 seed 并行、模型并行、Monte Carlo 外层并行；
-- `baseline_ols` 支持 `bootstrap_lr`、`asymptotic_chi2`、`asymptotic_f` 三种 p 值口径。
+- `baseline_ols` 默认使用 `bootstrap_lr` p 值；`baseline_ols_f` 始终使用 `asymptotic_f` 作为对照；
+- 四个模型统一 `T = 200`、`t = 100`，保证每段有效样本量一致。
 
 ### 启动命令示例
 
 ```bash
 python3 -u experiments/run_large_scale_mgrid_multiseed.py \
-  --M-grid 50 100 300 \
+  --M-grid 30 50 100 150 200 300 \
   --B 500 \
   --alpha 0.05 \
   --deltas 0.04 0.08 0.12 0.16 \
   --seeds 42 \
   --jobs 4 \
   --seed-workers 1 \
-  --baseline-pvalue-method asymptotic_chi2 \
-  --tag single_seed_m300_b500
+  --tag single_seed_bootstrap_v3
 ```
 
 ### 输出目录结构
@@ -334,15 +336,14 @@ results/large_scale_runs/
 ```bash
 tmux new -s var_exp
 python3 -u experiments/run_large_scale_mgrid_multiseed.py \
-  --M-grid 50 100 300 \
+  --M-grid 30 50 100 150 200 300 \
   --B 500 \
   --alpha 0.05 \
   --deltas 0.04 0.08 0.12 0.16 \
   --seeds 42 \
   --jobs 4 \
   --seed-workers 1 \
-  --baseline-pvalue-method asymptotic_chi2 \
-  --tag single_seed_m300_b500
+  --tag single_seed_bootstrap_v3
 ```
 
 启动后：
