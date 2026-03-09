@@ -50,6 +50,7 @@ python3 -u experiments/run_large_scale_mgrid_multiseed.py \
 | `--jobs` | 4 | 总并行预算 |
 | `--seed-workers` | 0 (自动) | 并发 seed 数 |
 | `--baseline-pvalue-method` | bootstrap_lr | baseline_ols 的 p 值方法 |
+| `--skip-type1` | false | 跳过 Type I error 评估，只跑 power |
 | `--tag` | (空) | 运行标签 |
 
 ---

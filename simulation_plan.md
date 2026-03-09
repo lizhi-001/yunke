@@ -311,26 +311,40 @@ M_grid = [50, 100, 300, 500, 1000, 2000]
 power_M = 300 (通过 --power-M 独立指定，不受 M_grid 影响)
 B = 200
 alpha = 0.05
-deltas = [0.05, 0.1, 0.15, 0.2, 0.3, 0.5]
+deltas = [0.05, 0.1, 0.15, 0.2, 0.3, 0.5, 0.8, 1.0]
 seeds = [42, 2026, 7]
 jobs = 4
 seed_workers = 0 (自动)
 baseline_pvalue_method = bootstrap_lr
+skip_type1 = false (可选，跳过 Type I error 只跑 power)
 ```
 
 ### 9.2 命令行示例
 
 ```bash
+# 完整实验（Type I error + Power）
 python3 experiments/run_large_scale_mgrid_multiseed.py \
   --M-grid 50 100 300 500 1000 2000 \
   --power-M 300 \
   --B 500 \
   --alpha 0.05 \
-  --deltas 0.05 0.1 0.15 0.2 0.3 0.5 \
+  --deltas 0.05 0.1 0.15 0.2 0.3 0.5 0.8 1.0 \
   --seeds 42 \
   --jobs 4 \
   --seed-workers 1 \
   --tag v5_t500_fro
+
+# 仅跑 Power（跳过 Type I error，用于扩展 delta 网格）
+python3 experiments/run_large_scale_mgrid_multiseed.py \
+  --power-M 300 \
+  --B 500 \
+  --alpha 0.05 \
+  --deltas 0.05 0.1 0.15 0.2 0.3 0.5 0.8 1.0 \
+  --seeds 42 \
+  --jobs 4 \
+  --seed-workers 1 \
+  --skip-type1 \
+  --tag v5_power_ext
 ```
 
 ### 9.3 推荐理解方式

@@ -71,6 +71,7 @@ class ExperimentConfig:
     seed_workers: int = 0
     baseline_pvalue_method: str = "bootstrap_lr"
     _power_M: int = 0  # 0 means use max(M_grid)
+    skip_type1: bool = False
 
     @property
     def power_M(self) -> int:
@@ -483,31 +484,32 @@ def run_model_for_seed(model_name: str, cfg: ExperimentConfig, seed: int, model_
     sigma = setup["Sigma"]
 
     type1_by_M = []
-    for M in cfg.M_grid:
-        stage_name = f"type1_M_{M}"
-        if tracker is not None:
-            tracker.start_stage(seed, model_name, stage_name, task="type1_error", M=int(M))
-        mc = setup["mc_factory"](M, cfg.B, seed, model_jobs, cfg.baseline_pvalue_method)
-        start = time.time()
-        try:
-            type1 = setup["type1_fn"](mc, phi, sigma, cfg.alpha)
-        except Exception as exc:
+    if not cfg.skip_type1:
+        for M in cfg.M_grid:
+            stage_name = f"type1_M_{M}"
             if tracker is not None:
-                tracker.fail_stage(seed, model_name, stage_name, str(exc), time.time() - start, task="type1_error", M=int(M))
-            raise
-        runtime = time.time() - start
-        type1_payload = {
-                "M": int(M),
-                "value": float(type1["type1_error"]),
-                "size_distortion": float(type1["size_distortion"]),
-                "rejections": int(type1["rejections"]),
-                "M_effective": int(type1["M_effective"]),
-                "runtime_sec": float(runtime),
-                "pvalue_summary": summarize_pvalues(type1["p_values"]),
-            }
-        type1_by_M.append(type1_payload)
-        if tracker is not None:
-            tracker.finish_stage(seed, model_name, stage_name, runtime, task="type1_error", M=int(M), metric_value=float(type1_payload["value"]))
+                tracker.start_stage(seed, model_name, stage_name, task="type1_error", M=int(M))
+            mc = setup["mc_factory"](M, cfg.B, seed, model_jobs, cfg.baseline_pvalue_method)
+            start = time.time()
+            try:
+                type1 = setup["type1_fn"](mc, phi, sigma, cfg.alpha)
+            except Exception as exc:
+                if tracker is not None:
+                    tracker.fail_stage(seed, model_name, stage_name, str(exc), time.time() - start, task="type1_error", M=int(M))
+                raise
+            runtime = time.time() - start
+            type1_payload = {
+                    "M": int(M),
+                    "value": float(type1["type1_error"]),
+                    "size_distortion": float(type1["size_distortion"]),
+                    "rejections": int(type1["rejections"]),
+                    "M_effective": int(type1["M_effective"]),
+                    "runtime_sec": float(runtime),
+                    "pvalue_summary": summarize_pvalues(type1["p_values"]),
+                }
+            type1_by_M.append(type1_payload)
+            if tracker is not None:
+                tracker.finish_stage(seed, model_name, stage_name, runtime, task="type1_error", M=int(M), metric_value=float(type1_payload["value"]))
 
     power_curve: List[Dict[str, Any]] = []
     power_M = cfg.power_M
@@ -692,35 +694,36 @@ def aggregate_results(seed_results: Dict[str, Dict[str, Any]], cfg: ExperimentCo
     models: Dict[str, Any] = {}
     for model_name in MODEL_EXECUTION_ORDER:
         type1_by_M = []
-        for M in cfg.M_grid:
-            rows = [
-                next(item for item in seed_results[str(seed)]["models"][model_name]["type1_error_by_M"] if item["M"] == M)
-                for seed in cfg.seeds
-            ]
-            values = [row["value"] for row in rows]
-            distortions = [row["size_distortion"] for row in rows]
-            rejections = [row["rejections"] for row in rows]
-            effective = [row["M_effective"] for row in rows]
-            runtime = [row["runtime_sec"] for row in rows]
-            stats = _aggregate_numeric(values)
-            dist_stats = _aggregate_numeric(distortions)
-            rej_stats = _aggregate_numeric(rejections)
-            eff_stats = _aggregate_numeric(effective)
-            run_stats = _aggregate_numeric(runtime)
-            type1_by_M.append(
-                {
-                    "M": int(M),
-                    "value_mean": stats["mean"],
-                    "value_std": stats["std"],
-                    "value_min": stats["min"],
-                    "value_max": stats["max"],
-                    "size_distortion_mean": dist_stats["mean"],
-                    "rejections_mean": rej_stats["mean"],
-                    "M_effective_mean": eff_stats["mean"],
-                    "runtime_sec_mean": run_stats["mean"],
-                    "seed_count": stats["count"],
-                }
-            )
+        if not cfg.skip_type1:
+            for M in cfg.M_grid:
+                rows = [
+                    next(item for item in seed_results[str(seed)]["models"][model_name]["type1_error_by_M"] if item["M"] == M)
+                    for seed in cfg.seeds
+                ]
+                values = [row["value"] for row in rows]
+                distortions = [row["size_distortion"] for row in rows]
+                rejections = [row["rejections"] for row in rows]
+                effective = [row["M_effective"] for row in rows]
+                runtime = [row["runtime_sec"] for row in rows]
+                stats = _aggregate_numeric(values)
+                dist_stats = _aggregate_numeric(distortions)
+                rej_stats = _aggregate_numeric(rejections)
+                eff_stats = _aggregate_numeric(effective)
+                run_stats = _aggregate_numeric(runtime)
+                type1_by_M.append(
+                    {
+                        "M": int(M),
+                        "value_mean": stats["mean"],
+                        "value_std": stats["std"],
+                        "value_min": stats["min"],
+                        "value_max": stats["max"],
+                        "size_distortion_mean": dist_stats["mean"],
+                        "rejections_mean": rej_stats["mean"],
+                        "M_effective_mean": eff_stats["mean"],
+                        "runtime_sec_mean": run_stats["mean"],
+                        "seed_count": stats["count"],
+                    }
+                )
 
         power_curve = []
         for delta in cfg.deltas:
@@ -891,17 +894,18 @@ def write_markdown_report(results: Dict[str, Any], report_path: str) -> None:
     lines.append(f"- 总耗时(秒): {info['total_runtime_sec']:.2f}")
     lines.append("")
 
-    lines.append("## 1. Size（不同 M 下的第一类错误，跨 seed 聚合）")
-    lines.append("")
-    lines.append("| 模型 | M | Type I Error Mean | Type I Error Std | Size Distortion Mean | Seeds |")
-    lines.append("|---|---:|---:|---:|---:|---:|")
-    for model_name in MODEL_EXECUTION_ORDER:
-        for row in agg[model_name]["type1_error_by_M"]:
-            lines.append(
-                f"| {model_name} | {row['M']} | {row['value_mean']:.4f} | {row['value_std']:.4f} | "
-                f"{row['size_distortion_mean']:+.4f} | {row['seed_count']} |"
-            )
-    lines.append("")
+    if agg[MODEL_EXECUTION_ORDER[0]]["type1_error_by_M"]:
+        lines.append("## 1. Size（不同 M 下的第一类错误，跨 seed 聚合）")
+        lines.append("")
+        lines.append("| 模型 | M | Type I Error Mean | Type I Error Std | Size Distortion Mean | Seeds |")
+        lines.append("|---|---:|---:|---:|---:|---:|")
+        for model_name in MODEL_EXECUTION_ORDER:
+            for row in agg[model_name]["type1_error_by_M"]:
+                lines.append(
+                    f"| {model_name} | {row['M']} | {row['value_mean']:.4f} | {row['value_std']:.4f} | "
+                    f"{row['size_distortion_mean']:+.4f} | {row['seed_count']} |"
+                )
+        lines.append("")
 
     lines.append("## 2. Power（固定 M_max，跨 seed 聚合）")
     lines.append("")
@@ -917,16 +921,19 @@ def write_markdown_report(results: Dict[str, Any], report_path: str) -> None:
     lines.append("## 3. 结论摘要")
     lines.append("")
     for model_name in MODEL_EXECUTION_ORDER:
-        size_row = next(row for row in agg[model_name]["type1_error_by_M"] if row["M"] == cfg["power_M"])
         power_points = agg[model_name]["power_curve"]
         power_values = [row["power_mean"] for row in power_points if not math.isnan(row["power_mean"])]
         monotone = len(power_values) >= 2 and all(power_values[i] <= power_values[i + 1] for i in range(len(power_values) - 1))
         final_point = power_points[-1]
-        power_gain = final_point["power_mean"] - size_row["value_mean"]
+        type1_rows = agg[model_name]["type1_error_by_M"]
+        size_str = ""
+        if type1_rows:
+            size_row = next((row for row in type1_rows if row["M"] == cfg["power_M"]), type1_rows[-1])
+            size_str = f"size_at_Mmax={size_row['value_mean']:.4f}; "
         lines.append(
-            f"- {model_name}: size_at_Mmax={size_row['value_mean']:.4f}; "
+            f"- {model_name}: {size_str}"
             f"power_at_Mmax_and_max_delta(base_delta={final_point['delta']:.2f}; target_fro_mean={final_point['target_fro_mean']:.2f})={final_point['power_mean']:.4f}; "
-            f"power_gain_over_size={power_gain:.4f}; power_monotone={monotone}"
+            f"power_monotone={monotone}"
         )
 
     with open(report_path, "w", encoding="utf-8") as f:
@@ -944,6 +951,7 @@ def main() -> None:
     parser.add_argument("--jobs", type=int, default=4)
     parser.add_argument("--seed-workers", type=int, default=0)
     parser.add_argument("--baseline-pvalue-method", type=str, default="bootstrap_lr", choices=["bootstrap_lr", "asymptotic_chi2", "asymptotic_f"])
+    parser.add_argument("--skip-type1", action="store_true", help="Skip Type I error evaluation, only run power.")
     parser.add_argument("--tag", type=str, default="")
     args = parser.parse_args()
 
@@ -957,6 +965,7 @@ def main() -> None:
         seed_workers=max(0, int(args.seed_workers)),
         baseline_pvalue_method=args.baseline_pvalue_method,
         _power_M=max(0, int(args.power_M)),
+        skip_type1=args.skip_type1,
     )
 
     stamp, run_dir = make_run_dir(args.tag)
@@ -970,7 +979,7 @@ def main() -> None:
     )
     print("=" * 72)
 
-    per_seed_stage_count = len(MODEL_EXECUTION_ORDER) * (len(cfg.M_grid) + len(cfg.deltas))
+    per_seed_stage_count = len(MODEL_EXECUTION_ORDER) * ((len(cfg.M_grid) if not cfg.skip_type1 else 0) + len(cfg.deltas))
     total_stage_count = len(cfg.seeds) * per_seed_stage_count
     tracker = ProgressTracker(run_dir=run_dir, total_stage_count=total_stage_count, per_seed_stage_count=per_seed_stage_count)
     tracker.log_run_started(cfg)
