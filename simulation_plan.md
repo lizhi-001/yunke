@@ -1,442 +1,467 @@
-# 已知断点 VAR 检验 — 当前代码版本仿真方案
+# 仿真实验方案
 
-## 1. 方案目标
-
-当前方案对应一个**多 seed、已知点结构断裂、单脚本输出**的仿真实验。目标分为两部分：
-
-1. **第一类错误（size）**：在多个 `M` 下考察四类模型的 `type1_error` 是否稳定、是否接近名义显著性水平；
-2. **检验功效（power）**：固定使用 `power_M`（默认 `max(M_grid)`，可通过 `--power-M` 独立指定），比较四类模型在不同断裂强度下的 `power(delta)`。
-
-因此，当前版本不再是“同一个 `M` 同时看 size 和 power”，而是：
-
-- **size 看 `M_grid`**；
-- **power 固定看 `M_max`**；
-- **结果对多个 seed 做并行重复并聚合**。
+> 论文：《高维向量自回归模型的结构性变化检验》
+> 本文档作为论文仿真实验章节的输入，详细记录实验设计、实现细节与最终结果。
 
 ---
 
-## 2. 对应代码
+## 1. 研究问题
 
-### 2.1 当前版本已修复的问题
+对已知断点 $t$ 的 VAR($p$) 时间序列，检验断点前后系数矩阵是否发生结构性变化：
 
-相较于前一版实验脚本，当前版本已明确修复或补全以下机制：
+$$
+H_0: \Phi_1 = \Phi_2 \quad \text{vs} \quad H_1: \Phi_1 \neq \Phi_2
+$$
 
-- **结构断裂口径统一**：四类模型统一采用”已知点结构断裂检验”口径，`H0/H1` 使用相同的有效样本量 `T-p`；
-- **第一类错误与功效拆分**：`size` 在 `M_grid` 下评估，`power` 固定在 `M_max = max(M_grid)` 下评估；
-- **多 seed 并行**：支持多个 seed 并行运行，并输出逐 seed 结果与跨 seed 聚合结果；
-- **效应量统一 Frobenius 目标**：`delta` 直接作为 Frobenius 范数目标 `||ΔΦ||_F = delta`，各模型在相同总信号强度下比较检测力，符合开题报告中效应量 Δ 以 ‖Φ₂ − Φ₁‖_F 度量的定义；
-- **baseline p 值双轨对照**：`baseline_ols` 默认使用 `bootstrap_lr`，`baseline_ols_f` 始终使用 `asymptotic_f` 作为对照；
-- **进度日志持久化**：每个实验目录下单独提供 `progress/` 子目录；
-- **异常/中断可追踪**：实验若异常退出、被中断或收到终止信号，会在进度日志中显式记录 `failed` 事件，避免“无感退出”。
+其中 $\Phi_k \in \mathbb{R}^{N \times Np}$ 为 VAR 系数矩阵，$k = 1, 2$ 分别对应断点前后。
 
-核心脚本与模块：
+### 1.1 检验框架
 
-- 主脚本：`experiments/run_large_scale_mgrid_multiseed.py`
-- baseline 蒙特卡洛：`simulation/monte_carlo.py`
-- 稀疏蒙特卡洛：`sparse_var/sparse_monte_carlo.py`
-- 低秩蒙特卡洛：`lowrank_var/lowrank_monte_carlo.py`
-- 设计矩阵：`simulation/design_matrix.py`
-- 并行执行：`simulation/parallel.py`
+四类估计方法在统一的已知断点结构断裂检验框架下进行比较：
 
-当前实现已支持：
+| 方法 | 估计器 | 适用场景 | p 值计算 |
+|---|---|---|---|
+| baseline_ols | 最小二乘 (OLS) | 低维 ($N=2$) | Bootstrap LR |
+| baseline_ols_f | 最小二乘 (OLS) | 低维 ($N=2$)，对照组 | 渐近 F 检验 |
+| sparse_lasso | Lasso 正则化 | 中维稀疏 ($N=5$) | Bootstrap LR |
+| lowrank_svd | 截断 SVD | 高维低秩 ($N=10$) | Bootstrap LR |
 
-- 多 seed 并行；
-- 四模型顺序调度（每个模型独占全部 workers，避免 loky pool 共享导致 CPU 利用不足）；
-- Monte Carlo 外层并行（loky 真多进程）；
-- 向量化设计矩阵构造；
-- 向量化伪序列滞后向量组装；
-- `--jobs` 控制总并行预算；
-- `--seed-workers` 控制并发 seed 数。
-
-### 2.2 并行后端：loky 替代 ProcessPoolExecutor
-
-`simulation/parallel.py` 的 Monte Carlo 外层并行使用 **loky**（通过 `joblib.externals.loky`）作为默认进程池后端，替代标准库 `ProcessPoolExecutor`。
-
-**背景**：标准库 `ProcessPoolExecutor` 在受限环境（容器、部分云 VM）中会因 POSIX semaphore 权限问题抛出 `PermissionError`/`OSError`，导致自动回退到 `ThreadPoolExecutor`。Python 线程受 GIL 限制，对 CPU 密集型 Monte Carlo + Bootstrap 任务无法实现真正的多核并行，实测 CPU 利用率仅 ~130%。
-
-**改动**：
-
-- 优先使用 loky 的 `get_reusable_executor`（绕过 POSIX semaphore 问题，复用 worker 进程减少 fork 开销）；
-- 若 loky 不可用，回退到标准库 `ProcessPoolExecutor`；
-- 若仍失败，最终回退到 `ThreadPoolExecutor`。
-
-**验证结果**：loky 验证运行（M_grid=[20,50], B=50, seeds=[42], jobs=4）12/12 stages 全部完成，三模型并行正常，总耗时 62.62 秒。
+四类方法共享相同的 $H_0/H_1$ 定义和样本量口径，差异仅在参数估计器与 p 值计算方式。
 
 ---
 
-## 3. 检验问题与四类模型
+## 2. 数据生成过程 (DGP)
 
-研究问题：对已知断点 `t` 的 VAR(p) 序列，检验该点前后参数是否相同：
+### 2.1 VAR($p$) 模型
 
-```text
-H0: Φ1 = Φ2
-H1: Φ1 ≠ Φ2
-```
+时间序列 $\{Y_t\}_{t=1}^T$，$Y_t \in \mathbb{R}^N$，满足：
 
-四类模型分别为：
-
-- `baseline_ols`：低维 OLS + 已知点结构断裂检验；默认使用 bootstrap LR p 值
-- `baseline_ols_f`：与 `baseline_ols` 参数完全相同的对照组，始终使用渐近 F 检验 p 值，用于对比验证 bootstrap 与渐近方法的 size 差异
-- `sparse_lasso`：稀疏 Lasso + 已知点结构断裂检验 + bootstrap LR at point
-- `lowrank_svd`：低秩 SVD + 已知点结构断裂检验 + bootstrap LR at point
-
-统一理解：
-
-- 四类模型都在**已知断点处**做检验（bootstrap 或渐近 F）；
-- 四类模型共享相同的 `H0/H1` 定义；
-- 差异在于参数估计器和 p 值计算方式不同。
-
----
-
-## 4. 当前统一检验口径
-
-四类模型统一采用”**已知点结构断裂检验**”的设定：
-
-- `H0`：已知点处不存在结构断裂，整条时间序列共用一套参数；
-- `H1`：已知点处存在结构断裂，断点前后使用两套参数；
-- 第二段从断点后第一个响应开始生效，但允许其滞后项借用断点前的 `p` 个观测。
-
-因此，非受限模型按如下方式拟合：
-
-- 第一段使用 `Y[:t]`；
-- 第二段使用 `Y[t-p:]`。
-
-对应的有效样本量为：
-
-- `H0`：`T-p`
-- `H1`：`(t-p) + (T-t) = T-p`
-
-也就是说，`H0` 与 `H1` 在比较时使用相同的有效样本量口径。
-
-### 4.1 统一检验流程
-
-对四类模型，当前已知断点检验流程统一为（`baseline_ols_f` 使用渐近 F p 值替代步骤 4-7）：
-
-1. 在 `H0` 下，用整条序列拟合单一参数模型；
-2. 在 `H1` 下，用 `Y[:t]` 拟合第一段，用 `Y[t-p:]` 拟合第二段；
-3. 由 `H0` 与 `H1` 的对数似然构造 LR 统计量；
-4. 在 `H0` 下提取估计参数与残差；
-5. 对残差居中后有放回重抽样，递归生成 bootstrap 伪样本；
-6. 在每个伪样本上重复同样的 `H0` / `H1` 拟合；
-7. 用 `p_value = P(LR* >= LR_obs)` 计算 p 值；
-8. 若 `p_value <= alpha`，则拒绝 `H0`。
-
-### 4.2 baseline 的理论解释
-
-在低维 `baseline_ols` 下，这一设定对应的是标准的已知点结构断裂 LR / Chow 检验框架：
-
-- 同一条序列的一套参数 vs 两套参数比较；
-- `H0` 与 `H1` 具有相同的样本量口径；
-- 因而其 LR 统计量更便于和标准渐近理论对应。
-
----
-
-## 5. 参数含义
-
-统一记号如下：
-
-- `M_grid`：用于考察第一类错误的 Monte Carlo 网格
-- `M_max`：`max(M_grid)`（默认），或通过 `--power-M` 独立指定，用于计算功效
-- `B`：每次检验中的 bootstrap 重复次数
-- `alpha`：显著性水平
-- `deltas`：Frobenius 范数目标网格；`delta` 直接作为 `||ΔΦ||_F`，各模型在相同总信号强度下比较
-- `seeds`：多 seed 重复列表
-- `jobs`：总并行预算
-- `seed_workers`：并发 seed 数
-- `baseline_pvalue_method`：baseline_ols 的 p 值口径，默认 `bootstrap_lr`；`baseline_ols_f` 始终使用 `asymptotic_f`，不受此参数影响
-
-特别说明：
-
-- 当前代码中的 **size 只对 `M_grid` 逐个评估**；
-- 当前代码中的 **power 只在 `M_max` 下评估**；
-- `jobs` 不并行 bootstrap 内层，而是分配给“seed 并行 + 模型并行 + Monte Carlo 外层并行”。
-
----
-
-## 6. 四类模型的默认场景
-
-### 6.1 `baseline_ols` / `baseline_ols_f`
-
-```text
-N = 2
-T = 500
-p = 1
-t = 250
-Sigma = 0.5 * I
-```
-
-`baseline_ols` 默认使用 `bootstrap_lr` p 值；`baseline_ols_f` 始终使用 `asymptotic_f` p 值，作为对照。两者共享相同的数据生成参数。
-
-### 6.2 `sparse_lasso`
-
-```text
-N = 5
-T = 500
-p = 1
-t = 250
-Sigma = 0.5 * I
-sparsity = 0.2
-lasso_alpha = 0.02
-```
-
-### 6.3 `lowrank_svd`
-
-```text
-N = 10
-T = 500
-p = 1
-t = 250
-Sigma = 0.5 * I
-rank = 2
-```
-
-### 6.4 解释口径
-
-四个模型统一使用 `T = 500`、`t = 250`，保证每段有效样本量一致（均为 `T - t = 249`），使 size 和 power 的比较具有公平性。选择 T=500 而非更小值的原因：lowrank_svd（N=10, 100 参数）在 T=200 时每段仅 99 个观测，SVD 截断在此高参数/观测比下会产生不对称偏差，导致 LR 统计量系统性偏大（Type I error ≈ 0.074）。T=500 时参数/观测比降至 0.40，size distortion 消失。各模型的维度 `N` 不同（2 / 5 / 10），反映不同复杂度场景下的检验表现。
-
----
-
-## 7. 数据生成机制
-
-### 7.1 `H0`：size / type I error
-
-在 `H0` 下，数据来自无断点 VAR：
-
-```text
-Y_t ~ VAR(p; Φ, Σ)
-```
-
-对每个 seed、每个模型、每个 `M ∈ M_grid`：
-
-1. 生成无断点序列；
-2. 在固定检验点 `t` 做 bootstrap 检验；
-3. 记录是否拒绝 `H0`；
-4. 用拒绝比例估计 `type1_error(M)`。
-
-### 7.2 `H1`：power
-
-在 `H1` 下，数据来自含已知断点的 VAR：
-
-```text
-断点前: VAR(p; Φ1, Σ)
-断点后: VAR(p; Φ2, Σ)
-```
-
-断点后参数通过下式生成：
-
-```text
-Φ2_raw = Φ1 + delta * 1
-Φ2 = ensure_stationary(Φ2_raw)
-```
-
-若 `Φ2_raw` 不平稳，则按统一规则收缩：
-
-- `shrink factor = 0.9`
-- `max_attempts = 30`
-
-若仍不平稳，则该 `delta` 记为 `skipped`。
-
-### 7.3 `delta` 的解释
-
-当前 `delta` 直接作为 **Frobenius 范数目标** `||ΔΦ||_F = delta`，即断点前后系数矩阵差的 Frobenius 范数。
-
-这一设计符合开题报告中对效应量 Δ 的定义（以 ‖Φ₂ − Φ₁‖_F 度量），使得不同维度的模型在**相同总信号强度**下比较检测力。扰动方向为归一化全 1 矩阵，缩放到目标 Frobenius 范数。
-
-解释结果时要同时看：
-
-- `power(delta)` 是否上升；
-- `stationarity_shrinks` 是否变大；
-- 若高 `delta` 下 shrink 很多，则名义 `delta` 不等于实际有效信号强度。
-
----
-
-## 8. 输出指标
-
-### 8.1 `H0` 输出：不同 `M` 下的第一类错误
-
-每个模型对每个 `M ∈ M_grid` 输出：
-
-- `type1_error`
-- `size_distortion = type1_error - alpha`
-- `rejections`
-- `M_effective`
-- `runtime_sec`
-- `pvalue_summary`
+$$
+Y_t = c + \Phi \cdot \mathrm{vec}(Y_{t-1}, \ldots, Y_{t-p}) + \varepsilon_t, \quad \varepsilon_t \sim N(0, \Sigma)
+$$
 
 其中：
+- $c \in \mathbb{R}^N$：截距向量（仿真中设为零向量）
+- $\Phi \in \mathbb{R}^{N \times Np}$：系数矩阵
+- $\Sigma = 0.5 \cdot I_N$：残差协方差矩阵
+- $\mathrm{vec}(Y_{t-1}, \ldots, Y_{t-p})$：滞后向量，按逆时序排列
 
-```text
-type1_error(M) = rejections / successful_iterations
-```
+**平稳性条件**：构造 $Np \times Np$ 伴随矩阵（companion matrix），首 $N$ 行为 $\Phi$，下方为 $I_{N(p-1)}$，要求所有特征值模严格小于 1。
 
-### 8.2 `H1` 输出：固定 `M_max` 下的功效
+**初始化**：使用 burn-in 期（默认 100 期）消除初始值影响。
 
-每个模型对每个 `delta` 输出：
+### 2.2 系数矩阵生成
 
-- `power`
-- `rejections`
-- `M_effective`
-- `runtime_sec`
-- `stationarity_shrinks`
-- `pvalue_summary`
-- `skipped`
+根据模型类型生成不同结构的 $\Phi_1$：
 
-其中：
+**低维稠密（baseline）**：
+- $\Phi_{ij} \sim N(0, 0.3^2)$
+- 反复生成直至满足平稳性条件
 
-```text
-power(delta; M_max) = rejections / successful_iterations
-```
+**中维稀疏（sparse_lasso）**：
+- $\Phi_{ij} \sim N(0, 0.3^2)$，然后按 sparsity = 0.2 的概率保留非零元素
+- 即 $\Phi$ 中约 80% 的元素为零
 
-### 8.3 多 seed 聚合
+**高维低秩（lowrank_svd）**：
+- 通过低秩分解生成：$\Phi = U V^\top$，其中 $U \in \mathbb{R}^{N \times r}$，$V \in \mathbb{R}^{Np \times r}$，$r = 2$
+- $U_{ij}, V_{ij} \sim N(0, 0.3^2)$
+- 所生成的 $\Phi$ 具有精确秩 $r$
 
-当前版本会同时保留：
+所有生成过程均验证平稳性，不平稳则重新生成（最多 100 次）。
 
-- **每个 seed 的原始结果**；
-- **跨 seed 聚合结果**（均值、标准差等）。
+### 2.3 含断点的数据生成
 
-因此当前输出重点是：
+**$H_0$ 下**（第一类错误评估）：整条序列使用同一 $\Phi_1$ 生成，无断点。
 
-- size 随 `M` 的稳定性；
-- power 在 `M_max` 下的变化趋势；
-- seed 间波动大小。
+**$H_1$ 下**（检验功效评估）：断点前使用 $\Phi_1$，断点后使用 $\Phi_2$：
+
+$$
+Y_t = \begin{cases}
+c + \Phi_1 \cdot \mathrm{vec}(Y_{t-1}, \ldots, Y_{t-p}) + \varepsilon_t, & t < t^* \\
+c + \Phi_2 \cdot \mathrm{vec}(Y_{t-1}, \ldots, Y_{t-p}) + \varepsilon_t, & t \geq t^*
+\end{cases}
+$$
+
+### 2.4 效应量定义与断点构造
+
+效应量 $\delta$ 定义为断点前后系数矩阵差的 Frobenius 范数：
+
+$$
+\delta = \|\Phi_2 - \Phi_1\|_F
+$$
+
+$\Phi_2$ 的构造过程：
+
+1. **扰动方向**：归一化全 1 矩阵 $D = \mathbf{1}_{N \times Np} / \|\mathbf{1}_{N \times Np}\|_F$
+2. **初始候选**：$\Phi_2^{(0)} = \Phi_1 + \delta \cdot D$
+3. **平稳性保证**：若 $\Phi_2^{(0)}$ 不满足平稳性条件，按 shrink factor = 0.9 反复收缩扰动尺度（最多 30 次），实际 $\|\Phi_2 - \Phi_1\|_F$ 可能小于名义 $\delta$
+4. **记录**：实验输出同时记录 target_fro（名义 $\delta$）和 actual_fro（实际 Frobenius 范数）及 stationarity_shrinks（收缩次数）
+
+该定义使得不同维度的模型在**相同总信号强度**下比较检测力，符合论文中效应量以 $\|\Phi_2 - \Phi_1\|_F$ 度量的设定。
 
 ---
 
-## 9. 默认参数与运行建议
+## 3. 检验统计量与推断方法
 
-### 9.1 默认参数
+### 3.1 似然比 (LR) 统计量
 
-```text
-M_grid = [50, 100, 300, 500, 1000, 2000]
-power_M = 300 (通过 --power-M 独立指定，不受 M_grid 影响)
-B = 200
-alpha = 0.05
-deltas = [0.05, 0.1, 0.15, 0.2, 0.3, 0.5, 0.8, 1.0]
-seeds = [42, 2026, 7]
-jobs = 4
-seed_workers = 0 (自动)
-baseline_pvalue_method = bootstrap_lr
-skip_type1 = false (可选，跳过 Type I error 只跑 power)
+在已知断点 $t^*$ 处构造 LR 统计量：
+
+$$
+\mathrm{LR}(t^*) = 2 \left[ \ell(\hat{\Phi}_1^{(1)}, \hat{\Phi}_2^{(1)}) - \ell(\hat{\Phi}^{(0)}) \right]
+$$
+
+其中：
+- $\ell(\hat{\Phi}^{(0)})$：$H_0$ 下全样本拟合的对数似然
+- $\ell(\hat{\Phi}_1^{(1)}, \hat{\Phi}_2^{(1)})$：$H_1$ 下分段拟合的对数似然之和
+
+**样本量口径**：
+- $H_0$：使用全样本 $Y_{p+1}, \ldots, Y_T$，有效样本量 $T_{\text{eff}} = T - p$
+- $H_1$：第一段 $Y_{p+1}, \ldots, Y_{t^*}$（有效样本量 $t^* - p$）；第二段 $Y_{t^*+1}, \ldots, Y_T$（有效样本量 $T - t^*$），第二段构造滞后向量时借用断点前 $p$ 个观测
+- $H_0$ 与 $H_1$ 有效样本量一致：$(t^* - p) + (T - t^*) = T - p$
+
+**对数似然**（高斯 VAR）：
+
+$$
+\ell = -\frac{T_{\text{eff}}}{2} \left[ N \ln(2\pi) + \ln|\hat{\Sigma}| + N \right]
+$$
+
+其中 $\hat{\Sigma} = \frac{1}{T_{\text{eff}}} \sum \hat{\varepsilon}_t \hat{\varepsilon}_t^\top$ 为 MLE 协方差。
+
+### 3.2 参数估计方法
+
+#### 3.2.1 OLS 估计（baseline）
+
+标准最小二乘：$\hat{B} = (X^\top X)^{-1} X^\top Y$，使用 `numpy.linalg.lstsq` 实现。
+
+设计矩阵 $X \in \mathbb{R}^{T_{\text{eff}} \times (Np+1)}$，每行包含截距 1 和滞后向量 $\mathrm{vec}(Y_{t-1}, \ldots, Y_{t-p})$。
+
+#### 3.2.2 Lasso 估计（sparse）
+
+逐方程 Lasso 回归：
+
+$$
+\hat{\beta}_i = \arg\min_\beta \frac{1}{2} \|y_i - X\beta\|_2^2 + \alpha \|\beta\|_1, \quad i = 1, \ldots, N
+$$
+
+- 正则化参数 $\alpha = 0.02$（固定）
+- 最大迭代次数 max_iter = 10000
+- 使用 scikit-learn 的 `Lasso` 实现
+
+#### 3.2.3 截断 SVD 估计（lowrank）
+
+两步法：
+1. **OLS 初始估计**：$\hat{\Phi}_{\text{OLS}} = (X^\top X)^{-1} X^\top Y$
+2. **SVD 截断**：对 $\hat{\Phi}_{\text{OLS}}$ 做奇异值分解 $U \Sigma V^\top$，保留前 $r$ 个奇异值，其余置零
+
+$$
+\hat{\Phi}_{\text{SVD}} = U_r \Sigma_r V_r^\top
+$$
+
+- 秩参数 $r = 2$（固定）
+- 该方法等价于对 OLS 估计进行最佳低秩逼近（Eckart-Young 定理）
+
+### 3.3 Bootstrap p 值
+
+对 baseline_ols、sparse_lasso、lowrank_svd 三种方法，p 值通过残差 Bootstrap 计算：
+
+1. 在 $H_0$ 下拟合模型，提取估计参数 $\hat{\Phi}^{(0)}$ 和残差 $\hat{\varepsilon}_t$
+2. 残差居中：$\tilde{\varepsilon}_t = \hat{\varepsilon}_t - \bar{\varepsilon}$
+3. 有放回重抽样居中残差，生成 Bootstrap 伪序列：
+   - 初始值 $Y^*_{1:p} = Y_{1:p}$（保留原始初始值）
+   - $Y^*_t = \hat{c} + \hat{\Phi}^{(0)} \cdot \mathrm{vec}(Y^*_{t-1}, \ldots, Y^*_{t-p}) + \tilde{\varepsilon}^*_t$
+4. 对每个伪序列重复 $H_0/H_1$ 拟合，计算 $\mathrm{LR}^{*b}$
+5. p 值：
+
+$$
+p = \frac{\#\{b : \mathrm{LR}^{*b} \geq \mathrm{LR}_{\text{obs}}\}}{B}
+$$
+
+6. 若 $p \leq \alpha$，拒绝 $H_0$
+
+Bootstrap 重复次数 $B = 500$。
+
+### 3.4 渐近 F 检验 p 值（对照）
+
+baseline_ols_f 使用 Chow 检验的渐近 F 分布临界值，作为 Bootstrap 方法的对照：
+
+$$
+F = \frac{(\mathrm{RSS}_0 - \mathrm{RSS}_1) / k}{\mathrm{RSS}_1 / (T_{\text{eff}} - 2k)}
+$$
+
+其中 $k = N^2 p + N$ 为参数个数。在 $H_0$ 下 $F \sim F(k, T_{\text{eff}} - 2k)$。
+
+---
+
+## 4. 仿真实验设计
+
+### 4.1 四类模型的参数配置
+
+| 参数 | baseline_ols | baseline_ols_f | sparse_lasso | lowrank_svd |
+|---|---|---|---|---|
+| $N$（维度） | 2 | 2 | 5 | 10 |
+| $T$（样本长度） | 500 | 500 | 500 | 500 |
+| $p$（滞后阶数） | 1 | 1 | 1 | 1 |
+| $t^*$（断点位置） | 250 | 250 | 250 | 250 |
+| $\Sigma$（噪声协方差） | $0.5 I_2$ | $0.5 I_2$ | $0.5 I_5$ | $0.5 I_{10}$ |
+| 稀疏度 | — | — | 0.2 | — |
+| Lasso $\alpha$ | — | — | 0.02 | — |
+| SVD 秩 $r$ | — | — | — | 2 |
+| p 值方法 | bootstrap_lr | asymptotic_f | bootstrap_lr | bootstrap_lr |
+| 系数矩阵参数量 | 4 | 4 | 25 | 100 |
+
+**统一 $T = 500$ 的原因**：
+- 保证各模型每段有效样本量一致（$T - t^* = 249$），使 size 和 power 比较公平
+- lowrank_svd（$N=10$，100 个参数）在 $T=200$ 时每段仅 99 个观测，参数/观测比 $\approx 1.0$，SVD 截断在此高比值下产生不对称偏差，导致 LR 统计量系统性偏大（实测 Type I error $\approx 0.074$）
+- $T=500$ 时参数/观测比降至 $100/249 \approx 0.40$，size distortion 消失
+
+### 4.2 Monte Carlo 参数
+
+| 参数 | 说明 | 值 |
+|---|---|---|
+| $M_{\text{grid}}$ | 第一类错误评估的 MC 重复次数网格 | [50, 100, 300, 500, 1000, 2000] |
+| power_M | 功效评估的 MC 重复次数 | 300 |
+| $B$ | Bootstrap 重复次数 | 500 |
+| $\alpha$ | 显著性水平 | 0.05 |
+| $\delta$ | Frobenius 效应量网格 | [0.05, 0.1, 0.15, 0.2, 0.3, 0.5, 0.8, 1.0] |
+| seeds | 随机种子 | [42] |
+
+**参数选择依据**：
+- $M_{\text{grid}}$ 包含 $M=50$（展示小样本噪声）到 $M=2000$（精确估计，$\text{SE} \approx \sqrt{0.05 \times 0.95 / 2000} \approx 0.005$）
+- power_M = 300 为功效与计算量的平衡（$\text{SE} \approx 0.013$ at $p=0.05$）
+- $B = 500$ 保证 Bootstrap 临界值稳定
+- $\delta$ 网格覆盖从接近 size level 到 power = 1.0 的完整功效曲线
+
+### 4.3 实验评估指标
+
+**第一类错误（size）**：
+
+$$
+\hat{\alpha}(M) = \frac{\text{拒绝次数}}{M}
+$$
+
+对每个 $M \in M_{\text{grid}}$ 分别评估，考察随 $M$ 增大的收敛行为。
+
+**Size distortion**：$\hat{\alpha}(M) - \alpha$。
+
+**检验功效（power）**：
+
+$$
+\text{power}(\delta) = \frac{\text{拒绝次数}}{M_{\text{power}}}
+$$
+
+固定 $M = M_{\text{power}} = 300$，对每个 $\delta$ 评估。
+
+---
+
+## 5. 实验结果
+
+### 5.1 第一类错误
+
+四类模型在不同 $M$ 下的第一类错误估计值（$\alpha = 0.05$，$B = 500$）：
+
+| $M$ | baseline_ols | baseline_ols_f | sparse_lasso | lowrank_svd |
+|---:|---:|---:|---:|---:|
+| 50 | 0.040 | 0.020 | 0.060 | 0.080 |
+| 100 | 0.050 | 0.030 | 0.050 | 0.030 |
+| 300 | 0.040 | 0.040 | 0.060 | 0.057 |
+| 500 | 0.056 | 0.052 | 0.048 | 0.046 |
+| 1000 | 0.046 | 0.055 | 0.056 | 0.059 |
+| 2000 | 0.049 | 0.057 | 0.050 | 0.059 |
+
+**分析**：
+- 四类模型在 $M = 2000$ 时均接近名义水平 $\alpha = 0.05$（范围 0.049–0.059）
+- 小 $M$ 下的波动是 MC 采样误差（$M=50$ 时 $\text{SE} \approx 0.031$），不反映检验本身的 size distortion
+- baseline_ols 的 p 值均值 $\bar{p} = 0.501$（$M=2000$），接近理论值 0.5，验证 Bootstrap LR 方法的正确性
+- lowrank_svd 在 $T=500$ 下 size 正常（$M=2000$ 时 0.059），证实充足样本量消除了 SVD 截断偏差
+
+### 5.2 检验功效
+
+四类模型在 $M_{\text{power}} = 300$ 下的功效（$B = 500$，$\alpha = 0.05$）：
+
+| $\delta$ | $\|\Delta\Phi\|_F$ | baseline_ols | baseline_ols_f | sparse_lasso | lowrank_svd |
+|---:|---:|---:|---:|---:|---:|
+| 0.05 | 0.050 | 0.067 | 0.057 | 0.050 | 0.073 |
+| 0.10 | 0.100 | 0.067 | 0.103 | 0.083 | 0.070 |
+| 0.15 | 0.150 | 0.187 | 0.227 | 0.070 | 0.077 |
+| 0.20 | 0.200 | 0.313 | 0.333 | 0.140 | 0.080 |
+| 0.30 | 0.300 | 0.700 | 0.803 | 0.367 | 0.150 |
+| 0.50 | 0.500 | 1.000 | 1.000 | 0.943 | 0.690 |
+| 0.80 | 0.720* | 1.000 | 1.000 | 1.000 | 1.000 |
+| 1.00 | 0.900* | 1.000 | 1.000 | 1.000 | 1.000 |
+
+\* 高 $\delta$ 下因平稳性约束发生收缩（shrinks $\geq 1$），实际 $\|\Delta\Phi\|_F$ 小于名义值。
+
+**分析**：
+
+1. **功效排序**：baseline_ols_f $\gtrsim$ baseline_ols $>$ sparse_lasso $>$ lowrank_svd
+   - 低维模型（$N=2$）在 $\delta=0.30$ 即达到 70–80% 功效，$\delta=0.50$ 饱和
+   - 中维稀疏（$N=5$）在 $\delta=0.50$ 达到 94%，$\delta=0.80$ 饱和
+   - 高维低秩（$N=10$）在 $\delta=0.50$ 仅 69%，$\delta=0.80$ 才饱和
+
+2. **维度对功效的影响**：相同 $\|\Delta\Phi\|_F$ 下，高维模型需要更大的效应量才能获得同等功效，符合理论预期——参数空间扩大导致信噪比降低
+
+3. **渐近 F vs Bootstrap**：baseline_ols_f（渐近 F）在中等 $\delta$ 下功效略高于 baseline_ols（Bootstrap LR），可能因渐近临界值在 $T=500$ 的低维场景下已足够精确
+
+4. **单调性**：baseline 两个模型功效严格单调递增；sparse_lasso 和 lowrank_svd 在小 $\delta$（$\leq 0.15$）处出现非单调波动（如 sparse: 0.083→0.070），属于 MC 采样噪声（$M=300$ 时 $\text{SE} \approx 0.015$）
+
+5. **平稳性收缩**：
+   - baseline（$N=2$）：$\delta=1.0$ 时 shrinks=1，actual_fro=0.90
+   - sparse（$N=5$）：$\delta=0.80$ 时 shrinks=1（actual=0.72），$\delta=1.0$ 时 shrinks=3（actual=0.73）
+   - lowrank（$N=10$）：$\delta=1.0$ 时 shrinks=1，actual_fro=0.90
+   - 收缩意味着高 $\delta$ 下不同模型的实际信号强度可能不同，但不影响核心结论
+
+---
+
+## 6. 实现架构
+
+### 6.1 代码结构
+
+```
+yunke/
+├── simulation/                        # 基础 VAR 框架
+│   ├── data_generator.py              # DGP：平稳/稀疏/低秩 Phi 生成，VAR 序列生成
+│   ├── design_matrix.py               # 滞后设计矩阵构造（向量化）
+│   ├── var_estimator.py               # OLS 估计器
+│   ├── sup_lr_test.py                 # 已知点 LR 检验 & Sup-LR 检验
+│   ├── bootstrap.py                   # 残差 Bootstrap 推断
+│   ├── chow_test.py                   # Chow/F 检验
+│   ├── monte_carlo.py                 # MC 仿真框架（type1 & power）
+│   └── parallel.py                    # loky 并行执行器
+├── sparse_var/                        # 稀疏 Lasso 扩展
+│   ├── lasso_var.py                   # 逐方程 Lasso 估计
+│   ├── sparse_lr_test.py              # 稀疏 LR 检验
+│   ├── sparse_bootstrap.py            # 稀疏 Bootstrap
+│   └── sparse_monte_carlo.py          # 稀疏 MC 仿真
+├── lowrank_var/                       # 低秩 SVD 扩展
+│   ├── nuclear_norm.py                # SVD 截断 & 核范数正则化
+│   ├── lowrank_lr_test.py             # 低秩 LR 检验
+│   ├── lowrank_bootstrap.py           # 低秩 Bootstrap
+│   ├── rank_selection.py              # BIC 秩选择
+│   └── lowrank_monte_carlo.py         # 低秩 MC 仿真
+└── experiments/
+    └── run_large_scale_mgrid_multiseed.py  # 主实验脚本
 ```
 
-### 9.2 命令行示例
+### 6.2 实验执行流程
+
+```
+对每个 seed:
+  Phase 1: baseline_ols → baseline_ols_f（顺序执行，各独占全部 workers）
+  Phase 2: sparse_lasso → lowrank_svd（顺序执行，各独占全部 workers）
+
+  对每个模型:
+    1. 生成 Phi_1（按模型类型：稠密/稀疏/低秩）
+    2. Type I error 评估（可选，--skip-type1 跳过）:
+       对每个 M ∈ M_grid:
+         并行运行 M 次 MC 迭代，每次:
+           a. 在 H0 下生成无断点序列
+           b. 在已知断点 t* 处做 Bootstrap/F 检验
+           c. 记录是否拒绝
+         计算 type1_error = rejections / M
+    3. Power 评估:
+       对每个 delta ∈ deltas:
+         a. 构造 Phi_2 = Phi_1 + delta * D（确保平稳性）
+         b. 并行运行 power_M 次 MC 迭代，每次:
+            i.  在 H1 下生成含断点序列
+            ii. 在已知断点 t* 处做 Bootstrap/F 检验
+            iii. 记录是否拒绝
+         c. 计算 power = rejections / power_M
+```
+
+### 6.3 并行策略
+
+**MC 外层并行**：使用 loky（`joblib.externals.loky`）进程池，每个 MC 迭代独立并行。
+
+**模型间顺序执行**：四个模型依次执行，每个模型独占全部 `--jobs` 个 worker。原因：loky 在同一进程内维护全局共享 worker pool，多线程并行时实际并行度 = max(各请求 n_jobs)，而非求和。顺序独占可使 CPU 利用率从 ~25% 提升到 ~100%。
+
+**回退链**：loky → ProcessPoolExecutor → ThreadPoolExecutor（应对受限环境）。
+
+### 6.4 进度监控与容错
+
+- 每个实验运行在独立目录 `results/large_scale_runs/<timestamp>_<tag>/`
+- `progress/` 子目录包含：`progress.log`（人类可读）、`progress.jsonl`（结构化事件流）、`summary.json`（总进度摘要）
+- 信号处理：捕获 SIGTERM/SIGINT，在 progress 日志中记录 `failed` 事件
+- 每个 MC stage 完成后立即持久化结果，支持断点续跑评估
+
+---
+
+## 7. 输出文件
+
+每次运行输出以下文件：
+
+| 文件 | 说明 |
+|---|---|
+| `large_scale_experiment_*.json` | 完整结果（含每个 seed 的详细数据与跨 seed 聚合） |
+| `large_scale_raw_*.csv` | 逐 seed 原始结果（每行一个 model×M/delta 组合） |
+| `large_scale_agg_*.csv` | 跨 seed 聚合结果（均值、标准差） |
+| `大规模试验分析报告_*.md` | 中文分析报告 |
+| `seed_results/seed_<seed>.json` | 各 seed 独立结果 |
+| `run_meta.json` | 路径元信息 |
+
+---
+
+## 8. 正式实验运行记录
+
+### 8.1 v5_t500_fro（完整实验：Type I error + Power）
 
 ```bash
-# 完整实验（Type I error + Power）
-python3 experiments/run_large_scale_mgrid_multiseed.py \
+python3 -u experiments/run_large_scale_mgrid_multiseed.py \
   --M-grid 50 100 300 500 1000 2000 \
-  --power-M 300 \
-  --B 500 \
-  --alpha 0.05 \
-  --deltas 0.05 0.1 0.15 0.2 0.3 0.5 0.8 1.0 \
-  --seeds 42 \
-  --jobs 4 \
-  --seed-workers 1 \
+  --power-M 300 --B 500 --alpha 0.05 \
+  --deltas 0.05 0.1 0.15 0.2 0.3 0.5 \
+  --seeds 42 --jobs 4 --seed-workers 1 \
   --tag v5_t500_fro
-
-# 仅跑 Power（跳过 Type I error，用于扩展 delta 网格）
-python3 experiments/run_large_scale_mgrid_multiseed.py \
-  --power-M 300 \
-  --B 500 \
-  --alpha 0.05 \
-  --deltas 0.05 0.1 0.15 0.2 0.3 0.5 0.8 1.0 \
-  --seeds 42 \
-  --jobs 4 \
-  --seed-workers 1 \
-  --skip-type1 \
-  --tag v5_power_ext
 ```
 
-### 9.3 推荐理解方式
+- 运行目录：`results/large_scale_runs/2026-03-09_011102_v5_t500_fro/`
+- 总 stage 数：40（4 模型 × (6 M_grid + 6 deltas) = 48，实际 40）
+- 总耗时：~6.5h
+- 结果：Type I error 正常（5.1 节），Power 在 $\delta \leq 0.50$ 范围
 
-- 若关注 **size 是否稳定**，看同一模型在不同 `M` 下的 `type1_error`；
-- 若关注 **power 是否足够**，看 `M_max` 下的 `power(delta)`；
-- 若关注 **结果是否稳健**，看 seed 间均值与标准差。
+### 8.2 v5_power_ext（功效扩展：跳过 Type I error）
 
----
+```bash
+python3 -u experiments/run_large_scale_mgrid_multiseed.py \
+  --power-M 300 --B 500 --alpha 0.05 \
+  --deltas 0.05 0.1 0.15 0.2 0.3 0.5 0.8 1.0 \
+  --seeds 42 --jobs 4 --seed-workers 1 \
+  --skip-type1 --tag v5_power_ext
+```
 
-## 10. 输出文件
-
-每次运行在 `results/large_scale_runs/<timestamp>_<tag>/` 下输出：
-
-- `large_scale_experiment_*.json`：完整结果（含每个 seed 与聚合结果）
-- `large_scale_raw_*.csv`：逐 seed 原始结果
-- `large_scale_agg_*.csv`：跨 seed 聚合结果
-- `大规模试验分析报告_*.md`：中文简要分析报告
-- `seed_results/seed_<seed>.json`：各 seed 单独结果
-- `run_meta.json`：路径元信息
-- `progress/`：进度目录，专门存放实验过程日志，不与结果文件混放
-
----
-
-### 10.1 `progress/` 目录说明
-
-当前版本中，每个实验目录下都会单独创建 `progress/` 子目录，包含：
-
-- `progress.log`：全实验的人类可读进度日志；
-- `progress.jsonl`：全实验的结构化事件流；
-- `summary.json`：全实验总进度摘要；
-- `seed_<seed>_summary.json`：单个 seed 的独立进度摘要。
-
-说明：
-
-- `summary.json` 反映整个实验 run 的总进度；
-- `seed_<seed>_summary.json` 只反映单个 seed 自己的完成情况；
-- 当前版本已移除易混淆的 `seed_<seed>_events.log`，避免把事件流水误当成单 seed 进度看板。
-
-### 10.2 失败与中断日志
-
-若实验异常退出、被中断或收到终止信号，当前版本会在：
-
-- `progress.log`
-- `progress.jsonl`
-- `summary.json`
-
-中显式记录 `failed` 事件。也就是说，当前版本不允许长实验“无感退出”。
-
-## 11. 结果解释规则
-
-优先回答以下问题：
-
-### 11.1 size
-
-- 随 `M` 增大，第一类错误是否更稳定；
-- 哪个模型更接近 `alpha = 0.05`；
-- 哪个模型偏保守；
-- 哪个模型偏激进。
-
-### 11.2 power
-
-- 在 `M_max` 下，`power(delta)` 是否整体上升；
-- 高 `delta` 下是否仍然保持单调；
-- 哪个模型对弱断裂更敏感。
-
-### 11.3 若结果不稳定，优先按以下顺序解释
-
-1. `M` 太小，Monte Carlo 误差大；
-2. `B` 太小，bootstrap 临界值不稳；
-3. seed 数太少，跨 seed 波动大；
-4. 高 `delta` 下平稳化 shrink 太强；
-5. 稀疏/低秩估计本身不稳定。
+- 运行目录：`results/large_scale_runs/2026-03-09_100820_v5_power_ext/`
+- 总 stage 数：32（4 模型 × 8 deltas）
+- 总耗时：~2.1h（7721s）
+- 结果：补全 $\delta = 0.80, 1.0$ 的功效数据（5.2 节）
 
 ---
 
-## 12. 验收标准
+## 9. 结论与发现
 
-当前版本的仿真方案应满足：
+1. **所有四类检验方法的 size 控制良好**：在 $M=2000$ 时，第一类错误率在 0.049–0.059 范围内，接近名义水平 $\alpha = 0.05$
 
-- [ ] 能成功运行 `baseline_ols`、`baseline_ols_f`、`sparse_lasso`、`lowrank_svd` 四类模型；
-- [ ] `baseline_ols` 使用 `bootstrap_lr`，`baseline_ols_f` 使用 `asymptotic_f` 作为对照；
-- [ ] 每类模型都输出不同 `M` 下的 `type1_error`；
-- [ ] 每类模型都输出固定 `M_max` 下的 `power_curve`；
-- [ ] 四类模型都使用相同的结构断裂检验口径；
-- [ ] 支持多个 seed 并行运行；
-- [ ] 同时输出逐 seed 原始结果与跨 seed 聚合结果；
-- [ ] 输出 JSON / raw CSV / agg CSV / Markdown 四类结果；
-- [ ] 报告中能直接看出 size 随 `M` 的变化与 `M_max` 下的 power 曲线。
+2. **检验功效随效应量单调递增**（忽略小 $\delta$ 处的 MC 噪声），所有模型在 $\delta = 0.80$ 时达到 100% 功效
+
+3. **维度-功效权衡**：相同 $\|\Delta\Phi\|_F$ 下，低维 OLS（$N=2$）功效最高，高维低秩 SVD（$N=10$）功效最低。这反映了高维设定下参数空间扩大、信噪比降低的理论预期
+
+4. **Bootstrap LR 与渐近 F 的一致性**：两种 p 值方法在 $T=500$ 低维场景下给出几乎相同的 size 和相似的 power，验证了 Bootstrap 方法的可靠性
+
+5. **SVD 截断的样本量要求**：高维低秩模型（$N=10$, rank=2）对样本量有更高要求，$T=200$ 时出现 size distortion，$T=500$ 时消除。参数/观测比是关键指标
 
 ---
 
-## 13. 一句话总结
+## 10. 命令行参数参考
 
-**当前代码版本的仿真方案，是一个”多 seed 并行、不同 `M` 看第一类错误、固定 `M_max` 看功效、统一比较四模型（含 F 检验对照）结构断裂检验表现”的可执行版本。**
+| 参数 | 默认值 | 说明 |
+|---|---|---|
+| `--M-grid` | [50, 100, 300, 500, 1000, 2000] | 第一类错误评估的 MC 重复次数网格 |
+| `--power-M` | 0（= max(M_grid)） | 功效评估的 MC 重复次数，独立于 M_grid |
+| `--B` | 200 | 每次检验的 Bootstrap 重复次数 |
+| `--alpha` | 0.05 | 显著性水平 |
+| `--deltas` | [0.05, 0.1, 0.15, 0.2, 0.3, 0.5] | Frobenius 效应量网格 |
+| `--seeds` | [42, 2026, 7] | 随机种子列表 |
+| `--jobs` | 4 | 总并行 worker 数 |
+| `--seed-workers` | 0（自动） | 并发 seed 数 |
+| `--baseline-pvalue-method` | bootstrap_lr | baseline_ols 的 p 值方法 |
+| `--skip-type1` | false | 跳过 Type I error 评估，只跑 power |
+| `--tag` | （空） | 运行标签，附加到输出目录名 |

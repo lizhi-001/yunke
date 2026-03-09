@@ -1,0 +1,14 @@
+{
+  "run_dir": "results/large_scale_runs/2026-03-09_011102_v5_t500_fro",
+  "json": "results/large_scale_runs/2026-03-09_011102_v5_t500_fro/large_scale_experiment_2026-03-09_011102_v5_t500_fro.json",
+  "raw_csv": "results/large_scale_runs/2026-03-09_011102_v5_t500_fro/large_scale_raw_2026-03-09_011102_v5_t500_fro.csv",
+  "agg_csv": "results/large_scale_runs/2026-03-09_011102_v5_t500_fro/large_scale_agg_2026-03-09_011102_v5_t500_fro.csv",
+  "markdown": "results/large_scale_runs/2026-03-09_011102_v5_t500_fro/大规模试验分析报告_2026-03-09_011102_v5_t500_fro.md",
+  "run_meta": "results/large_scale_runs/2026-03-09_011102_v5_t500_fro/run_meta.json",
+  "seed_results_dir": "results/large_scale_runs/2026-03-09_011102_v5_t500_fro/seed_results",
+  "progress_dir": "results/large_scale_runs/2026-03-09_011102_v5_t500_fro/progress",
+  "progress_log": "results/large_scale_runs/2026-03-09_011102_v5_t500_fro/progress/progress.log",
+  "progress_jsonl": "results/large_scale_runs/2026-03-09_011102_v5_t500_fro/progress/progress.jsonl",
+  "progress_summary": "results/large_scale_runs/2026-03-09_011102_v5_t500_fro/progress/summary.json",
+  "seed_summary_pattern": "results/large_scale_runs/2026-03-09_011102_v5_t500_fro/progress/seed_<seed>_summary.json"
+}

@@ -1,0 +1,17 @@
+========================================================================
+Running large-scale multi-seed M-grid experiment
+Config: M_grid=[50, 100, 300, 500, 1000, 2000], power_M=300, B=500, alpha=0.05, deltas=[0.05, 0.1, 0.15, 0.2, 0.3, 0.5, 0.8, 1.0], seeds=[42], jobs=4, seed_workers=1, baseline_pvalue_method=bootstrap_lr
+========================================================================
+Running seeds in parallel with total_jobs=4; seed_workers=1; seed_job_split=[4]
+[seed 42] start (jobs=4, power_M=300, M_grid=[50, 100, 300, 500, 1000, 2000])
+[seed 42] done in 7721.48s
+
+Outputs:
+- RUN     : results/large_scale_runs/2026-03-09_100820_v5_power_ext
+- JSON    : results/large_scale_runs/2026-03-09_100820_v5_power_ext/large_scale_experiment_2026-03-09_100820_v5_power_ext.json
+- RAW CSV : results/large_scale_runs/2026-03-09_100820_v5_power_ext/large_scale_raw_2026-03-09_100820_v5_power_ext.csv
+- AGG CSV : results/large_scale_runs/2026-03-09_100820_v5_power_ext/large_scale_agg_2026-03-09_100820_v5_power_ext.csv
+- MD      : results/large_scale_runs/2026-03-09_100820_v5_power_ext/大规模试验分析报告_2026-03-09_100820_v5_power_ext.md
+- PROGRESS: results/large_scale_runs/2026-03-09_100820_v5_power_ext/progress
+- META    : results/large_scale_runs/2026-03-09_100820_v5_power_ext/run_meta.json
+Total runtime: 7721.48s
