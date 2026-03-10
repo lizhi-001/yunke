@@ -1,0 +1,57 @@
+{
+  "experiment": "Sector ETF Low-Rank Structural Break Test",
+  "model": "lowrank_svd",
+  "N": 11,
+  "tickers": [
+    "XLB",
+    "XLC",
+    "XLE",
+    "XLF",
+    "XLI",
+    "XLK",
+    "XLP",
+    "XLRE",
+    "XLU",
+    "XLV",
+    "XLY"
+  ],
+  "timestamp": "20260309_201850",
+  "results": [
+    {
+      "break_label": "COVID-19 (WHO)",
+      "break_date": "2020-03-11",
+      "N": 11,
+      "T": 500,
+      "t": 250,
+      "rank": "1",
+      "lr_stat": 812.2714857223982,
+      "p_value": 0.0,
+      "reject_h0": "True",
+      "B_effective": 500
+    },
+    {
+      "break_label": "Placebo: 2019-07 (calm)",
+      "break_date": "2019-07-01",
+      "N": 11,
+      "T": 231,
+      "t": 103,
+      "rank": "3",
+      "lr_stat": 168.56594319878423,
+      "p_value": 0.22,
+      "reject_h0": "False",
+      "B_effective": 500
+    },
+    {
+      "break_label": "Placebo: 2021-07 (calm)",
+      "break_date": "2021-07-01",
+      "N": 11,
+      "T": 233,
+      "t": 105,
+      "rank": "3",
+      "lr_stat": 140.40584822468736,
+      "p_value": 0.494,
+      "reject_h0": "False",
+      "B_effective": 500
+    }
+  ]
+}

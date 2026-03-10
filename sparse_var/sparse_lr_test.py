@@ -17,7 +17,8 @@ from .debiased_lasso import DebiasedLassoVAR
 class SparseLRTest:
     """高维稀疏VAR的LR结构变化检验"""
 
-    def __init__(self, estimator_type: str = 'lasso', alpha: Optional[float] = None):
+    def __init__(self, estimator_type: str = 'lasso', alpha: Optional[float] = None,
+                 post_lasso_ols: bool = False):
         """
         初始化稀疏LR检验
 
@@ -27,9 +28,12 @@ class SparseLRTest:
             估计方法：'lasso' 或 'debiased_lasso'
         alpha : float, optional
             正则化参数，如果为None则使用交叉验证选择
+        post_lasso_ols : bool
+            是否使用Post-Lasso OLS重拟合
         """
         self.estimator_type = estimator_type
         self.alpha = alpha
+        self.post_lasso_ols = post_lasso_ols
         self.lr_statistic = None
         self._estimator = None
 
@@ -39,7 +43,8 @@ class SparseLRTest:
             return self._estimator
 
         if self.estimator_type == 'lasso':
-            self._estimator = LassoVAREstimator(alpha=self.alpha)
+            self._estimator = LassoVAREstimator(alpha=self.alpha,
+                                                 post_lasso_ols=self.post_lasso_ols)
         elif self.estimator_type == 'debiased_lasso':
             self._estimator = DebiasedLassoVAR(alpha=self.alpha)
         else:

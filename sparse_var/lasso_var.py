@@ -24,7 +24,7 @@ class LassoVAREstimator:
     """Lasso-VAR估计器（高维稀疏场景）"""
 
     def __init__(self, alpha: Optional[float] = None, cv: int = 5,
-                 max_iter: int = 10000):
+                 max_iter: int = 10000, post_lasso_ols: bool = False):
         """
         初始化Lasso-VAR估计器
 
@@ -36,6 +36,10 @@ class LassoVAREstimator:
             交叉验证折数
         max_iter : int
             最大迭代次数
+        post_lasso_ols : bool
+            是否使用Post-Lasso OLS：先用Lasso做变量选择，
+            再用OLS在选出的变量上无偏重拟合。
+            可消除正则化偏差对似然函数的影响。
         """
         if not HAS_SKLEARN:
             raise ImportError("需要安装sklearn: pip install scikit-learn")
@@ -43,6 +47,7 @@ class LassoVAREstimator:
         self.alpha = alpha
         self.cv = cv
         self.max_iter = max_iter
+        self.post_lasso_ols = post_lasso_ols
         self.Phi_hat = None
         self.c_hat = None
         self.Sigma_hat = None
@@ -141,6 +146,21 @@ class LassoVAREstimator:
         Y_fitted = X @ B_hat
         self.residuals = Y_response - Y_fitted
 
+        # 计算稀疏度
+        sparsity = np.mean(np.abs(self.Phi_hat) < 1e-10)
+
+        # Post-Lasso OLS: 用Lasso选出的非零变量做OLS重拟合
+        if self.post_lasso_ols:
+            B_hat, self.residuals = self._post_lasso_refit(
+                X, Y_response, B_hat, N, include_const
+            )
+            if include_const:
+                self.c_hat = B_hat[0, :]
+                self.Phi_hat = B_hat[1:, :].T
+            else:
+                self.c_hat = np.zeros(N)
+                self.Phi_hat = B_hat.T
+
         # 计算残差协方差矩阵
         self.Sigma_hat = (self.residuals.T @ self.residuals) / T_eff
 
@@ -149,9 +169,6 @@ class LassoVAREstimator:
         if det_Sigma <= 0:
             det_Sigma = 1e-10
         log_likelihood = -0.5 * T_eff * (N * np.log(2 * np.pi) + np.log(det_Sigma) + N)
-
-        # 计算稀疏度
-        sparsity = np.mean(np.abs(self.Phi_hat) < 1e-10)
 
         return {
             'Phi': self.Phi_hat,
@@ -163,6 +180,50 @@ class LassoVAREstimator:
             'alphas_used': self.alphas_used,
             'sparsity': sparsity
         }
+
+    def _post_lasso_refit(self, X: np.ndarray, Y_response: np.ndarray,
+                          B_lasso: np.ndarray, N: int,
+                          include_const: bool) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Post-Lasso OLS重拟合：在Lasso选出的非零变量上用OLS重拟合。
+
+        对每个响应方程，找出Lasso系数非零的特征，用OLS重新估计，
+        消除正则化偏差。
+
+        Returns
+        -------
+        B_refit : np.ndarray, 与B_lasso同形状
+        residuals : np.ndarray
+        """
+        n_features = X.shape[1]
+        B_refit = np.zeros_like(B_lasso)
+
+        for i in range(N):
+            y_i = Y_response[:, i]
+            coef_i = B_lasso[:, i].copy()
+
+            # 确定非零特征（常数项始终保留）
+            if include_const:
+                nonzero = np.abs(coef_i[1:]) > 1e-10
+                selected = np.concatenate([[True], nonzero])  # 保留常数项
+            else:
+                selected = np.abs(coef_i) > 1e-10
+
+            if np.sum(selected) == 0:
+                # 无特征被选中，只用常数项
+                if include_const:
+                    selected[0] = True
+                else:
+                    B_refit[:, i] = 0
+                    continue
+
+            # OLS重拟合
+            X_sel = X[:, selected]
+            beta_ols = np.linalg.lstsq(X_sel, y_i, rcond=None)[0]
+            B_refit[selected, i] = beta_ols
+
+        residuals = Y_response - X @ B_refit
+        return B_refit, residuals
 
     def get_nonzero_coefficients(self) -> Dict[str, Any]:
         """

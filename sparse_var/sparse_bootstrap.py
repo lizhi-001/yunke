@@ -14,7 +14,8 @@ class SparseBootstrapInference:
     """高维稀疏VAR的Bootstrap推断"""
 
     def __init__(self, B: int = 500, seed: Optional[int] = None,
-                 estimator_type: str = 'lasso', alpha: Optional[float] = None):
+                 estimator_type: str = 'lasso', alpha: Optional[float] = None,
+                 post_lasso_ols: bool = False):
         """
         初始化Bootstrap推断
 
@@ -28,11 +29,14 @@ class SparseBootstrapInference:
             估计方法：'lasso' 或 'debiased_lasso'
         alpha : float, optional
             正则化参数
+        post_lasso_ols : bool
+            是否使用Post-Lasso OLS重拟合
         """
         self.B = B
         self.seed = seed
         self.estimator_type = estimator_type
         self.alpha = alpha
+        self.post_lasso_ols = post_lasso_ols
         self.bootstrap_statistics = None
         self.p_value = None
         self.critical_values = None
@@ -110,7 +114,8 @@ class SparseBootstrapInference:
             Bootstrap检验结果
         """
         # Step 1: 计算原始数据的LR统计量
-        lr_test = SparseLRTest(estimator_type=self.estimator_type, alpha=self.alpha)
+        lr_test = SparseLRTest(estimator_type=self.estimator_type, alpha=self.alpha,
+                               post_lasso_ols=self.post_lasso_ols)
         original_result = lr_test.compute_lr_at_point(Y, p, t)
         original_lr = original_result['lr_statistic']
 

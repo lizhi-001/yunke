@@ -1,0 +1,48 @@
+{
+  "experiment": "Cross-Asset ETF Sparse Structural Break Test",
+  "model": "sparse_lasso",
+  "N": 5,
+  "tickers": [
+    "SPY",
+    "AGG",
+    "TLT",
+    "GLD",
+    "VNQ"
+  ],
+  "timestamp": "20260310_000435",
+  "results": [
+    {
+      "break_label": "COVID-19 (WHO)",
+      "break_date": "2020-03-11",
+      "N": 5,
+      "T": 500,
+      "t": 250,
+      "lr_stat": 800.2501709852004,
+      "p_value": 0.0,
+      "reject_h0": "True",
+      "B_effective": 500
+    },
+    {
+      "break_label": "Placebo: 2019-07 (calm)",
+      "break_date": "2019-07-01",
+      "N": 5,
+      "T": 231,
+      "t": 103,
+      "lr_stat": 69.72054834298615,
+      "p_value": 0.128,
+      "reject_h0": "False",
+      "B_effective": 500
+    },
+    {
+      "break_label": "Placebo: 2019-04 (calm)",
+      "break_date": "2019-04-15",
+      "N": 5,
+      "T": 231,
+      "t": 50,
+      "lr_stat": 43.17461851693588,
+      "p_value": 0.466,
+      "reject_h0": "False",
+      "B_effective": 500
+    }
+  ]
+}
