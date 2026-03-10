@@ -1,0 +1,12 @@
+[2026-03-11 01:36:57] | event=run | status=started | progress=0/144 | B=200 | M_grid=[50, 100, 300, 500, 1000, 2000] | alpha=0.05 | baseline_pvalue_method=bootstrap_lr | deltas=[0.05, 0.1, 0.15, 0.2, 0.3, 0.5] | jobs=4 | power_M=500 | seed_workers=0 | seeds=[42]
+[2026-03-11 01:36:57] | event=seed | status=started | progress=0/144 | seed=42 | jobs=4
+[2026-03-11 01:36:57] | event=model | status=started | progress=0/144 | seed=42 | model=baseline_ols_n5 | jobs=4
+[2026-03-11 01:36:57] | event=stage | status=started | progress=0/144 | seed=42 | model=baseline_ols_n5 | stage=type1_M_50 | M=50 | task=type1_error
+[2026-03-11 01:37:22] | event=stage | status=completed | progress=1/144 | seed=42 | model=baseline_ols_n5 | stage=type1_M_50 | runtime_sec=25.81 | M=50 | metric_value=0.1 | task=type1_error
+[2026-03-11 01:37:22] | event=stage | status=started | progress=1/144 | seed=42 | model=baseline_ols_n5 | stage=type1_M_100 | M=100 | task=type1_error
+[2026-03-11 01:38:12] | event=stage | status=completed | progress=2/144 | seed=42 | model=baseline_ols_n5 | stage=type1_M_100 | runtime_sec=49.97 | M=100 | metric_value=0.08 | task=type1_error
+[2026-03-11 01:38:12] | event=stage | status=started | progress=2/144 | seed=42 | model=baseline_ols_n5 | stage=type1_M_300 | M=300 | task=type1_error
+[2026-03-11 01:40:43] | event=stage | status=completed | progress=3/144 | seed=42 | model=baseline_ols_n5 | stage=type1_M_300 | runtime_sec=150.42 | M=300 | metric_value=0.06 | task=type1_error
+[2026-03-11 01:40:43] | event=stage | status=started | progress=3/144 | seed=42 | model=baseline_ols_n5 | stage=type1_M_500 | M=500 | task=type1_error
+[2026-03-11 01:44:51] | event=stage | status=completed | progress=4/144 | seed=42 | model=baseline_ols_n5 | stage=type1_M_500 | runtime_sec=248.53 | M=500 | metric_value=0.042 | task=type1_error
+[2026-03-11 01:44:51] | event=stage | status=started | progress=4/144 | seed=42 | model=baseline_ols_n5 | stage=type1_M_1000 | M=1000 | task=type1_error

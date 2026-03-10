@@ -1,0 +1,13 @@
+scope,seed,model,metric,M,delta,target_fro,actual_fro,value_mean,value_std,size_distortion_mean,rejections_mean,effective_iterations_mean,runtime_sec_mean,seed_count,target_fro_mean,actual_fro_mean
+aggregate,,baseline_ols_n5,type1_error,10,,,,0.1,0.0,0.05,1.0,10.0,1.2880916595458984,1,,
+aggregate,,baseline_ols_n5,power,10,0.1,0.1,,0.3,0.0,,3.0,10.0,0.26880526542663574,1,0.1,0.10000000000000005
+aggregate,,baseline_ols_n5,power,10,0.3,0.3,,0.9,0.0,,9.0,10.0,0.2662084102630615,1,0.3,0.3000000000000001
+aggregate,,baseline_ols_f_n5,type1_error,10,,,,0.1,0.0,0.05,1.0,10.0,0.053568124771118164,1,,
+aggregate,,baseline_ols_f_n5,power,10,0.1,0.1,,0.2,0.0,,2.0,10.0,0.05060219764709473,1,0.1,0.10000000000000005
+aggregate,,baseline_ols_f_n5,power,10,0.3,0.3,,1.0,0.0,,10.0,10.0,0.05130171775817871,1,0.3,0.3000000000000001
+aggregate,,sparse_lasso_n5,type1_error,10,,,,0.1,0.0,0.05,1.0,10.0,1.08150053024292,1,,
+aggregate,,sparse_lasso_n5,power,10,0.1,0.1,,0.1,0.0,,1.0,10.0,0.8019905090332031,1,0.1,0.1
+aggregate,,sparse_lasso_n5,power,10,0.3,0.3,,0.7,0.0,,7.0,10.0,0.5013015270233154,1,0.3,0.30000000000000004
+aggregate,,lowrank_svd_n5,type1_error,10,,,,0.1,0.0,0.05,1.0,10.0,0.16150784492492676,1,,
+aggregate,,lowrank_svd_n5,power,10,0.1,0.1,,0.2,0.0,,2.0,10.0,0.1646425724029541,1,0.1,0.09999999999999999
+aggregate,,lowrank_svd_n5,power,10,0.3,0.3,,0.9,0.0,,9.0,10.0,0.17733287811279297,1,0.3,0.30000000000000004

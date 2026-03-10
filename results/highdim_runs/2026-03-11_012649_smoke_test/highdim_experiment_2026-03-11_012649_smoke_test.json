@@ -1,0 +1,764 @@
+{
+  "experiment_info": {
+    "timestamp": "2026-03-11 01:26:54",
+    "description": "高维 VAR 结构断裂检验仿真（4方法×3维度=12模型，T=1000）",
+    "config": {
+      "M_grid": [
+        10
+      ],
+      "B": 5,
+      "alpha": 0.05,
+      "deltas": [
+        0.1,
+        0.3
+      ],
+      "seeds": [
+        42
+      ],
+      "jobs": 2,
+      "seed_workers": 0,
+      "baseline_pvalue_method": "bootstrap_lr",
+      "_power_M": 10,
+      "skip_type1": false,
+      "power_M": 10,
+      "effect_size_mode": "direct_frobenius",
+      "effect_direction": "normalized_all_ones",
+      "delta_interpretation": "frobenius_norm_of_break",
+      "T": 1000,
+      "p": 1,
+      "t": 500
+    },
+    "total_runtime_sec": 4.9225263595581055,
+    "output_paths": {
+      "run_dir": "results/highdim_runs/2026-03-11_012649_smoke_test",
+      "json": "results/highdim_runs/2026-03-11_012649_smoke_test/highdim_experiment_2026-03-11_012649_smoke_test.json",
+      "raw_csv": "results/highdim_runs/2026-03-11_012649_smoke_test/highdim_raw_2026-03-11_012649_smoke_test.csv",
+      "agg_csv": "results/highdim_runs/2026-03-11_012649_smoke_test/highdim_agg_2026-03-11_012649_smoke_test.csv",
+      "markdown": "results/highdim_runs/2026-03-11_012649_smoke_test/高维仿真报告_2026-03-11_012649_smoke_test.md",
+      "run_meta": "results/highdim_runs/2026-03-11_012649_smoke_test/run_meta.json",
+      "seed_results_dir": "results/highdim_runs/2026-03-11_012649_smoke_test/seed_results",
+      "progress_dir": "results/highdim_runs/2026-03-11_012649_smoke_test/progress",
+      "progress_log": "results/highdim_runs/2026-03-11_012649_smoke_test/progress/progress.log",
+      "progress_jsonl": "results/highdim_runs/2026-03-11_012649_smoke_test/progress/progress.jsonl",
+      "progress_summary": "results/highdim_runs/2026-03-11_012649_smoke_test/progress/summary.json",
+      "seed_summary_pattern": "results/highdim_runs/2026-03-11_012649_smoke_test/progress/seed_<seed>_summary.json"
+    }
+  },
+  "seed_results": {
+    "42": {
+      "seed": 42,
+      "jobs": 2,
+      "runtime_sec": 4.920119285583496,
+      "models": {
+        "baseline_ols_n5": {
+          "model": "baseline_ols_n5",
+          "parameters": {
+            "N": 5,
+            "T": 1000,
+            "p": 1,
+            "t": 500,
+            "M_grid": [
+              10
+            ],
+            "power_M": 10,
+            "B": 5,
+            "alpha": 0.05,
+            "baseline_pvalue_method": "bootstrap_lr"
+          },
+          "phi": [
+            [
+              0.0914151239263294,
+              -0.31199523187214867,
+              0.22513535874193716,
+              0.28216941491736414,
+              -0.5853105565961509
+            ],
+            [
+              -0.3906538520586954,
+              0.03835212095018561,
+              -0.09487277770307466,
+              -0.005040347251286639,
+              -0.255913178272074
+            ],
+            [
+              0.26381939245884856,
+              0.23333758062868448,
+              0.019809209268364814,
+              0.33817236209040985,
+              0.14025280267561369
+            ],
+            [
+              -0.25778773886497147,
+              0.11062523522474965,
+              -0.2876647802486997,
+              0.26353509039218176,
+              -0.014977773295875869
+            ],
+            [
+              -0.055458709063578165,
+              -0.20427886332118242,
+              0.3667624016022091,
+              -0.046358844620640646,
+              -0.12849834664893217
+            ]
+          ],
+          "type1_error_by_M": [
+            {
+              "M": 10,
+              "value": 0.1,
+              "size_distortion": 0.05,
+              "rejections": 1,
+              "M_effective": 10,
+              "runtime_sec": 1.2880916595458984,
+              "pvalue_summary": {
+                "count": 10,
+                "mean": 0.58,
+                "std": 0.3515679166249389,
+                "q25": 0.25,
+                "q50": 0.6,
+                "q75": 0.95
+              }
+            }
+          ],
+          "power_curve": [
+            {
+              "M": 10,
+              "delta": 0.1,
+              "target_fro": 0.1,
+              "actual_fro": 0.10000000000000005,
+              "power": 0.3,
+              "M_effective": 10,
+              "rejections": 3,
+              "runtime_sec": 0.26880526542663574,
+              "stationarity_shrinks": 0,
+              "skipped": false,
+              "pvalue_summary": {
+                "count": 10,
+                "mean": 0.28,
+                "std": 0.28565713714171403,
+                "q25": 0.05,
+                "q50": 0.2,
+                "q75": 0.35000000000000003
+              }
+            },
+            {
+              "M": 10,
+              "delta": 0.3,
+              "target_fro": 0.3,
+              "actual_fro": 0.3000000000000001,
+              "power": 0.9,
+              "M_effective": 10,
+              "rejections": 9,
+              "runtime_sec": 0.2662084102630615,
+              "stationarity_shrinks": 0,
+              "skipped": false,
+              "pvalue_summary": {
+                "count": 10,
+                "mean": 0.06,
+                "std": 0.18,
+                "q25": 0.0,
+                "q50": 0.0,
+                "q75": 0.0
+              }
+            }
+          ]
+        },
+        "baseline_ols_f_n5": {
+          "model": "baseline_ols_f_n5",
+          "parameters": {
+            "N": 5,
+            "T": 1000,
+            "p": 1,
+            "t": 500,
+            "M_grid": [
+              10
+            ],
+            "power_M": 10,
+            "B": 5,
+            "alpha": 0.05,
+            "baseline_pvalue_method": "bootstrap_lr",
+            "pvalue_method": "asymptotic_f"
+          },
+          "phi": [
+            [
+              0.0914151239263294,
+              -0.31199523187214867,
+              0.22513535874193716,
+              0.28216941491736414,
+              -0.5853105565961509
+            ],
+            [
+              -0.3906538520586954,
+              0.03835212095018561,
+              -0.09487277770307466,
+              -0.005040347251286639,
+              -0.255913178272074
+            ],
+            [
+              0.26381939245884856,
+              0.23333758062868448,
+              0.019809209268364814,
+              0.33817236209040985,
+              0.14025280267561369
+            ],
+            [
+              -0.25778773886497147,
+              0.11062523522474965,
+              -0.2876647802486997,
+              0.26353509039218176,
+              -0.014977773295875869
+            ],
+            [
+              -0.055458709063578165,
+              -0.20427886332118242,
+              0.3667624016022091,
+              -0.046358844620640646,
+              -0.12849834664893217
+            ]
+          ],
+          "type1_error_by_M": [
+            {
+              "M": 10,
+              "value": 0.1,
+              "size_distortion": 0.05,
+              "rejections": 1,
+              "M_effective": 10,
+              "runtime_sec": 0.053568124771118164,
+              "pvalue_summary": {
+                "count": 10,
+                "mean": 0.4039738620669998,
+                "std": 0.19085935394738135,
+                "q25": 0.26250135062518026,
+                "q50": 0.45891214788054135,
+                "q75": 0.5551130052604168
+              }
+            }
+          ],
+          "power_curve": [
+            {
+              "M": 10,
+              "delta": 0.1,
+              "target_fro": 0.1,
+              "actual_fro": 0.10000000000000005,
+              "power": 0.2,
+              "M_effective": 10,
+              "rejections": 2,
+              "runtime_sec": 0.05060219764709473,
+              "stationarity_shrinks": 0,
+              "skipped": false,
+              "pvalue_summary": {
+                "count": 10,
+                "mean": 0.3044734815474117,
+                "std": 0.3083366544524074,
+                "q25": 0.08989109283881967,
+                "q50": 0.16994861196482824,
+                "q75": 0.43857797898119283
+              }
+            },
+            {
+              "M": 10,
+              "delta": 0.3,
+              "target_fro": 0.3,
+              "actual_fro": 0.3000000000000001,
+              "power": 1.0,
+              "M_effective": 10,
+              "rejections": 10,
+              "runtime_sec": 0.05130171775817871,
+              "stationarity_shrinks": 0,
+              "skipped": false,
+              "pvalue_summary": {
+                "count": 10,
+                "mean": 0.0036606177910649346,
+                "std": 0.004688861514108312,
+                "q25": 5.796990490662915e-05,
+                "q50": 0.0013536543222772593,
+                "q75": 0.005331979119770135
+              }
+            }
+          ]
+        },
+        "sparse_lasso_n5": {
+          "model": "sparse_lasso_n5",
+          "parameters": {
+            "N": 5,
+            "T": 1000,
+            "p": 1,
+            "t": 500,
+            "M_grid": [
+              10
+            ],
+            "power_M": 10,
+            "B": 5,
+            "alpha": 0.05,
+            "baseline_pvalue_method": "bootstrap_lr",
+            "sparsity": 0.2,
+            "lasso_alpha": 0.02
+          },
+          "phi": [
+            [
+              0.0914151239263294,
+              -0.0,
+              0.22513535874193716,
+              0.28216941491736414,
+              -0.0
+            ],
+            [
+              -0.0,
+              0.0,
+              -0.0,
+              -0.0,
+              -0.0
+            ],
+            [
+              0.26381939245884856,
+              0.23333758062868448,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              -0.0,
+              0.0,
+              -0.0,
+              0.0,
+              -0.0
+            ],
+            [
+              -0.0,
+              -0.0,
+              0.0,
+              -0.0,
+              -0.12849834664893217
+            ]
+          ],
+          "type1_error_by_M": [
+            {
+              "M": 10,
+              "value": 0.1,
+              "size_distortion": 0.05,
+              "rejections": 1,
+              "M_effective": 10,
+              "runtime_sec": 1.08150053024292,
+              "pvalue_summary": {
+                "count": 10,
+                "mean": 0.5399999999999999,
+                "std": 0.32310988842807026,
+                "q25": 0.25,
+                "q50": 0.6,
+                "q75": 0.75
+              }
+            }
+          ],
+          "power_curve": [
+            {
+              "M": 10,
+              "delta": 0.1,
+              "target_fro": 0.1,
+              "actual_fro": 0.1,
+              "power": 0.1,
+              "M_effective": 10,
+              "rejections": 1,
+              "runtime_sec": 0.8019905090332031,
+              "stationarity_shrinks": 0,
+              "skipped": false,
+              "pvalue_summary": {
+                "count": 10,
+                "mean": 0.56,
+                "std": 0.29393876913398137,
+                "q25": 0.4,
+                "q50": 0.6,
+                "q75": 0.8
+              }
+            },
+            {
+              "M": 10,
+              "delta": 0.3,
+              "target_fro": 0.3,
+              "actual_fro": 0.30000000000000004,
+              "power": 0.7,
+              "M_effective": 10,
+              "rejections": 7,
+              "runtime_sec": 0.5013015270233154,
+              "stationarity_shrinks": 0,
+              "skipped": false,
+              "pvalue_summary": {
+                "count": 10,
+                "mean": 0.08,
+                "std": 0.132664991614216,
+                "q25": 0.0,
+                "q50": 0.0,
+                "q75": 0.15000000000000002
+              }
+            }
+          ]
+        },
+        "lowrank_svd_n5": {
+          "model": "lowrank_svd_n5",
+          "parameters": {
+            "N": 5,
+            "T": 1000,
+            "p": 1,
+            "t": 500,
+            "M_grid": [
+              10
+            ],
+            "power_M": 10,
+            "B": 5,
+            "alpha": 0.05,
+            "baseline_pvalue_method": "bootstrap_lr",
+            "rank": 2
+          },
+          "phi": [
+            [
+              -0.04868313011693803,
+              -0.10369730320299948,
+              0.09324977269857994,
+              0.09986285940259358,
+              0.028764086799512985
+            ],
+            [
+              0.12523580216853195,
+              0.09988165098730138,
+              -0.041163950403462844,
+              -0.05626455071687252,
+              0.055104797588870456
+            ],
+            [
+              -0.24557050014359907,
+              -0.1437028752130028,
+              0.01861432720286859,
+              0.047627236502794316,
+              -0.14839874560676908
+            ],
+            [
+              -0.0120193511681722,
+              -0.03132362614413926,
+              0.02983603129573235,
+              0.03153426915102104,
+              0.011528112617725732
+            ],
+            [
+              -0.061043903218619036,
+              -0.08664260927981737,
+              0.06526435674405502,
+              0.07305961859009447,
+              0.002504701199110381
+            ]
+          ],
+          "type1_error_by_M": [
+            {
+              "M": 10,
+              "value": 0.1,
+              "size_distortion": 0.05,
+              "rejections": 1,
+              "M_effective": 10,
+              "runtime_sec": 0.16150784492492676,
+              "pvalue_summary": {
+                "count": 10,
+                "mean": 0.4600000000000001,
+                "std": 0.3352610922848042,
+                "q25": 0.2,
+                "q50": 0.4,
+                "q75": 0.7000000000000001
+              }
+            }
+          ],
+          "power_curve": [
+            {
+              "M": 10,
+              "delta": 0.1,
+              "target_fro": 0.1,
+              "actual_fro": 0.09999999999999999,
+              "power": 0.2,
+              "M_effective": 10,
+              "rejections": 2,
+              "runtime_sec": 0.1646425724029541,
+              "stationarity_shrinks": 0,
+              "skipped": false,
+              "pvalue_summary": {
+                "count": 10,
+                "mean": 0.52,
+                "std": 0.41182520563948,
+                "q25": 0.2,
+                "q50": 0.4,
+                "q75": 1.0
+              }
+            },
+            {
+              "M": 10,
+              "delta": 0.3,
+              "target_fro": 0.3,
+              "actual_fro": 0.30000000000000004,
+              "power": 0.9,
+              "M_effective": 10,
+              "rejections": 9,
+              "runtime_sec": 0.17733287811279297,
+              "stationarity_shrinks": 0,
+              "skipped": false,
+              "pvalue_summary": {
+                "count": 10,
+                "mean": 0.02,
+                "std": 0.06,
+                "q25": 0.0,
+                "q50": 0.0,
+                "q75": 0.0
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "aggregates": {
+    "models": {
+      "baseline_ols_n5": {
+        "parameters": {
+          "N": 5,
+          "T": 1000,
+          "p": 1,
+          "t": 500,
+          "M_grid": [
+            10
+          ],
+          "power_M": 10,
+          "B": 5,
+          "alpha": 0.05,
+          "baseline_pvalue_method": "bootstrap_lr"
+        },
+        "type1_error_by_M": [
+          {
+            "M": 10,
+            "value_mean": 0.1,
+            "value_std": 0.0,
+            "value_min": 0.1,
+            "value_max": 0.1,
+            "size_distortion_mean": 0.05,
+            "rejections_mean": 1.0,
+            "M_effective_mean": 10.0,
+            "runtime_sec_mean": 1.2880916595458984,
+            "seed_count": 1
+          }
+        ],
+        "power_curve": [
+          {
+            "M": 10,
+            "delta": 0.1,
+            "target_fro_mean": 0.1,
+            "actual_fro_mean": 0.10000000000000005,
+            "power_mean": 0.3,
+            "power_std": 0.0,
+            "power_min": 0.3,
+            "power_max": 0.3,
+            "rejections_mean": 3.0,
+            "M_effective_mean": 10.0,
+            "runtime_sec_mean": 0.26880526542663574,
+            "seed_count": 1,
+            "skipped_count": 0
+          },
+          {
+            "M": 10,
+            "delta": 0.3,
+            "target_fro_mean": 0.3,
+            "actual_fro_mean": 0.3000000000000001,
+            "power_mean": 0.9,
+            "power_std": 0.0,
+            "power_min": 0.9,
+            "power_max": 0.9,
+            "rejections_mean": 9.0,
+            "M_effective_mean": 10.0,
+            "runtime_sec_mean": 0.2662084102630615,
+            "seed_count": 1,
+            "skipped_count": 0
+          }
+        ]
+      },
+      "baseline_ols_f_n5": {
+        "parameters": {
+          "N": 5,
+          "T": 1000,
+          "p": 1,
+          "t": 500,
+          "M_grid": [
+            10
+          ],
+          "power_M": 10,
+          "B": 5,
+          "alpha": 0.05,
+          "baseline_pvalue_method": "bootstrap_lr",
+          "pvalue_method": "asymptotic_f"
+        },
+        "type1_error_by_M": [
+          {
+            "M": 10,
+            "value_mean": 0.1,
+            "value_std": 0.0,
+            "value_min": 0.1,
+            "value_max": 0.1,
+            "size_distortion_mean": 0.05,
+            "rejections_mean": 1.0,
+            "M_effective_mean": 10.0,
+            "runtime_sec_mean": 0.053568124771118164,
+            "seed_count": 1
+          }
+        ],
+        "power_curve": [
+          {
+            "M": 10,
+            "delta": 0.1,
+            "target_fro_mean": 0.1,
+            "actual_fro_mean": 0.10000000000000005,
+            "power_mean": 0.2,
+            "power_std": 0.0,
+            "power_min": 0.2,
+            "power_max": 0.2,
+            "rejections_mean": 2.0,
+            "M_effective_mean": 10.0,
+            "runtime_sec_mean": 0.05060219764709473,
+            "seed_count": 1,
+            "skipped_count": 0
+          },
+          {
+            "M": 10,
+            "delta": 0.3,
+            "target_fro_mean": 0.3,
+            "actual_fro_mean": 0.3000000000000001,
+            "power_mean": 1.0,
+            "power_std": 0.0,
+            "power_min": 1.0,
+            "power_max": 1.0,
+            "rejections_mean": 10.0,
+            "M_effective_mean": 10.0,
+            "runtime_sec_mean": 0.05130171775817871,
+            "seed_count": 1,
+            "skipped_count": 0
+          }
+        ]
+      },
+      "sparse_lasso_n5": {
+        "parameters": {
+          "N": 5,
+          "T": 1000,
+          "p": 1,
+          "t": 500,
+          "M_grid": [
+            10
+          ],
+          "power_M": 10,
+          "B": 5,
+          "alpha": 0.05,
+          "baseline_pvalue_method": "bootstrap_lr",
+          "sparsity": 0.2,
+          "lasso_alpha": 0.02
+        },
+        "type1_error_by_M": [
+          {
+            "M": 10,
+            "value_mean": 0.1,
+            "value_std": 0.0,
+            "value_min": 0.1,
+            "value_max": 0.1,
+            "size_distortion_mean": 0.05,
+            "rejections_mean": 1.0,
+            "M_effective_mean": 10.0,
+            "runtime_sec_mean": 1.08150053024292,
+            "seed_count": 1
+          }
+        ],
+        "power_curve": [
+          {
+            "M": 10,
+            "delta": 0.1,
+            "target_fro_mean": 0.1,
+            "actual_fro_mean": 0.1,
+            "power_mean": 0.1,
+            "power_std": 0.0,
+            "power_min": 0.1,
+            "power_max": 0.1,
+            "rejections_mean": 1.0,
+            "M_effective_mean": 10.0,
+            "runtime_sec_mean": 0.8019905090332031,
+            "seed_count": 1,
+            "skipped_count": 0
+          },
+          {
+            "M": 10,
+            "delta": 0.3,
+            "target_fro_mean": 0.3,
+            "actual_fro_mean": 0.30000000000000004,
+            "power_mean": 0.7,
+            "power_std": 0.0,
+            "power_min": 0.7,
+            "power_max": 0.7,
+            "rejections_mean": 7.0,
+            "M_effective_mean": 10.0,
+            "runtime_sec_mean": 0.5013015270233154,
+            "seed_count": 1,
+            "skipped_count": 0
+          }
+        ]
+      },
+      "lowrank_svd_n5": {
+        "parameters": {
+          "N": 5,
+          "T": 1000,
+          "p": 1,
+          "t": 500,
+          "M_grid": [
+            10
+          ],
+          "power_M": 10,
+          "B": 5,
+          "alpha": 0.05,
+          "baseline_pvalue_method": "bootstrap_lr",
+          "rank": 2
+        },
+        "type1_error_by_M": [
+          {
+            "M": 10,
+            "value_mean": 0.1,
+            "value_std": 0.0,
+            "value_min": 0.1,
+            "value_max": 0.1,
+            "size_distortion_mean": 0.05,
+            "rejections_mean": 1.0,
+            "M_effective_mean": 10.0,
+            "runtime_sec_mean": 0.16150784492492676,
+            "seed_count": 1
+          }
+        ],
+        "power_curve": [
+          {
+            "M": 10,
+            "delta": 0.1,
+            "target_fro_mean": 0.1,
+            "actual_fro_mean": 0.09999999999999999,
+            "power_mean": 0.2,
+            "power_std": 0.0,
+            "power_min": 0.2,
+            "power_max": 0.2,
+            "rejections_mean": 2.0,
+            "M_effective_mean": 10.0,
+            "runtime_sec_mean": 0.1646425724029541,
+            "seed_count": 1,
+            "skipped_count": 0
+          },
+          {
+            "M": 10,
+            "delta": 0.3,
+            "target_fro_mean": 0.3,
+            "actual_fro_mean": 0.30000000000000004,
+            "power_mean": 0.9,
+            "power_std": 0.0,
+            "power_min": 0.9,
+            "power_max": 0.9,
+            "rejections_mean": 9.0,
+            "M_effective_mean": 10.0,
+            "runtime_sec_mean": 0.17733287811279297,
+            "seed_count": 1,
+            "skipped_count": 0
+          }
+        ]
+      }
+    }
+  }
+}

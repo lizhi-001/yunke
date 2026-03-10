@@ -1,0 +1,13 @@
+scope,seed,model,metric,M,delta,target_fro,actual_fro,value_mean,value_std,size_distortion_mean,M_effective_mean,M_effective_min,runtime_sec_mean,seed_count,actual_fro_mean,skipped_count
+aggregate,,ols_n10,type1_error,5,,,,0.2,0.0,0.15000000000000002,5.0,5.0,0.8371303081512451,1,,
+aggregate,,ols_n10,power,5,0.2,0.2,,0.4,0.0,,5.0,,0.05827617645263672,1,0.20000000000000004,0
+aggregate,,ols_n10,power,5,0.5,0.5,,0.8,0.0,,5.0,,0.05793166160583496,1,0.5,0
+aggregate,,ols_n20,type1_error,5,,,,0.0,0.0,-0.05,5.0,5.0,1.187628984451294,1,,
+aggregate,,ols_n20,power,5,0.2,0.2,,0.0,0.0,,5.0,,0.9418768882751465,1,0.2000000000000001,0
+aggregate,,ols_n20,power,5,0.5,0.5,,0.4,0.0,,5.0,,0.5801472663879395,1,0.5,0
+aggregate,,lasso_n20,type1_error,5,,,,0.2,0.0,0.15000000000000002,5.0,5.0,1.3885056972503662,1,,
+aggregate,,lasso_n20,power,5,0.2,0.2,,0.2,0.0,,5.0,,1.0129690170288086,1,0.20000000000000007,0
+aggregate,,lasso_n20,power,5,0.5,0.5,,0.0,0.0,,5.0,,1.0986509323120117,1,0.5,0
+aggregate,,svd_n20,type1_error,5,,,,0.2,0.0,0.15000000000000002,5.0,5.0,0.8652291297912598,1,,
+aggregate,,svd_n20,power,5,0.2,0.2,,0.2,0.0,,5.0,,1.550264835357666,1,0.2,0
+aggregate,,svd_n20,power,5,0.5,0.5,,0.6,0.0,,5.0,,0.9252772331237793,1,0.5,0

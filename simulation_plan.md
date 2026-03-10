@@ -605,7 +605,190 @@ python3 applications/sector_lowrank_test.py --B 500 --verbose
 
 ---
 
-## 11. 命令行参数参考
+## 11. 高维仿真实验（扩展）
+
+### 11.1 实验动机与核心叙事
+
+原实验（Section 4）以 $N=2,5,10$ 展示了不同维度下各方法的 size 与 power，但三个维度对应**三种不同方法**（OLS / Lasso / SVD），难以单独剥离"维度效应"。
+
+高维实验针对以下问题：
+
+> **当 OLS 在高维下仍然统计可行（参数量 < 观测数）时，结构化方法（Lasso/SVD）是否依然更有统计效率？**
+
+通过固定 $T=1000$ 使 OLS 在 $N=5,10,20$ 三个维度均可行，系统比较 4 种方法在相同维度下的 size 控制与检验功效，论证：**即使 OLS 可行，结构化方法在高维时的统计效率更高。**
+
+---
+
+### 11.2 OLS 可行性分析
+
+实验参数：$T = 1000$，$p = 1$，$t^* = 500$，每段有效观测数 $\approx 499$。
+
+OLS 每段参数量 $= N^2 p + N = N^2 + N$：
+
+| $N$ | 参数量 | 每段有效观测 | 参数/观测比 | 可行性 |
+|---:|---:|---:|---:|---|
+| 5 | 30 | 499 | 0.06 | ✓ 充裕 |
+| 10 | 110 | 499 | 0.22 | ✓ 充裕 |
+| 20 | 420 | 499 | 0.84 | ✓ 可行（紧） |
+
+三个维度下 OLS 均为**欠定以上**（有效自由度 $> 0$），`numpy.linalg.lstsq` 可正常求解，LR 统计量不退化为欠定极值。
+
+---
+
+### 11.3 模型矩阵（4 方法 × 3 维度 = 12 个模型）
+
+| 模型名 | 方法 | $N$ | DGP | p 值方法 | B 有效 |
+|---|---|---:|---|---|---|
+| `baseline_ols_n5` | OLS | 5 | 稠密 | Bootstrap LR | ✓ |
+| `baseline_ols_n10` | OLS | 10 | 稠密 | Bootstrap LR | ✓ |
+| `baseline_ols_n20` | OLS | 20 | 稠密 | Bootstrap LR | ✓ |
+| `baseline_ols_f_n5` | OLS | 5 | 稠密 | 渐近 F | ✗ |
+| `baseline_ols_f_n10` | OLS | 10 | 稠密 | 渐近 F | ✗ |
+| `baseline_ols_f_n20` | OLS | 20 | 稠密 | 渐近 F | ✗ |
+| `sparse_lasso_n5` | Lasso | 5 | 稀疏(0.2) | Bootstrap LR | ✓ |
+| `sparse_lasso_n10` | Lasso | 10 | 稀疏(0.2) | Bootstrap LR | ✓ |
+| `sparse_lasso_n20` | Lasso | 20 | 稀疏(0.2) | Bootstrap LR | ✓ |
+| `lowrank_svd_n5` | SVD | 5 | 低秩(rank=2) | Bootstrap LR | ✓ |
+| `lowrank_svd_n10` | SVD | 10 | 低秩(rank=2) | Bootstrap LR | ✓ |
+| `lowrank_svd_n20` | SVD | 20 | 低秩(rank=2) | Bootstrap LR | ✓ |
+
+**检验统计量构造**：所有方法均采用同一 LR 框架（见 Section 3.1），差异仅在估计器（OLS / Lasso / SVD）。渐近 F 检验（`_f_` 系列）使用 Chow F 统计量，不依赖 Bootstrap，$B$ 参数传入但不生效。
+
+---
+
+### 11.4 DGP 的 scale 自适应调整
+
+原实验固定 `scale=0.3`（适用于 $N \leq 10$），$N=20$ 时稠密随机矩阵谱半径约为 $\text{scale} \cdot \sqrt{N} \approx 0.3 \times 4.5 = 1.34 > 1$，无法生成平稳矩阵。
+
+高维实验采用随维度自适应的 scale：
+
+**稠密矩阵**（OLS / baseline）：
+
+$$
+\text{scale\_dense}(N) = \min\!\left(0.3,\; \frac{0.85}{\sqrt{N}}\right)
+$$
+
+保证谱半径 $\approx \text{scale} \cdot \sqrt{N} \leq 0.85$，留有平稳性安全边界。
+
+**低秩矩阵**（SVD）：
+
+$$
+\text{scale\_lowrank}(N) = \min\!\left(0.3,\; \sqrt{\frac{0.7}{N}}\right)
+$$
+
+低秩矩阵谱范数 $\approx \text{scale}^2 \cdot N \leq 0.7$，确保平稳性。
+
+**稀疏矩阵**（Lasso）：沿用稠密公式，稀疏化后实际谱半径更小，不会触发平稳性问题。
+
+各模型实测谱半径（seed=42）：
+
+| $N$ | OLS | Lasso | SVD |
+|---:|---:|---:|---:|
+| 5 | 0.73 | 0.29 | 0.21 |
+| 10 | 0.75 | 0.38 | 0.25 |
+| 20 | 0.81 | 0.55 | 0.13 |
+
+---
+
+### 11.5 参数配置
+
+| 参数 | 值 | 说明 |
+|---|---|---|
+| $T$ | 1000 | 总样本长度 |
+| $p$ | 1 | VAR 滞后阶数 |
+| $t^*$ | 500 | 已知断点位置（正中） |
+| $\Sigma$ | $0.5 I_N$ | 残差协方差 |
+| $M_{\text{grid}}$ | [50, 100, 300, 500, 1000, 2000] | Type I error 评估 |
+| $M_{\text{power}}$ | 500 | Power 评估（3 seed 聚合后 SE $\approx 0.013$） |
+| $B$ | 200（初跑）/ 500（完整） | Bootstrap 重复次数 |
+| $\alpha$ | 0.05 | 显著性水平 |
+| $\delta$ | [0.05, 0.1, 0.15, 0.2, 0.3, 0.5] | Frobenius 效应量网格 |
+| seeds | [42] | 初跑单 seed；完整实验可扩展 |
+| Lasso $\alpha$ | 0.02 | 固定正则化参数 |
+| SVD rank | 2 | 固定截断秩 |
+
+**与原实验参数对比**：
+
+| 参数 | 原实验 | 高维实验 |
+|---|---|---|
+| $T$ | 500 | **1000** |
+| $t^*$ | 250 | **500** |
+| 模型数 | 4 | **12** |
+| $N$ 水平 | 2, 5, 10 | **5, 10, 20** |
+| $B$（完整） | 500 | **500** |
+| $M_{\text{power}}$ | 300 | **500** |
+
+---
+
+### 11.6 实现脚本
+
+脚本路径：`experiments/run_highdim_mgrid_multiseed.py`
+
+与原实验脚本（`run_large_scale_mgrid_multiseed.py`）结构完全一致，差异：
+
+1. `MODEL_EXECUTION_ORDER`：12 个模型
+2. `get_model_setup()`：按模型名解析方法类型和 $N$，参数化生成配置，`T=1000`, `t=500`
+3. `ExperimentConfig`：$B$ 默认 500，`power_M` 默认 500
+4. `run_all_models_for_seed()`：12 个模型顺序执行，各独占全部 worker
+5. 输出目录：`results/highdim_runs/`
+6. 支持 `--models` 参数运行模型子集
+
+进度追踪与原实验完全相同：`progress/progress.log`、`progress/progress.jsonl`、`progress/summary.json`、`progress/seed_<seed>_summary.json`。
+
+**运行命令**：
+
+```bash
+# 初跑（B=200，单 seed）
+python3 experiments/run_highdim_mgrid_multiseed.py \
+  --B 200 --seeds 42 --jobs 4 --tag b200_seed42
+
+# 完整实验（B=500，多 seed）
+python3 experiments/run_highdim_mgrid_multiseed.py \
+  --B 500 --seeds 42 2026 7 --jobs 4 --tag full
+
+# 仅跑部分模型（快速验证）
+python3 experiments/run_highdim_mgrid_multiseed.py \
+  --models baseline_ols_n20 baseline_ols_f_n20 sparse_lasso_n20 lowrank_svd_n20 \
+  --B 100 --seeds 42 --tag n20_only
+
+# 跳过 Type I error，只评估 Power
+python3 experiments/run_highdim_mgrid_multiseed.py \
+  --skip-type1 --B 200 --seeds 42 --tag power_only
+```
+
+---
+
+### 11.7 计算量分析
+
+以 $M=5$、$B=5$ 的基准测试推算（jobs=4，单线程等效）：
+
+| 模型 | 基准耗时(s) | B=200,seed=1 预估(h) | 主要原因 |
+|---|---:|---:|---|
+| `baseline_ols_f_*`（全部） | < 0.5 | < 0.1 | 渐近 F，无 bootstrap |
+| `sparse_lasso_n5/n10` | 0.8–1.3 | 约 9 × 2 | bootstrap + Lasso |
+| `sparse_lasso_n20` | 2.6 | 约 20 | bootstrap + 高维 Lasso |
+| `lowrank_svd_n5/n10` | 0.2–0.8 | 约 2–6 | bootstrap + SVD |
+| `baseline_ols_n5/n10` | 0.8–1.1 | 约 6–9 | bootstrap + OLS |
+| **`baseline_ols_n20`** | **14.4** | **约 119** | bootstrap + 近奇异 OLS |
+| **`lowrank_svd_n20`** | **23.2** | **约 185** | bootstrap + OLS 预估 + SVD |
+| **合计** | — | **≈ 367** | B=200, seed=1, jobs=4 |
+
+**瓶颈**：`lowrank_svd_n20`（50%）和 `baseline_ols_n20`（32%）合占 82%，原因是 $N=20$ 时 OLS 矩阵求解在参数/观测比 0.84 时接近数值奇异，每次迭代耗时显著增加。
+
+**精度**（B=200, M=2000, seed=1）：
+
+| 指标 | SE | 95% CI |
+|---|---|---|
+| Type I error（$\alpha=0.05$） | 0.0049 | ±0.010 |
+| Power（假设=0.5） | 0.0112 | ±0.022 |
+
+对"定性展示高维趋势"的论文目的，精度满足要求。
+
+---
+
+## 12. 命令行参数参考
+
+### 原始实验（`run_large_scale_mgrid_multiseed.py`）
 
 | 参数 | 默认值 | 说明 |
 |---|---|---|
@@ -620,3 +803,21 @@ python3 applications/sector_lowrank_test.py --B 500 --verbose
 | `--baseline-pvalue-method` | bootstrap_lr | baseline_ols 的 p 值方法 |
 | `--skip-type1` | false | 跳过 Type I error 评估，只跑 power |
 | `--tag` | （空） | 运行标签，附加到输出目录名 |
+
+### 高维实验（`run_highdim_mgrid_multiseed.py`）
+
+在原始实验全部参数基础上，新增以下参数，其余参数含义相同：
+
+| 参数 | 默认值 | 说明 |
+|---|---|---|
+| `--B` | **500** | Bootstrap 重复次数（高维实验默认更大） |
+| `--power-M` | **500** | 功效评估 MC 次数（独立于 M_grid，不再随 M_grid 最大值变化） |
+| `--models` | （全部 12 个） | 指定运行的模型子集，如 `--models baseline_ols_n20 sparse_lasso_n20` |
+
+**固定参数**（不可通过命令行修改，直接在脚本中定义）：
+
+| 参数 | 值 | 说明 |
+|---|---|---|
+| $T$ | 1000 | 总样本长度 |
+| $t^*$ | 500 | 已知断点位置 |
+| $p$ | 1 | VAR 滞后阶数 |

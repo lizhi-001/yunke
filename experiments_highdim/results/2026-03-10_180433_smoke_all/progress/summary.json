@@ -1,0 +1,29 @@
+{
+  "updated_at": "2026-03-10 18:44:12",
+  "completed_stage_count": 28,
+  "total_stage_count": 28,
+  "progress_ratio": 1.0,
+  "active_stages": [],
+  "completed_stages": [
+    "seed_42/ols_n30/type1_M_20",
+    "seed_42/ols_n30/power_delta_0.20",
+    "seed_42/ols_n30/power_delta_0.50",
+    "seed_42/ols_n30/power_delta_1.00",
+    "seed_42/lasso_n20/type1_M_20",
+    "seed_42/lasso_n20/power_delta_0.20",
+    "seed_42/lasso_n20/power_delta_0.50",
+    "seed_42/lasso_n20/power_delta_1.00",
+    "seed_42/lasso_n30/type1_M_20",
+    "seed_42/lasso_n30/power_delta_0.20",
+    "seed_42/lasso_n30/power_delta_0.50",
+    "seed_42/lasso_n30/power_delta_1.00",
+    "seed_42/svd_n20/type1_M_20",
+    "seed_42/svd_n20/power_delta_0.20",
+    "seed_42/svd_n20/power_delta_0.50",
+    "seed_42/svd_n20/power_delta_1.00",
+    "seed_42/svd_n30/type1_M_20",
+    "seed_42/svd_n30/power_delta_0.20",
+    "seed_42/svd_n30/power_delta_0.50",
+    "seed_42/svd_n30/power_delta_1.00"
+  ]
+}

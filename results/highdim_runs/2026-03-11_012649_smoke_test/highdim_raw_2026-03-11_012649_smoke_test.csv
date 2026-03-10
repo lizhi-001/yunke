@@ -1,0 +1,13 @@
+scope,seed,model,metric,M,delta,target_fro,actual_fro,value,size_distortion,rejections,effective_iterations,runtime_sec
+seed,42,baseline_ols_n5,type1_error,10,,,,0.1,0.05,1,10,1.2880916595458984
+seed,42,baseline_ols_n5,power,10,0.1,0.1,0.10000000000000005,0.3,,3,10,0.26880526542663574
+seed,42,baseline_ols_n5,power,10,0.3,0.3,0.3000000000000001,0.9,,9,10,0.2662084102630615
+seed,42,baseline_ols_f_n5,type1_error,10,,,,0.1,0.05,1,10,0.053568124771118164
+seed,42,baseline_ols_f_n5,power,10,0.1,0.1,0.10000000000000005,0.2,,2,10,0.05060219764709473
+seed,42,baseline_ols_f_n5,power,10,0.3,0.3,0.3000000000000001,1.0,,10,10,0.05130171775817871
+seed,42,sparse_lasso_n5,type1_error,10,,,,0.1,0.05,1,10,1.08150053024292
+seed,42,sparse_lasso_n5,power,10,0.1,0.1,0.1,0.1,,1,10,0.8019905090332031
+seed,42,sparse_lasso_n5,power,10,0.3,0.3,0.30000000000000004,0.7,,7,10,0.5013015270233154
+seed,42,lowrank_svd_n5,type1_error,10,,,,0.1,0.05,1,10,0.16150784492492676
+seed,42,lowrank_svd_n5,power,10,0.1,0.1,0.09999999999999999,0.2,,2,10,0.1646425724029541
+seed,42,lowrank_svd_n5,power,10,0.3,0.3,0.30000000000000004,0.9,,9,10,0.17733287811279297
