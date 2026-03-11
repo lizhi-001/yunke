@@ -1,0 +1,192 @@
+
+\section{高维参数估计方法}
+
+在多元时间序列分析中，向量自回归模型能够较为系统地刻画变量之间的动态依赖关系，因此构成宏观经济波动分析、金融网络结构识别以及结构变化检验的重要基础。模型参数估计的精度不仅关系到系统动态特征的识别，也直接影响后续结构性变化检验的第一类错误率控制与检验功效表现。随着数据采集能力的提升，研究对象已由传统的少量核心变量扩展至包含数十乃至上百个变量的高维系统。在这种背景下，经典估计方法所依赖的大样本渐近理论面临明显挑战：当变量维度迅速上升时，参数规模随之膨胀，有限样本中的自由度被大量消耗，从而使一致且有效的参数估计变得更加困难。
+
+为应对高维情形下的估计不稳定问题，研究者通常结合参数矩阵的先验结构特征，引入正则化或降维方法对 VAR 模型进行约束估计。基于不同的结构假设，高维参数估计方法大体可分为三类：其一是作为基准方法的最小二乘估计；其二是基于稀疏性假设的 Lasso 正则化估计；其三是基于低秩结构假设的奇异值分解截断估计。它们分别对应不同的数据生成特征与参数空间约束方式，也构成了高维 VAR 模型估计方法的主要演进路径。
+
+\subsection{最小二乘（OLS）基准估计与理论推演}
+
+在讨论高维约束估计方法之前，有必要首先给出一般 VAR 模型的统一数学表示。设观测系统包含 $N$ 个相互关联的内生变量，在有效样本长度为 $T_{\mathrm{eff}}$ 的条件下，系统满足 $p$ 阶滞后结构，则其数据生成过程可写为
+\begin{equation}
+ y_t = c + \Phi_1 y_{t-1} + \Phi_2 y_{t-2} + \cdots + \Phi_p y_{t-p} + \epsilon_t,
+\end{equation}
+其中，$y_t=(y_{1t},y_{2t},\dots,y_{Nt})^{\top}$ 为 $N\times 1$ 维观测向量，$c$ 为 $N\times 1$ 维常数项向量，$\Phi_k\in\mathbb{R}^{N\times N}$ 为第 $k$ 阶滞后系数矩阵，$\epsilon_t$ 为随机扰动向量。对于矩阵 $\Phi_k$ 中的任意元素 $\phi_{ij,k}$，其含义是第 $j$ 个变量在滞后 $k$ 期对第 $i$ 个变量当前值的线性影响强度。
+
+通常假定扰动项 $\epsilon_t$ 满足
+\begin{equation}
+ \mathbb{E}(\epsilon_t)=\bm{0}, \qquad \mathbb{E}(\epsilon_t\epsilon_t^{\top})=\Sigma,
+\end{equation}
+并且在时间维度上不存在自相关，即对于任意 $t\neq s$，有
+\begin{equation}
+ \mathbb{E}(\epsilon_t\epsilon_s^{\top})=\bm{0}.
+\end{equation}
+其中，$\Sigma$ 为 $N\times N$ 的对称正定协方差矩阵，其对角线元素表示各变量特质性冲击的方差，非对角线元素刻画变量之间的同期相关性。为了保证模型的统计性质良好，VAR 系统还必须满足平稳性条件，即特征方程的全部根位于单位圆之外，或者等价地，伴随矩阵的全部特征值模长严格小于 $1$。
+
+为了便于参数估计的矩阵推导，可将逐期联立方程重写为紧凑的矩阵回归形式。定义响应变量矩阵与误差矩阵分别为
+\begin{equation}
+ Y=
+ \begin{pmatrix}
+ y_1^{\top}\\
+ y_2^{\top}\\
+ \vdots\\
+ y_{T_{\mathrm{eff}}}^{\top}
+ \end{pmatrix}
+ \in\mathbb{R}^{T_{\mathrm{eff}}\times N},
+ \qquad
+ E=
+ \begin{pmatrix}
+ \epsilon_1^{\top}\\
+ \epsilon_2^{\top}\\
+ \vdots\\
+ \epsilon_{T_{\mathrm{eff}}}^{\top}
+ \end{pmatrix}
+ \in\mathbb{R}^{T_{\mathrm{eff}}\times N}.
+\end{equation}
+进一步定义设计矩阵
+\begin{equation}
+ X=
+ \begin{pmatrix}
+ 1 & y_0^{\top} & y_{-1}^{\top} & \cdots & y_{1-p}^{\top}\\
+ 1 & y_1^{\top} & y_0^{\top} & \cdots & y_{2-p}^{\top}\\
+ \vdots & \vdots & \vdots & \ddots & \vdots\\
+ 1 & y_{T_{\mathrm{eff}}-1}^{\top} & y_{T_{\mathrm{eff}}-2}^{\top} & \cdots & y_{T_{\mathrm{eff}}-p}^{\top}
+ \end{pmatrix}
+ \in\mathbb{R}^{T_{\mathrm{eff}}\times (Np+1)},
+\end{equation}
+并将常数项与全部滞后系数矩阵按列堆叠为参数矩阵
+\begin{equation}
+ \Phi=
+ \begin{pmatrix}
+ c^{\top}\\
+ \Phi_1^{\top}\\
+ \Phi_2^{\top}\\
+ \vdots\\
+ \Phi_p^{\top}
+ \end{pmatrix}
+ \in\mathbb{R}^{(Np+1)\times N}.
+\end{equation}
+于是，VAR($p$) 模型可被改写为标准的多元线性回归形式：
+\begin{equation}
+ Y=X\Phi+E.
+\end{equation}
+
+在维度较低、样本量相对充足的情况下，最小二乘估计是最常用的基准方法。其思想是通过最小化整体残差平方和来估计参数矩阵，即求解优化问题
+\begin{equation}
+ \hat{\Phi}_{\mathrm{OLS}}=\arg\min_{\Phi}\ \mathrm{tr}\bigl[(Y-X\Phi)^{\top}(Y-X\Phi)\bigr].
+\end{equation}
+将目标函数展开为
+\begin{equation}
+ \mathrm{tr}\left(Y^{\top}Y-Y^{\top}X\Phi-\Phi^{\top}X^{\top}Y+\Phi^{\top}X^{\top}X\Phi\right),
+\end{equation}
+并利用迹算子的循环不变性与矩阵微分法则，对参数矩阵 $\Phi$ 求导并令其等于零，可得正规方程
+\begin{equation}
+ -2X^{\top}Y+2X^{\top}X\Phi=\bm{0}.
+\end{equation}
+若 $T_{\mathrm{eff}}$ 充分大，且设计矩阵 $X$ 的列向量线性无关，则 $X^{\top}X$ 为可逆矩阵，从而得到最小二乘估计的解析解
+\begin{equation}
+ \hat{\Phi}_{\mathrm{OLS}}=(X^{\top}X)^{-1}X^{\top}Y.
+\end{equation}
+
+在得到参数估计后，可进一步利用残差构造同期扰动协方差矩阵的估计量。记第 $t$ 期残差为
+\begin{equation}
+ \hat{\epsilon}_t=y_t-\hat{\Phi}_{\mathrm{OLS}}^{\top}x_t,
+\end{equation}
+其中 $x_t^{\top}$ 为设计矩阵 $X$ 的第 $t$ 行，则协方差矩阵可估计为
+\begin{equation}
+ \hat{\Sigma}=\frac{1}{T_{\mathrm{eff}}-L}\sum_{t=1}^{T_{\mathrm{eff}}}\hat{\epsilon}_t\hat{\epsilon}_t^{\top}
+ =\frac{1}{T_{\mathrm{eff}}-(Np+1)}\hat{E}^{\top}\hat{E},
+\end{equation}
+其中，$L=Np+1$ 表示单个方程中实际估计的参数个数。该自由度修正有助于减轻方差估计中的有限样本偏差。
+
+在低维系统中，OLS 估计与极大似然估计在正态性假设下是等价的，因此能够直接用于结构变化检验中的对数似然函数计算。然而，当变量维度上升时，OLS 的局限性会迅速显现。对于一个包含 $N$ 个变量、滞后阶数为 $p$ 的 VAR 系统，仅自回归部分便需要估计 $N^2p$ 个参数。当 $N$ 较大而样本量有限时，参数数量与有效观测数量之比会快速上升，导致信息矩阵 $X^{\top}X$ 条件数恶化，估计结果高度敏感，并伴随明显的过拟合风险。在这种情况下，即便矩阵尚未完全奇异，参数估计的不稳定性仍会使基于渐近理论构造的检验统计量出现明显偏差。因此，OLS 只能作为低维或基准情形下的参考方法，而难以直接适用于高维 VAR 模型的稳健估计。
+
+\subsection{基于 Lasso 的高维稀疏正则化估计与坐标下降推导}
+
+为缓解高维 VAR 模型中的参数爆炸问题，一个自然思路是对系数矩阵引入稀疏性假设。该假设认为，虽然系统中的变量数量可能较多，但真正具有直接动态影响关系的变量对通常只占较小比例，因而真实参数矩阵中包含大量为零的元素。对于宏观经济与金融网络而言，这一设定具有较强的现实解释：变量之间虽然存在广泛的潜在联系，但真正发挥主要作用的直接传导路径通常相对有限。
+
+在稀疏性假设下，最小绝对收缩与选择算子（Least Absolute Shrinkage and Selection Operator, Lasso）被广泛用于高维 VAR 参数估计。与无约束的 OLS 不同，Lasso 在最小化残差平方和的同时，对参数向量施加 $L_1$ 范数惩罚，以实现参数估计与变量选择的同步进行。由于逐方程估计能够有效降低计算复杂度，实际处理中常将多元 VAR 的估计分解为 $N$ 个并行的一元惩罚回归问题。对于第 $i$ 个方程，记响应向量为 $y_i\in\mathbb{R}^{T_{\mathrm{eff}}}$，设计矩阵仍记为 $X\in\mathbb{R}^{T_{\mathrm{eff}}\times(Np+1)}$，其对应参数向量记为 $\beta_i$，则 Lasso 估计问题可表述为
+\begin{equation}
+ \hat{\beta}_i=\arg\min_{\beta_i\in\mathbb{R}^{Np+1}}
+ \left\{
+ \frac{1}{2T_{\mathrm{eff}}}\lVert y_i-X\beta_i\rVert_2^2 + \alpha\lVert\beta_i\rVert_1
+ \right\},
+\end{equation}
+其中，$\alpha>0$ 为正则化参数，控制拟合误差与模型稀疏度之间的平衡。
+
+Lasso 的关键特征在于 $L_1$ 范数惩罚项的引入。相较于平方惩罚，$L_1$ 惩罚在零点处不可微，因而具有将较小系数直接压缩为零的能力。这种几何特征使得 Lasso 尤其适合处理高维但稀疏的参数估计问题。由于目标函数在零点处不可微，传统基于一阶可导假设的标准梯度法并不适用，而坐标下降法则成为求解该类问题的常用算法。
+
+坐标下降法的基本思想是：在每一步迭代中固定其余参数，仅对某一个坐标方向上的参数进行一维优化，然后依次循环更新所有参数，直至收敛。为了推导单个坐标的更新公式，记第 $j$ 个参数对应的解释变量列向量为 $x_j$，并定义去除该变量影响后的偏残差为
+\begin{equation}
+ r_i^{(j)}=y_i-\sum_{k\neq j}x_k\beta_{ik}.
+\end{equation}
+此时，关于单个参数 $\beta_{ij}$ 的优化问题可化为
+\begin{equation}
+ \min_{\beta_{ij}}
+ \left\{
+ \frac{1}{2T_{\mathrm{eff}}}\lVert r_i^{(j)}-x_j\beta_{ij}\rVert_2^2 + \alpha|\beta_{ij}|
+ \right\}.
+\end{equation}
+
+由于绝对值函数在零点不可微，需要借助次梯度条件刻画最优解。对应的一阶最优性条件可写为
+\begin{equation}
+ -\frac{1}{T_{\mathrm{eff}}}x_j^{\top}(r_i^{(j)}-x_j\beta_{ij})+\alpha z=0,
+\end{equation}
+其中，$z$ 属于绝对值函数在 $\beta_{ij}$ 处的次梯度集合。当 $\beta_{ij}>0$ 时，$z=1$；当 $\beta_{ij}<0$ 时，$z=-1$；当 $\beta_{ij}=0$ 时，$z\in[-1,1]$。若进一步假设各列变量已经标准化，使得
+\begin{equation}
+ \frac{x_j^{\top}x_j}{T_{\mathrm{eff}}}=1,
+\end{equation}
+则可推得 $\beta_{ij}$ 的闭式更新公式为
+\begin{equation}
+ \hat{\beta}_{ij}=S_{\alpha}\left(\frac{1}{T_{\mathrm{eff}}}x_j^{\top}r_i^{(j)}\right)
+ =\operatorname{sgn}\left(\frac{1}{T_{\mathrm{eff}}}x_j^{\top}r_i^{(j)}\right)
+ \max\left\{
+ \left|\frac{1}{T_{\mathrm{eff}}}x_j^{\top}r_i^{(j)}\right|-\alpha,\ 0
+ \right\},
+\end{equation}
+其中，$S_{\alpha}(\cdot)$ 表示软阈值算子。该更新公式揭示了 Lasso 稀疏化的基本机制：如果某个变量对应的边际贡献未超过阈值 $\alpha$，其估计值会被直接压缩为零；只有当信号足够强时，该变量才会被保留，但其系数仍会向零方向收缩。
+
+在理论上，Lasso 之所以适用于高维 VAR 模型，是因为在一定条件下它具有较好的非渐近性质。当设计矩阵满足受限特征值条件，误差项具有适当的尾部性质，并且真实模型具有充分稀疏性时，Lasso 估计可以在高维环境中保持较好的参数恢复能力与预测性能。这意味着，即便参数总数超过样本量，只要有效非零参数数量受到控制，Lasso 仍能在一定意义上实现一致估计。正因如此，Lasso 已成为高维稀疏 VAR 模型中最具代表性的估计方法之一。
+
+不过，Lasso 的收缩特性也意味着其估计量存在偏差，尤其是对较大系数的估计会产生系统性低估。因此，在将其应用于结构变化检验或进一步的统计推断时，通常需要结合重新估计、去偏技术或重抽样方法，以提高推断的稳健性。即便如此，作为一种能够有效压缩参数空间并缓解高维病态问题的工具，Lasso 仍然在高维 VAR 模型的参数估计中具有重要地位。
+
+\subsection{基于 SVD 截断的高维低秩逼近估计与理论说明}
+
+稀疏性假设适用于变量之间直接连接较为有限的系统，但在许多宏观经济和金融数据中，变量之间往往表现出较为广泛的联动关系。这类表面上呈现密集相关的系统，未必意味着参数矩阵本身是稠密且高复杂度的；相反，许多变量之间的共同变动可能主要由少数潜在公共因子所驱动。在这种情况下，参数矩阵虽然在元素层面上并不稀疏，但在代数结构上可能具有较低的秩。于是，低秩约束便为高维 VAR 模型提供了另一类自然的降维思路。
+
+低秩假设的核心在于：高维系统的动态关系可以由少数几个潜在因子进行概括，从而使得参数矩阵虽然维度较大，但其有效自由度远低于表面规模。若将系数矩阵表示为
+\begin{equation}
+ \Phi=UV^{\top},
+\end{equation}
+其中，$U\in\mathbb{R}^{N\times r}$ 和 $V\in\mathbb{R}^{Np\times r}$，且 $r\ll N$，则说明整个高维系统的动态结构实质上由 $r$ 个共同方向所主导。这一表示在理论上能够有效降低参数维数，在实践中也更符合由少数宏观因子驱动大量经济变量联动变化的经验事实。
+
+基于低秩假设的估计通常采用两步策略。第一步，暂时忽略秩约束，利用样本获得一个无约束的初始估计矩阵 $\hat{\Phi}_{\mathrm{OLS}}$；第二步，对该矩阵实施奇异值分解，并通过截断较小奇异值获得低秩逼近。具体而言，对于任意实矩阵 $\hat{\Phi}_{\mathrm{OLS}}\in\mathbb{R}^{K\times N}$（其中 $K=Np+1$），总存在奇异值分解
+\begin{equation}
+ \hat{\Phi}_{\mathrm{OLS}}=U\Sigma V^{\top},
+\end{equation}
+其中，$U$ 与 $V$ 为正交矩阵，$\Sigma$ 为非负对角矩阵，其主对角线上元素满足
+\begin{equation}
+ \sigma_1\geq \sigma_2\geq \cdots \geq \sigma_{\min(K,N)}\geq 0.
+\end{equation}
+这些奇异值刻画了矩阵在各个正交方向上的主要变异强度。
+
+在给定目标秩 $r$ 的条件下，问题转化为：在所有秩不超过 $r$ 的矩阵中，寻找一个与 $\hat{\Phi}_{\mathrm{OLS}}$ 距离最近的矩阵。若采用 Frobenius 范数作为逼近误差度量，则目标问题可表示为
+\begin{equation}
+ \min_{B:\,\mathrm{rank}(B)\leq r}\ \lVert \hat{\Phi}_{\mathrm{OLS}}-B\rVert_F^2.
+\end{equation}
+根据 Eckart--Young--Mirsky 定理，该问题的最优解恰好可以通过保留前 $r$ 个最大奇异值并截断其余奇异值获得。也就是说，最优秩 $r$ 逼近矩阵为
+\begin{equation}
+ \hat{\Phi}_r=\sum_{i=1}^{r}\sigma_i u_i v_i^{\top},
+\end{equation}
+其中，$u_i$ 与 $v_i$ 分别为对应的左右奇异向量。与此同时，最小逼近误差满足
+\begin{equation}
+ \min_{B:\,\mathrm{rank}(B)=r}\ \lVert \hat{\Phi}_{\mathrm{OLS}}-B\rVert_F^2
+ =\sum_{i=r+1}^{\min(K,N)}\sigma_i^2.
+\end{equation}
+
+这一结果表明，在 Frobenius 范数意义下，截断 SVD 并非一种经验性的降维技巧，而是具有严格最优性质的低秩近似方法。通过仅保留主导奇异值及其对应方向，该方法能够最大程度地保留参数矩阵中的主要结构信息，同时有效滤除由于样本有限所带来的高频噪声成分。因此，对于那些整体联系较强但内部受少数公共因子驱动的高维系统，低秩逼近往往比稀疏化处理更符合模型真实结构。
+
+从统计角度看，低秩约束的作用在于降低参数空间的有效复杂度。相比直接在全维矩阵空间中进行估计，SVD 截断方法通过将参数矩阵投影到低维主成分子空间中，显著降低了估计方差，提高了高维条件下模型拟合与推断的稳定性。在结构变化分析中，低秩估计还有助于更加清晰地识别系统状态的整体变化，因为模型变化不再体现在大量单个参数的局部波动上，而更多体现为主导结构方向与主要奇异值的变化。
+
+需要指出的是，低秩估计同样会引入新的推断问题。一方面，秩的选取本身会影响估计结果；另一方面，低秩约束使参数空间不再是简单的全空间线性集合，因此相关统计量的经典渐近理论往往不再直接适用。尽管如此，作为高维 VAR 模型中另一类重要的结构约束方法，基于 SVD 截断的低秩逼近估计仍为处理公共因子驱动的高维系统提供了有力工具。与稀疏正则化方法相比，它从另一种结构假设出发实现了有效降维，并与 Lasso 方法共同构成高维 VAR 参数估计的两条主要技术路径。
+

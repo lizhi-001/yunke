@@ -1,2 +1,22 @@
 __pycache__/
 *.py[cod]
+# macOS
+.DS_Store
+
+# Thesis LaTeX temp files
+yunke大论文/SJTUThesis-master/*.aux
+yunke大论文/SJTUThesis-master/*.bbl
+yunke大论文/SJTUThesis-master/*.bcf
+yunke大论文/SJTUThesis-master/*.blg
+yunke大论文/SJTUThesis-master/*.fdb_latexmk
+yunke大论文/SJTUThesis-master/*.fls
+yunke大论文/SJTUThesis-master/*.loa
+yunke大论文/SJTUThesis-master/*.lof
+yunke大论文/SJTUThesis-master/*.log
+yunke大论文/SJTUThesis-master/*.lot
+yunke大论文/SJTUThesis-master/*.out
+yunke大论文/SJTUThesis-master/*.run.xml
+yunke大论文/SJTUThesis-master/*.toc
+yunke大论文/SJTUThesis-master/*.xdv
+yunke大论文/SJTUThesis-master/*.synctex(busy)
+
