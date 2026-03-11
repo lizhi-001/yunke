@@ -1,0 +1,14 @@
+{
+  "run_dir": "results/highdim_runs/2026-03-11_020809_preflight_check",
+  "json": "results/highdim_runs/2026-03-11_020809_preflight_check/highdim_experiment_2026-03-11_020809_preflight_check.json",
+  "raw_csv": "results/highdim_runs/2026-03-11_020809_preflight_check/highdim_raw_2026-03-11_020809_preflight_check.csv",
+  "agg_csv": "results/highdim_runs/2026-03-11_020809_preflight_check/highdim_agg_2026-03-11_020809_preflight_check.csv",
+  "markdown": "results/highdim_runs/2026-03-11_020809_preflight_check/高维仿真报告_2026-03-11_020809_preflight_check.md",
+  "run_meta": "results/highdim_runs/2026-03-11_020809_preflight_check/run_meta.json",
+  "seed_results_dir": "results/highdim_runs/2026-03-11_020809_preflight_check/seed_results",
+  "progress_dir": "results/highdim_runs/2026-03-11_020809_preflight_check/progress",
+  "progress_log": "results/highdim_runs/2026-03-11_020809_preflight_check/progress/progress.log",
+  "progress_jsonl": "results/highdim_runs/2026-03-11_020809_preflight_check/progress/progress.jsonl",
+  "progress_summary": "results/highdim_runs/2026-03-11_020809_preflight_check/progress/summary.json",
+  "seed_summary_pattern": "results/highdim_runs/2026-03-11_020809_preflight_check/progress/seed_<seed>_summary.json"
+}

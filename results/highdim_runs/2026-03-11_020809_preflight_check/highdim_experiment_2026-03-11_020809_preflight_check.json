@@ -1,0 +1,200 @@
+{
+  "experiment_info": {
+    "timestamp": "2026-03-11 02:08:09",
+    "description": "高维 VAR 结构断裂检验仿真（4方法×3维度=12模型，T=1000）",
+    "config": {
+      "M_grid": [
+        5
+      ],
+      "B": 2,
+      "alpha": 0.05,
+      "deltas": [
+        0.05
+      ],
+      "seeds": [
+        42
+      ],
+      "jobs": 1,
+      "seed_workers": 0,
+      "baseline_pvalue_method": "bootstrap_lr",
+      "_power_M": 5,
+      "skip_type1": false,
+      "power_M": 5,
+      "effect_size_mode": "direct_frobenius",
+      "effect_direction": "normalized_all_ones",
+      "delta_interpretation": "frobenius_norm_of_break",
+      "T": 1000,
+      "p": 1,
+      "t": 500
+    },
+    "total_runtime_sec": 0.048069000244140625,
+    "output_paths": {
+      "run_dir": "results/highdim_runs/2026-03-11_020809_preflight_check",
+      "json": "results/highdim_runs/2026-03-11_020809_preflight_check/highdim_experiment_2026-03-11_020809_preflight_check.json",
+      "raw_csv": "results/highdim_runs/2026-03-11_020809_preflight_check/highdim_raw_2026-03-11_020809_preflight_check.csv",
+      "agg_csv": "results/highdim_runs/2026-03-11_020809_preflight_check/highdim_agg_2026-03-11_020809_preflight_check.csv",
+      "markdown": "results/highdim_runs/2026-03-11_020809_preflight_check/高维仿真报告_2026-03-11_020809_preflight_check.md",
+      "run_meta": "results/highdim_runs/2026-03-11_020809_preflight_check/run_meta.json",
+      "seed_results_dir": "results/highdim_runs/2026-03-11_020809_preflight_check/seed_results",
+      "progress_dir": "results/highdim_runs/2026-03-11_020809_preflight_check/progress",
+      "progress_log": "results/highdim_runs/2026-03-11_020809_preflight_check/progress/progress.log",
+      "progress_jsonl": "results/highdim_runs/2026-03-11_020809_preflight_check/progress/progress.jsonl",
+      "progress_summary": "results/highdim_runs/2026-03-11_020809_preflight_check/progress/summary.json",
+      "seed_summary_pattern": "results/highdim_runs/2026-03-11_020809_preflight_check/progress/seed_<seed>_summary.json"
+    }
+  },
+  "seed_results": {
+    "42": {
+      "seed": 42,
+      "jobs": 1,
+      "runtime_sec": 0.045905113220214844,
+      "models": {
+        "baseline_ols_f_n5": {
+          "model": "baseline_ols_f_n5",
+          "parameters": {
+            "N": 5,
+            "T": 1000,
+            "p": 1,
+            "t": 500,
+            "M_grid": [
+              5
+            ],
+            "power_M": 5,
+            "B": 2,
+            "alpha": 0.05,
+            "baseline_pvalue_method": "bootstrap_lr",
+            "pvalue_method": "asymptotic_f"
+          },
+          "phi": [
+            [
+              0.0914151239263294,
+              -0.31199523187214867,
+              0.22513535874193716,
+              0.28216941491736414,
+              -0.5853105565961509
+            ],
+            [
+              -0.3906538520586954,
+              0.03835212095018561,
+              -0.09487277770307466,
+              -0.005040347251286639,
+              -0.255913178272074
+            ],
+            [
+              0.26381939245884856,
+              0.23333758062868448,
+              0.019809209268364814,
+              0.33817236209040985,
+              0.14025280267561369
+            ],
+            [
+              -0.25778773886497147,
+              0.11062523522474965,
+              -0.2876647802486997,
+              0.26353509039218176,
+              -0.014977773295875869
+            ],
+            [
+              -0.055458709063578165,
+              -0.20427886332118242,
+              0.3667624016022091,
+              -0.046358844620640646,
+              -0.12849834664893217
+            ]
+          ],
+          "type1_error_by_M": [
+            {
+              "M": 5,
+              "value": 0.0,
+              "size_distortion": -0.05,
+              "rejections": 0,
+              "M_effective": 5,
+              "runtime_sec": 0.02254009246826172,
+              "pvalue_summary": {
+                "count": 5,
+                "mean": 0.3161123955406756,
+                "std": 0.20893828804607031,
+                "q25": 0.1673592480103748,
+                "q50": 0.26453234275228943,
+                "q75": 0.46501234453271323
+              }
+            }
+          ],
+          "power_curve": [
+            {
+              "M": 5,
+              "delta": 0.05,
+              "target_fro": 0.05,
+              "actual_fro": 0.05000000000000003,
+              "power": 0.2,
+              "M_effective": 5,
+              "rejections": 1,
+              "runtime_sec": 0.01487421989440918,
+              "stationarity_shrinks": 0,
+              "skipped": false,
+              "pvalue_summary": {
+                "count": 5,
+                "mean": 0.3964393046506058,
+                "std": 0.3013164363546886,
+                "q25": 0.2356400800041236,
+                "q50": 0.25965644462476767,
+                "q75": 0.6092036493210282
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "aggregates": {
+    "models": {
+      "baseline_ols_f_n5": {
+        "parameters": {
+          "N": 5,
+          "T": 1000,
+          "p": 1,
+          "t": 500,
+          "M_grid": [
+            5
+          ],
+          "power_M": 5,
+          "B": 2,
+          "alpha": 0.05,
+          "baseline_pvalue_method": "bootstrap_lr",
+          "pvalue_method": "asymptotic_f"
+        },
+        "type1_error_by_M": [
+          {
+            "M": 5,
+            "value_mean": 0.0,
+            "value_std": 0.0,
+            "value_min": 0.0,
+            "value_max": 0.0,
+            "size_distortion_mean": -0.05,
+            "rejections_mean": 0.0,
+            "M_effective_mean": 5.0,
+            "runtime_sec_mean": 0.02254009246826172,
+            "seed_count": 1
+          }
+        ],
+        "power_curve": [
+          {
+            "M": 5,
+            "delta": 0.05,
+            "target_fro_mean": 0.05,
+            "actual_fro_mean": 0.05000000000000003,
+            "power_mean": 0.2,
+            "power_std": 0.0,
+            "power_min": 0.2,
+            "power_max": 0.2,
+            "rejections_mean": 1.0,
+            "M_effective_mean": 5.0,
+            "runtime_sec_mean": 0.01487421989440918,
+            "seed_count": 1,
+            "skipped_count": 0
+          }
+        ]
+      }
+    }
+  }
+}

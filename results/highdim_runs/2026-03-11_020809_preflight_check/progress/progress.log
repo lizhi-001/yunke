@@ -1,0 +1,10 @@
+[2026-03-11 02:08:09] | event=run | status=started | progress=0/2 | B=2 | M_grid=[5] | alpha=0.05 | baseline_pvalue_method=bootstrap_lr | deltas=[0.05] | jobs=1 | power_M=5 | seed_workers=0 | seeds=[42]
+[2026-03-11 02:08:09] | event=seed | status=started | progress=0/2 | seed=42 | jobs=1
+[2026-03-11 02:08:09] | event=model | status=started | progress=0/2 | seed=42 | model=baseline_ols_f_n5 | jobs=1
+[2026-03-11 02:08:09] | event=stage | status=started | progress=0/2 | seed=42 | model=baseline_ols_f_n5 | stage=type1_M_5 | M=5 | task=type1_error
+[2026-03-11 02:08:09] | event=stage | status=completed | progress=1/2 | seed=42 | model=baseline_ols_f_n5 | stage=type1_M_5 | runtime_sec=0.02 | M=5 | metric_value=0.0 | task=type1_error
+[2026-03-11 02:08:09] | event=stage | status=started | progress=1/2 | seed=42 | model=baseline_ols_f_n5 | stage=power_delta_0.05 | M=5 | base_delta=0.05 | target_fro=0.05 | task=power
+[2026-03-11 02:08:09] | event=stage | status=completed | progress=2/2 | seed=42 | model=baseline_ols_f_n5 | stage=power_delta_0.05 | runtime_sec=0.01 | M=5 | base_delta=0.05 | metric_value=0.2 | target_fro=0.05 | task=power
+[2026-03-11 02:08:09] | event=model | status=completed | progress=2/2 | seed=42 | model=baseline_ols_f_n5 | runtime_sec=0.04
+[2026-03-11 02:08:09] | event=seed | status=completed | progress=2/2 | seed=42 | runtime_sec=0.05
+[2026-03-11 02:08:09] | event=run | status=completed | progress=2/2 | runtime_sec=0.05 | completed_stage_count=2
