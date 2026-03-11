@@ -381,6 +381,31 @@ def _aggregate_numeric(values: Sequence[float]) -> Dict[str, float]:
     }
 
 
+def _compute_pooled_mc_band(rejections: Sequence[float], effective: Sequence[float]) -> Dict[str, float]:
+    total_rejections = int(sum(int(v) for v in rejections if not math.isnan(v)))
+    total_effective = int(sum(int(v) for v in effective if not math.isnan(v)))
+    if total_effective <= 0:
+        return {
+            "rejections_total": 0,
+            "M_effective_total": 0,
+            "mc_se_pooled": math.nan,
+            "ci95_low": math.nan,
+            "ci95_high": math.nan,
+        }
+
+    p_hat = total_rejections / total_effective
+    mc_se = math.sqrt(max(0.0, p_hat * (1.0 - p_hat) / total_effective))
+    ci95_low = max(0.0, p_hat - 1.96 * mc_se)
+    ci95_high = min(1.0, p_hat + 1.96 * mc_se)
+    return {
+        "rejections_total": total_rejections,
+        "M_effective_total": total_effective,
+        "mc_se_pooled": float(mc_se),
+        "ci95_low": float(ci95_low),
+        "ci95_high": float(ci95_high),
+    }
+
+
 # ===========================================================================
 # 模型配置工厂
 # ===========================================================================
@@ -731,6 +756,7 @@ def aggregate_results(seed_results: Dict[str, Dict[str, Any]], cfg: ExperimentCo
                 rej_stats = _aggregate_numeric(rejections)
                 eff_stats = _aggregate_numeric(effective)
                 run_stats = _aggregate_numeric(runtime)
+                pooled_band = _compute_pooled_mc_band(rejections, effective)
                 type1_by_M.append({
                     "M": int(M),
                     "value_mean": stats["mean"], "value_std": stats["std"],
@@ -740,6 +766,7 @@ def aggregate_results(seed_results: Dict[str, Dict[str, Any]], cfg: ExperimentCo
                     "M_effective_mean": eff_stats["mean"],
                     "runtime_sec_mean": run_stats["mean"],
                     "seed_count": stats["count"],
+                    **pooled_band,
                 })
 
         power_curve = []
@@ -833,6 +860,11 @@ def build_aggregate_rows(aggregate_results_block: Dict[str, Any]) -> List[Dict[s
                 "size_distortion_mean": float(row["size_distortion_mean"]),
                 "rejections_mean": float(row["rejections_mean"]),
                 "effective_iterations_mean": float(row["M_effective_mean"]),
+                "rejections_total": int(row["rejections_total"]),
+                "effective_iterations_total": int(row["M_effective_total"]),
+                "mc_se_pooled": float(row["mc_se_pooled"]),
+                "ci95_low": float(row["ci95_low"]),
+                "ci95_high": float(row["ci95_high"]),
                 "runtime_sec_mean": float(row["runtime_sec_mean"]),
                 "seed_count": int(row["seed_count"]),
             })
@@ -904,8 +936,8 @@ def write_markdown_report(results: Dict[str, Any], report_path: str) -> None:
     if agg[MODEL_EXECUTION_ORDER[0]]["type1_error_by_M"]:
         lines.append("## 1. Size（Type I Error，跨 seed 聚合）")
         lines.append("")
-        lines.append("| 模型 | N | 方法 | M | Type I Error Mean | Std | Size Distortion | Seeds |")
-        lines.append("|---|---:|---|---:|---:|---:|---:|---:|")
+        lines.append("| 模型 | N | 方法 | M | Type I Error Mean | MC SE | 95% CI | Std | Size Distortion | Seeds |")
+        lines.append("|---|---:|---|---:|---:|---:|---|---:|---:|---:|")
         for model_name in MODEL_EXECUTION_ORDER:
             params = agg[model_name]["parameters"]
             N = params["N"]
@@ -920,7 +952,8 @@ def write_markdown_report(results: Dict[str, Any], report_path: str) -> None:
             for row in agg[model_name]["type1_error_by_M"]:
                 lines.append(
                     f"| {model_name} | {N} | {method} | {row['M']} | "
-                    f"{row['value_mean']:.4f} | {row['value_std']:.4f} | "
+                    f"{row['value_mean']:.4f} | {row['mc_se_pooled']:.4f} | "
+                    f"[{row['ci95_low']:.4f}, {row['ci95_high']:.4f}] | {row['value_std']:.4f} | "
                     f"{row['size_distortion_mean']:+.4f} | {row['seed_count']} |"
                 )
         lines.append("")

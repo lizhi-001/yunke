@@ -160,3 +160,101 @@ tail -f results/large_scale_runs/<run_name>/progress/progress.log
 | lowrank_svd | ~16s | SVD 求解慢，N=10 |
 
 核心瓶颈是 sparse/lowrank 的 Lasso/SVD 优化求解。
+
+---
+
+## 6. 高维实验补充说明（2026-03-11 更新）
+
+高维实验脚本：`experiments/run_highdim_mgrid_multiseed.py`
+
+### 最近一次快版正式结果（2026-03-11 02:19:25）
+
+已完成运行：`results/highdim_runs/2026-03-11_021925_b200_seed42_fast/`
+
+- 配置：`B=200`、`seeds=[42]`、`jobs=10`、`seed_workers=1`
+- 用途：快速验证高维主叙事，不作为最终展示版本
+
+关键结论：
+
+- `baseline_ols_n20` 的 `Size@M=2000=0.0565`，说明高维下 OLS 仍统计可行；
+- 但 `Power@δ=0.50=0.6700`，明显低于 `N=5/10`，说明高维下 OLS 检验效率下降；
+- `sparse_lasso_n20=0.7620`、`lowrank_svd_n20=0.9000` 高于 `baseline_ols_n20`，支持“结构化方法在高维下更有优势”的定性叙事；
+- `B=200 + 单 seed` 下，Type I error 曲线仍会出现较明显波动，因此正式展示应改用“均值 + 误差带”。
+
+### 当前推荐的展示增强版配置
+
+若目标是绘制更稳定的 `M-size` 曲线，建议使用：
+
+```bash
+python3 -u experiments/run_highdim_mgrid_multiseed.py \
+  --B 500 --seeds 42 2026 \
+  --jobs 10 --seed-workers 1 \
+  --tag b500_seed2_band
+```
+
+设计理由：
+
+- `B=500`：降低 bootstrap 临界值抖动；
+- `2` 个 seeds：减弱单 seed 偶然波动；
+- 其余设定不变：便于将展示改善归因到 `B` 和 seed 数，而不引入新的 DGP 变化。
+
+### 新增聚合输出字段（用于画 `M-size 均值 + 误差带`）
+
+展示增强版聚合 CSV 在原有 `value_mean/value_std` 之外新增：
+
+| 字段 | 含义 |
+|---|---|
+| `rejections_total` | 所有 seed 的拒绝次数总和 |
+| `effective_iterations_total` | 所有 seed 的有效 Monte Carlo 次数总和 |
+| `mc_se_pooled` | 合并后比例估计的 Monte Carlo 标准误 |
+| `ci95_low`, `ci95_high` | 95% 误差带端点 |
+
+计算公式：
+
+```text
+p_hat = R_total / M_total
+mc_se_pooled = sqrt(p_hat * (1 - p_hat) / M_total)
+ci95 = p_hat ± 1.96 * mc_se_pooled
+```
+
+其中 `R_total` 为所有 seed 的拒绝次数总和，`M_total` 为所有 seed 的有效 Monte Carlo 次数总和。
+
+### 绘图建议
+
+推荐图像元素：
+
+1. 横轴：`M_grid`
+2. 纵轴：`value_mean`（Type I error mean）
+3. 参考线：`y = 0.05`
+4. 阴影带：`[ci95_low, ci95_high]`
+
+说明：Type I error 曲线不要求随 `M` 单调逼近 `0.05`；正确的展示重点应为“随着 `M` 增大，估计围绕 `0.05` 的波动幅度减小”。
+
+### 专用绘图脚本
+
+已新增脚本：`plots/plot_highdim_size_band.py`
+
+作用：
+
+- 读取高维实验聚合 CSV；
+- 对 `N = 5, 10, 20` 分别绘制一张子图；
+- 每张子图叠加 4 条方法曲线（`OLS(LR)` / `OLS(F)` / `Lasso` / `SVD`）；
+- 绘制 `value_mean` 与 `[ci95_low, ci95_high]` 阴影带；
+- 自动添加 `y = 0.05` 参考线。
+
+推荐用法：
+
+```bash
+python3 plots/plot_highdim_size_band.py \
+  --run-dir results/highdim_runs/2026-03-11_095431_b500_seed2_band
+```
+
+或显式指定 CSV / 输出路径：
+
+```bash
+python3 plots/plot_highdim_size_band.py \
+  --agg-csv results/highdim_runs/<run_name>/highdim_agg_<stamp>.csv \
+  --output results/highdim_runs/<run_name>/高维_size_mean_band.png
+```
+
+默认输出文件：`<run_dir>/高维_size_mean_band.png`

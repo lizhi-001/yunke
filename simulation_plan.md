@@ -786,6 +786,80 @@ python3 experiments/run_highdim_mgrid_multiseed.py \
 
 ---
 
+### 11.8 2026-03-11 快版正式结果复盘（`b200_seed42_fast`）
+
+已完成运行：`results/highdim_runs/2026-03-11_021925_b200_seed42_fast/`
+
+- 配置：`B=200`、`seeds=[42]`、`jobs=10`、`seed_workers=1`
+- 总耗时：`9178.23s`（约 2.55 小时）
+- 用途：验证高维实验主叙事是否成立，并识别正式展示所需的额外校准项
+
+**关键结果摘要**：
+
+| 模型 | `Size@M=2000` | `Power@δ=0.50` | 解读 |
+|---|---:|---:|---|
+| `baseline_ols_n5` | 0.0540 | 1.0000 | 低维 OLS 正常 |
+| `baseline_ols_n10` | 0.0490 | 0.9960 | 中维 OLS 仍较强 |
+| `baseline_ols_n20` | 0.0565 | 0.6700 | 高维下功效明显下降 |
+| `baseline_ols_f_n20` | 0.0490 | 0.8620 | 渐近 F 对照在 `N=20` 下不弱 |
+| `sparse_lasso_n20` | 0.0655 | 0.7620 | 稀疏方法优于 OLS(LR)，但 size 略偏高 |
+| `lowrank_svd_n20` | 0.0740 | 0.9000 | 低秩方法在高维下功效最佳，但 size 偏高 |
+
+**结论**：
+
+1. **核心叙事获得定性支持**：`baseline_ols_n20` 在 `δ=0.50` 时功效仅 `0.6700`，明显低于 `N=5/10`；说明即使 OLS 统计上可行，高维下其检验效率仍显著下降。
+2. **结构化方法在 `N=20` 下有优势，但并非全面压制**：`sparse_lasso_n20=0.7620`、`lowrank_svd_n20=0.9000` 高于 `baseline_ols_n20=0.6700`，但 `baseline_ols_f_n20=0.8620` 也较强，说明“结构化方法全面优于所有 OLS 基线”这一更强命题在快版结果中尚不足以直接下结论。
+3. **size 展示不够理想的主因是展示精度而非实验失效**：`B=200 + 单 seed` 下，`type1_error(M)` 曲线会混合 Monte Carlo 噪声、bootstrap 临界值抖动和单 seed 波动；因此更适合作为“方向性验证”，不适合作为最终主图。
+4. **正式展示应转向“均值 + 误差带”而非单条曲线单调收敛**：size 曲线本就不要求单调逼近 0.05，合理展示方式应为跨 seed 均值、参考线 `y=0.05` 和 Monte Carlo 误差带。
+
+---
+
+### 11.9 2026-03-11 展示增强版实验改动（`b500_seed2_band`）
+
+基于 11.8 的复盘，正式展示方案调整为：
+
+- 保持 `T=1000`、`M_grid`、`power_M`、模型集合和 DGP 设定不变；
+- 将 bootstrap 次数提高到 `B=500`；
+- 将随机种子扩展为 `seeds=[42, 2026]`；
+- 输出跨 seed 的 **size 均值 + 误差带** 所需字段；
+- 运行标签：`b500_seed2_band`。
+
+推荐命令：
+
+```bash
+python3 -u experiments/run_highdim_mgrid_multiseed.py \
+  --B 500 --seeds 42 2026 \
+  --jobs 10 --seed-workers 1 \
+  --tag b500_seed2_band
+```
+
+**新增聚合字段**（用于绘制 `M-size 均值 + 误差带` 图像）：
+
+| 字段 | 含义 |
+|---|---|
+| `rejections_total` | 所有 seed 的拒绝次数总和 |
+| `effective_iterations_total` | 所有 seed 的有效 Monte Carlo 次数总和 |
+| `mc_se_pooled` | 合并后 size 比例的 Monte Carlo 标准误 |
+| `ci95_low`, `ci95_high` | `value_mean ± 1.96 × mc_se_pooled` 的 95% 误差带 |
+
+`mc_se_pooled` 的计算公式为：
+
+$$
+\hat p = \frac{R_{\text{total}}}{M_{\text{total}}}, \qquad
+\text{mc\_se\_pooled} = \sqrt{\frac{\hat p(1-\hat p)}{M_{\text{total}}}}
+$$
+
+其中 $R_{\text{total}}$ 为所有 seed 的拒绝次数总和，$M_{\text{total}}$ 为所有 seed 的有效 Monte Carlo 次数总和。
+
+**采用该方案的原因**：
+
+1. `B=500` 可显著降低 bootstrap 临界值的额外随机性；
+2. `2` 个 seeds 能明显减少单 seed 偶然波动；
+3. `mc_se_pooled` 比 `seed_std` 更贴合“随 `M` 增大估计精度提升”的展示目标；
+4. 保持其余设定不变，可将改进明确归因于 `B`、seed 数和展示口径，而不混入新的 DGP 变化。
+
+---
+
 ## 12. 命令行参数参考
 
 ### 原始实验（`run_large_scale_mgrid_multiseed.py`）
