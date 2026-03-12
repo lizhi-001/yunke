@@ -1,0 +1,29 @@
+{
+  "updated_at": "2026-03-13 00:28:19",
+  "completed_stage_count": 30,
+  "total_stage_count": 30,
+  "progress_ratio": 1.0,
+  "active_stages": [],
+  "completed_stages": [
+    "seed_42/sparse_lasso/type1_M_50",
+    "seed_42/sparse_lasso/type1_M_300",
+    "seed_42/sparse_lasso/power_delta_0.10",
+    "seed_42/sparse_lasso/power_delta_0.30",
+    "seed_42/sparse_lasso/power_delta_0.50",
+    "seed_42/sparse_ols_f/type1_M_50",
+    "seed_42/sparse_ols_f/type1_M_300",
+    "seed_42/sparse_ols_f/power_delta_0.10",
+    "seed_42/sparse_ols_f/power_delta_0.30",
+    "seed_42/sparse_ols_f/power_delta_0.50",
+    "seed_42/lowrank_svd/type1_M_50",
+    "seed_42/lowrank_svd/type1_M_300",
+    "seed_42/lowrank_svd/power_delta_0.10",
+    "seed_42/lowrank_svd/power_delta_0.30",
+    "seed_42/lowrank_svd/power_delta_0.50",
+    "seed_42/lowrank_ols_f/type1_M_50",
+    "seed_42/lowrank_ols_f/type1_M_300",
+    "seed_42/lowrank_ols_f/power_delta_0.10",
+    "seed_42/lowrank_ols_f/power_delta_0.30",
+    "seed_42/lowrank_ols_f/power_delta_0.50"
+  ]
+}

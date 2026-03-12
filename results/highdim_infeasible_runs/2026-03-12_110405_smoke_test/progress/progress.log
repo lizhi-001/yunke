@@ -1,0 +1,28 @@
+[2026-03-12 11:04:05] | event=run | status=started | progress=0/9 | B=10 | M_grid=[50] | alpha=0.05 | baseline_pvalue_method=bootstrap_lr | deltas=[0.1, 0.3] | jobs=2 | power_M=50 | seed_workers=0 | seeds=[42]
+[2026-03-12 11:04:05] | event=seed | status=started | progress=0/9 | seed=42 | jobs=2
+[2026-03-12 11:04:05] | event=model | status=started | progress=0/9 | seed=42 | model=sparse_lasso_n20 | jobs=2
+[2026-03-12 11:04:05] | event=stage | status=started | progress=0/9 | seed=42 | model=sparse_lasso_n20 | stage=type1_M_50 | M=50 | task=type1_error
+[2026-03-12 11:04:09] | event=stage | status=completed | progress=1/9 | seed=42 | model=sparse_lasso_n20 | stage=type1_M_50 | runtime_sec=4.43 | M=50 | metric_value=0.04 | task=type1_error
+[2026-03-12 11:04:09] | event=stage | status=started | progress=1/9 | seed=42 | model=sparse_lasso_n20 | stage=power_delta_0.10 | M=50 | base_delta=0.1 | target_fro=0.1 | task=power
+[2026-03-12 11:04:13] | event=stage | status=completed | progress=2/9 | seed=42 | model=sparse_lasso_n20 | stage=power_delta_0.10 | runtime_sec=3.36 | M=50 | base_delta=0.1 | metric_value=0.12 | target_fro=0.1 | task=power
+[2026-03-12 11:04:13] | event=stage | status=started | progress=2/9 | seed=42 | model=sparse_lasso_n20 | stage=power_delta_0.30 | M=50 | base_delta=0.3 | target_fro=0.3 | task=power
+[2026-03-12 11:04:16] | event=stage | status=completed | progress=3/9 | seed=42 | model=sparse_lasso_n20 | stage=power_delta_0.30 | runtime_sec=3.35 | M=50 | base_delta=0.3 | metric_value=0.08 | target_fro=0.3 | task=power
+[2026-03-12 11:04:16] | event=model | status=completed | progress=3/9 | seed=42 | model=sparse_lasso_n20 | runtime_sec=11.15
+[2026-03-12 11:04:16] | event=model | status=started | progress=3/9 | seed=42 | model=lowrank_svd_n20 | jobs=2
+[2026-03-12 11:04:16] | event=stage | status=started | progress=3/9 | seed=42 | model=lowrank_svd_n20 | stage=type1_M_50 | M=50 | task=type1_error
+[2026-03-12 11:04:17] | event=stage | status=completed | progress=4/9 | seed=42 | model=lowrank_svd_n20 | stage=type1_M_50 | runtime_sec=0.34 | M=50 | metric_value=0.34 | task=type1_error
+[2026-03-12 11:04:17] | event=stage | status=started | progress=4/9 | seed=42 | model=lowrank_svd_n20 | stage=power_delta_0.10 | M=50 | base_delta=0.1 | target_fro=0.1 | task=power
+[2026-03-12 11:04:17] | event=stage | status=completed | progress=5/9 | seed=42 | model=lowrank_svd_n20 | stage=power_delta_0.10 | runtime_sec=0.32 | M=50 | base_delta=0.1 | metric_value=0.3 | target_fro=0.1 | task=power
+[2026-03-12 11:04:17] | event=stage | status=started | progress=5/9 | seed=42 | model=lowrank_svd_n20 | stage=power_delta_0.30 | M=50 | base_delta=0.3 | target_fro=0.3 | task=power
+[2026-03-12 11:04:17] | event=stage | status=completed | progress=6/9 | seed=42 | model=lowrank_svd_n20 | stage=power_delta_0.30 | runtime_sec=0.32 | M=50 | base_delta=0.3 | metric_value=0.3 | target_fro=0.3 | task=power
+[2026-03-12 11:04:17] | event=model | status=completed | progress=6/9 | seed=42 | model=lowrank_svd_n20 | runtime_sec=0.99
+[2026-03-12 11:04:17] | event=model | status=started | progress=6/9 | seed=42 | model=baseline_ols_f_n20 | jobs=2
+[2026-03-12 11:04:17] | event=stage | status=started | progress=6/9 | seed=42 | model=baseline_ols_f_n20 | stage=type1_M_50 | M=50 | task=type1_error
+[2026-03-12 11:04:17] | event=stage | status=completed | progress=7/9 | seed=42 | model=baseline_ols_f_n20 | stage=type1_M_50 | runtime_sec=0.04 | M=50 | metric_value=0.08 | task=type1_error
+[2026-03-12 11:04:17] | event=stage | status=started | progress=7/9 | seed=42 | model=baseline_ols_f_n20 | stage=power_delta_0.10 | M=50 | base_delta=0.1 | target_fro=0.1 | task=power
+[2026-03-12 11:04:17] | event=stage | status=completed | progress=8/9 | seed=42 | model=baseline_ols_f_n20 | stage=power_delta_0.10 | runtime_sec=0.03 | M=50 | base_delta=0.1 | metric_value=0.0 | target_fro=0.1 | task=power
+[2026-03-12 11:04:17] | event=stage | status=started | progress=8/9 | seed=42 | model=baseline_ols_f_n20 | stage=power_delta_0.30 | M=50 | base_delta=0.3 | target_fro=0.3 | task=power
+[2026-03-12 11:04:17] | event=stage | status=completed | progress=9/9 | seed=42 | model=baseline_ols_f_n20 | stage=power_delta_0.30 | runtime_sec=0.03 | M=50 | base_delta=0.3 | metric_value=0.12 | target_fro=0.3 | task=power
+[2026-03-12 11:04:17] | event=model | status=completed | progress=9/9 | seed=42 | model=baseline_ols_f_n20 | runtime_sec=0.11
+[2026-03-12 11:04:17] | event=seed | status=completed | progress=9/9 | seed=42 | runtime_sec=12.25
+[2026-03-12 11:04:17] | event=run | status=completed | progress=9/9 | runtime_sec=12.25 | completed_stage_count=9

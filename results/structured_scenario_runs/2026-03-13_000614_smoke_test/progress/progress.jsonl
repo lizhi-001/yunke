@@ -1,0 +1,52 @@
+{"timestamp": "2026-03-13 00:06:14", "event": "run_started", "config": {"seeds": [42], "B": 20, "M_grid": [50], "power_M": 50, "alpha": 0.05, "deltas": [0.1, 0.3]}}
+{"timestamp": "2026-03-13 00:06:14", "event": "seed_started", "seed": 42, "jobs": 8}
+{"timestamp": "2026-03-13 00:06:14", "event": "model_started", "seed": 42, "model": "baseline_ols", "jobs": 8}
+{"timestamp": "2026-03-13 00:06:14", "event": "stage_started", "seed": 42, "model": "baseline_ols", "stage": "type1_M_50", "task": "type1_error", "M": 50}
+{"timestamp": "2026-03-13 00:06:15", "event": "stage_finished", "seed": 42, "model": "baseline_ols", "stage": "type1_M_50", "runtime_sec": 1.1969630718231201, "task": "type1_error", "M": 50, "metric_value": 0.08}
+{"timestamp": "2026-03-13 00:06:15", "event": "stage_started", "seed": 42, "model": "baseline_ols", "stage": "power_delta_0.10", "task": "power", "M": 50, "base_delta": 0.1, "target_fro": 0.1}
+{"timestamp": "2026-03-13 00:06:15", "event": "stage_finished", "seed": 42, "model": "baseline_ols", "stage": "power_delta_0.10", "runtime_sec": 0.25580906867980957, "task": "power", "M": 50, "base_delta": 0.1, "target_fro": 0.1, "metric_value": 0.18}
+{"timestamp": "2026-03-13 00:06:15", "event": "stage_started", "seed": 42, "model": "baseline_ols", "stage": "power_delta_0.30", "task": "power", "M": 50, "base_delta": 0.3, "target_fro": 0.3}
+{"timestamp": "2026-03-13 00:06:15", "event": "stage_finished", "seed": 42, "model": "baseline_ols", "stage": "power_delta_0.30", "runtime_sec": 0.259141206741333, "task": "power", "M": 50, "base_delta": 0.3, "target_fro": 0.3, "metric_value": 0.34}
+{"timestamp": "2026-03-13 00:06:15", "event": "model_finished", "seed": 42, "model": "baseline_ols", "runtime_sec": 1.7154381275177002}
+{"timestamp": "2026-03-13 00:06:15", "event": "model_started", "seed": 42, "model": "baseline_ols_f", "jobs": 8}
+{"timestamp": "2026-03-13 00:06:15", "event": "stage_started", "seed": 42, "model": "baseline_ols_f", "stage": "type1_M_50", "task": "type1_error", "M": 50}
+{"timestamp": "2026-03-13 00:06:16", "event": "stage_finished", "seed": 42, "model": "baseline_ols_f", "stage": "type1_M_50", "runtime_sec": 0.023103952407836914, "task": "type1_error", "M": 50, "metric_value": 0.08}
+{"timestamp": "2026-03-13 00:06:16", "event": "stage_started", "seed": 42, "model": "baseline_ols_f", "stage": "power_delta_0.10", "task": "power", "M": 50, "base_delta": 0.1, "target_fro": 0.1}
+{"timestamp": "2026-03-13 00:06:16", "event": "stage_finished", "seed": 42, "model": "baseline_ols_f", "stage": "power_delta_0.10", "runtime_sec": 0.019999980926513672, "task": "power", "M": 50, "base_delta": 0.1, "target_fro": 0.1, "metric_value": 0.04}
+{"timestamp": "2026-03-13 00:06:16", "event": "stage_started", "seed": 42, "model": "baseline_ols_f", "stage": "power_delta_0.30", "task": "power", "M": 50, "base_delta": 0.3, "target_fro": 0.3}
+{"timestamp": "2026-03-13 00:06:16", "event": "stage_finished", "seed": 42, "model": "baseline_ols_f", "stage": "power_delta_0.30", "runtime_sec": 0.019832849502563477, "task": "power", "M": 50, "base_delta": 0.3, "target_fro": 0.3, "metric_value": 0.24}
+{"timestamp": "2026-03-13 00:06:16", "event": "model_finished", "seed": 42, "model": "baseline_ols_f", "runtime_sec": 0.06589698791503906}
+{"timestamp": "2026-03-13 00:06:16", "event": "model_started", "seed": 42, "model": "sparse_lasso", "jobs": 8}
+{"timestamp": "2026-03-13 00:06:16", "event": "stage_started", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_50", "task": "type1_error", "M": 50}
+{"timestamp": "2026-03-13 00:06:20", "event": "stage_finished", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_50", "runtime_sec": 4.113440990447998, "task": "type1_error", "M": 50, "metric_value": 0.06}
+{"timestamp": "2026-03-13 00:06:20", "event": "stage_started", "seed": 42, "model": "sparse_lasso", "stage": "power_delta_0.10", "task": "power", "M": 50, "base_delta": 0.1, "target_fro": 0.1}
+{"timestamp": "2026-03-13 00:06:23", "event": "stage_finished", "seed": 42, "model": "sparse_lasso", "stage": "power_delta_0.10", "runtime_sec": 3.538118839263916, "task": "power", "M": 50, "base_delta": 0.1, "target_fro": 0.1, "metric_value": 0.18}
+{"timestamp": "2026-03-13 00:06:23", "event": "stage_started", "seed": 42, "model": "sparse_lasso", "stage": "power_delta_0.30", "task": "power", "M": 50, "base_delta": 0.3, "target_fro": 0.3}
+{"timestamp": "2026-03-13 00:06:27", "event": "stage_finished", "seed": 42, "model": "sparse_lasso", "stage": "power_delta_0.30", "runtime_sec": 3.3729248046875, "task": "power", "M": 50, "base_delta": 0.3, "target_fro": 0.3, "metric_value": 0.24}
+{"timestamp": "2026-03-13 00:06:27", "event": "model_finished", "seed": 42, "model": "sparse_lasso", "runtime_sec": 11.028272867202759}
+{"timestamp": "2026-03-13 00:06:27", "event": "model_started", "seed": 42, "model": "sparse_ols_f", "jobs": 8}
+{"timestamp": "2026-03-13 00:06:27", "event": "stage_started", "seed": 42, "model": "sparse_ols_f", "stage": "type1_M_50", "task": "type1_error", "M": 50}
+{"timestamp": "2026-03-13 00:06:27", "event": "stage_finished", "seed": 42, "model": "sparse_ols_f", "stage": "type1_M_50", "runtime_sec": 0.031175851821899414, "task": "type1_error", "M": 50, "metric_value": 0.06}
+{"timestamp": "2026-03-13 00:06:27", "event": "stage_started", "seed": 42, "model": "sparse_ols_f", "stage": "power_delta_0.10", "task": "power", "M": 50, "base_delta": 0.1, "target_fro": 0.1}
+{"timestamp": "2026-03-13 00:06:27", "event": "stage_finished", "seed": 42, "model": "sparse_ols_f", "stage": "power_delta_0.10", "runtime_sec": 0.024678945541381836, "task": "power", "M": 50, "base_delta": 0.1, "target_fro": 0.1, "metric_value": 0.06}
+{"timestamp": "2026-03-13 00:06:27", "event": "stage_started", "seed": 42, "model": "sparse_ols_f", "stage": "power_delta_0.30", "task": "power", "M": 50, "base_delta": 0.3, "target_fro": 0.3}
+{"timestamp": "2026-03-13 00:06:27", "event": "stage_finished", "seed": 42, "model": "sparse_ols_f", "stage": "power_delta_0.30", "runtime_sec": 0.02347707748413086, "task": "power", "M": 50, "base_delta": 0.3, "target_fro": 0.3, "metric_value": 0.16}
+{"timestamp": "2026-03-13 00:06:27", "event": "model_finished", "seed": 42, "model": "sparse_ols_f", "runtime_sec": 0.08251094818115234}
+{"timestamp": "2026-03-13 00:06:27", "event": "model_started", "seed": 42, "model": "lowrank_svd", "jobs": 8}
+{"timestamp": "2026-03-13 00:06:27", "event": "stage_started", "seed": 42, "model": "lowrank_svd", "stage": "type1_M_50", "task": "type1_error", "M": 50}
+{"timestamp": "2026-03-13 00:06:27", "event": "stage_finished", "seed": 42, "model": "lowrank_svd", "stage": "type1_M_50", "runtime_sec": 0.3854050636291504, "task": "type1_error", "M": 50, "metric_value": 0.14}
+{"timestamp": "2026-03-13 00:06:27", "event": "stage_started", "seed": 42, "model": "lowrank_svd", "stage": "power_delta_0.10", "task": "power", "M": 50, "base_delta": 0.1, "target_fro": 0.1}
+{"timestamp": "2026-03-13 00:06:27", "event": "stage_finished", "seed": 42, "model": "lowrank_svd", "stage": "power_delta_0.10", "runtime_sec": 0.3855760097503662, "task": "power", "M": 50, "base_delta": 0.1, "target_fro": 0.1, "metric_value": 0.2}
+{"timestamp": "2026-03-13 00:06:27", "event": "stage_started", "seed": 42, "model": "lowrank_svd", "stage": "power_delta_0.30", "task": "power", "M": 50, "base_delta": 0.3, "target_fro": 0.3}
+{"timestamp": "2026-03-13 00:06:28", "event": "stage_finished", "seed": 42, "model": "lowrank_svd", "stage": "power_delta_0.30", "runtime_sec": 0.395082950592041, "task": "power", "M": 50, "base_delta": 0.3, "target_fro": 0.3, "metric_value": 0.2}
+{"timestamp": "2026-03-13 00:06:28", "event": "model_finished", "seed": 42, "model": "lowrank_svd", "runtime_sec": 1.1696419715881348}
+{"timestamp": "2026-03-13 00:06:28", "event": "model_started", "seed": 42, "model": "lowrank_ols_f", "jobs": 8}
+{"timestamp": "2026-03-13 00:06:28", "event": "stage_started", "seed": 42, "model": "lowrank_ols_f", "stage": "type1_M_50", "task": "type1_error", "M": 50}
+{"timestamp": "2026-03-13 00:06:28", "event": "stage_finished", "seed": 42, "model": "lowrank_ols_f", "stage": "type1_M_50", "runtime_sec": 0.027868986129760742, "task": "type1_error", "M": 50, "metric_value": 0.04}
+{"timestamp": "2026-03-13 00:06:28", "event": "stage_started", "seed": 42, "model": "lowrank_ols_f", "stage": "power_delta_0.10", "task": "power", "M": 50, "base_delta": 0.1, "target_fro": 0.1}
+{"timestamp": "2026-03-13 00:06:28", "event": "stage_finished", "seed": 42, "model": "lowrank_ols_f", "stage": "power_delta_0.10", "runtime_sec": 0.025828838348388672, "task": "power", "M": 50, "base_delta": 0.1, "target_fro": 0.1, "metric_value": 0.04}
+{"timestamp": "2026-03-13 00:06:28", "event": "stage_started", "seed": 42, "model": "lowrank_ols_f", "stage": "power_delta_0.30", "task": "power", "M": 50, "base_delta": 0.3, "target_fro": 0.3}
+{"timestamp": "2026-03-13 00:06:28", "event": "stage_finished", "seed": 42, "model": "lowrank_ols_f", "stage": "power_delta_0.30", "runtime_sec": 0.026003360748291016, "task": "power", "M": 50, "base_delta": 0.3, "target_fro": 0.3, "metric_value": 0.12}
+{"timestamp": "2026-03-13 00:06:28", "event": "model_finished", "seed": 42, "model": "lowrank_ols_f", "runtime_sec": 0.08289980888366699}
+{"timestamp": "2026-03-13 00:06:28", "event": "seed_finished", "seed": 42, "runtime_sec": 14.149872064590454}
+{"timestamp": "2026-03-13 00:06:28", "event": "run_finished", "runtime_sec": 14.152868747711182}

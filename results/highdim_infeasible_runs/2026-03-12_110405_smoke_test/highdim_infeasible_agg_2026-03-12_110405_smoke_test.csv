@@ -1,0 +1,10 @@
+scope,seed,model,metric,M,delta,target_fro,actual_fro,value_mean,value_std,size_distortion_mean,rejections_mean,effective_iterations_mean,rejections_total,effective_iterations_total,mc_se_pooled,ci95_low,ci95_high,runtime_sec_mean,seed_count,target_fro_mean,actual_fro_mean,perturbation_types
+aggregate,,sparse_lasso_n20,type1_error,50,,,,0.04,0.0,-0.010000000000000002,2.0,50.0,2,50,0.027712812921102035,0.0,0.09431711332536,4.432896137237549,1,,,
+aggregate,,sparse_lasso_n20,power,50,0.1,0.1,,0.12,0.0,,6.0,50.0,,,,,,3.3605523109436035,1,0.1,0.10000000000000003,sparse
+aggregate,,sparse_lasso_n20,power,50,0.3,0.3,,0.08,0.0,,4.0,50.0,,,,,,3.3545162677764893,1,0.3,0.29999999999999993,sparse
+aggregate,,lowrank_svd_n20,type1_error,50,,,,0.34,0.0,0.29000000000000004,17.0,50.0,17,50,0.0669925368977769,0.2086946276803573,0.47130537231964276,0.33934712409973145,1,,,
+aggregate,,lowrank_svd_n20,power,50,0.1,0.1,,0.3,0.0,,15.0,50.0,,,,,,0.3230581283569336,1,0.1,0.09999999999999999,lowrank
+aggregate,,lowrank_svd_n20,power,50,0.3,0.3,,0.3,0.0,,15.0,50.0,,,,,,0.3223142623901367,1,0.3,0.3,lowrank
+aggregate,,baseline_ols_f_n20,type1_error,50,,,,0.08,0.0,0.03,4.0,50.0,4,50,0.03836665218650176,0.0048013617144565535,0.15519863828554345,0.0400388240814209,1,,,
+aggregate,,baseline_ols_f_n20,power,50,0.1,0.1,,0.0,0.0,,0.0,50.0,,,,,,0.03325676918029785,1,0.1,0.10000000000000009,uniform_ones
+aggregate,,baseline_ols_f_n20,power,50,0.3,0.3,,0.12,0.0,,6.0,50.0,,,,,,0.031823158264160156,1,0.3,0.3000000000000001,uniform_ones

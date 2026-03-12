@@ -163,98 +163,89 @@ tail -f results/large_scale_runs/<run_name>/progress/progress.log
 
 ---
 
-## 6. 高维实验补充说明（2026-03-11 更新）
+## 6. 第二层实验：真高维（OLS 不可行）
 
-高维实验脚本：`experiments/run_highdim_mgrid_multiseed.py`
+脚本：`experiments/run_highdim_v2_infeasible_ols.py`
 
-### 最近一次快版正式结果（2026-03-11 02:19:25）
+### 在论文中的角色
 
-已完成运行：`results/highdim_runs/2026-03-11_021925_b200_seed42_fast/`
+本实验是论文两层递进证明的第二层（第一层为 Section 1 的低维基准实验），回答"为什么需要正则化方法"。通过制造 OLS 不可行的场景，展示 Lasso/SVD 的不可替代性。详见 `simulation_plan.md` Section 11。
 
-- 配置：`B=200`、`seeds=[42]`、`jobs=10`、`seed_workers=1`
-- 用途：快速验证高维主叙事，不作为最终展示版本
+### 实验设计
 
-关键结论：
+在 OLS 真正不可行（参数量 >> 每段观测数）的场景下，用结构匹配扰动验证 Lasso 和 SVD 的 Bootstrap Sup-LR 检验。结构匹配扰动（稀疏支撑集 / 列空间低秩）的设计基于实证观察：真实世界的结构断裂是保结构的（见 `simulation_plan.md` Section 11.2）。
 
-- `baseline_ols_n20` 的 `Size@M=2000=0.0565`，说明高维下 OLS 仍统计可行；
-- 但 `Power@δ=0.50=0.6700`，明显低于 `N=5/10`，说明高维下 OLS 检验效率下降；
-- `sparse_lasso_n20=0.7620`、`lowrank_svd_n20=0.9000` 高于 `baseline_ols_n20`，支持“结构化方法在高维下更有优势”的定性叙事；
-- `B=200 + 单 seed` 下，Type I error 曲线仍会出现较明显波动，因此正式展示应改用“均值 + 误差带”。
+- $T=300$，$p=1$，$t^*=150$，每段有效观测约 149
+- $N=20$：OLS 参数量 420，参数/观测比 2.82 → OLS 不可行
+- $N=30$：OLS 参数量 930，参数/观测比 6.24 → OLS 严重不可行
 
-### 当前推荐的展示增强版配置
+### 6 个模型
 
-若目标是绘制更稳定的 `M-size` 曲线，建议使用：
+| 模型 | N | 方法 | p 值方法 | 扰动类型 | 说明 |
+|---|---:|---|---|---|---|
+| `baseline_ols_f_n20` | 20 | OLS | 渐近 F | 均匀全 1 | 对照：预期 size → 1 |
+| `baseline_ols_f_n30` | 30 | OLS | 渐近 F | 均匀全 1 | 对照：预期 size → 1 |
+| `sparse_lasso_n20` | 20 | Lasso | Bootstrap LR | 稀疏支撑集 | 结构匹配扰动 |
+| `sparse_lasso_n30` | 30 | Lasso | Bootstrap LR | 稀疏支撑集 | 结构匹配扰动 |
+| `lowrank_svd_n20` | 20 | SVD | Bootstrap LR | 列空间低秩 | 结构匹配扰动 |
+| `lowrank_svd_n30` | 30 | SVD | Bootstrap LR | 列空间低秩 | 结构匹配扰动 |
+
+> **设计说明**：OLS 对照组仅使用渐近 F 检验，不设 Bootstrap OLS 对照。原因：OLS 在欠定场景（$X^\top X$ 奇异）下的失败发生在参数估计阶段，与 p 值计算方式无关——无论用渐近 F 还是 Bootstrap LR，都在同一步骤崩溃。F-test 对照组已能清晰展示 size 爆炸现象，增加 Bootstrap OLS 只会重复相同的数值崩溃，增加大量计算开销而不提供额外信息。
+
+### 启动命令
 
 ```bash
-python3 -u experiments/run_highdim_mgrid_multiseed.py \
-  --B 500 --seeds 42 2026 \
-  --jobs 10 --seed-workers 1 \
-  --tag b500_seed2_band
+# 快速验证（B=100, 单 seed）
+python3 -u experiments/run_highdim_v2_infeasible_ols.py \
+  --B 100 --seeds 42 --jobs 8 --tag smoke_test
+
+# 正式实验（B=500, 双 seed）
+python3 -u experiments/run_highdim_v2_infeasible_ols.py \
+  --B 500 --seeds 42 2026 --jobs 8 --tag v1_structured
 ```
 
-设计理由：
+### 命令行参数
 
-- `B=500`：降低 bootstrap 临界值抖动；
-- `2` 个 seeds：减弱单 seed 偶然波动；
-- 其余设定不变：便于将展示改善归因到 `B` 和 seed 数，而不引入新的 DGP 变化。
+与主实验脚本参数一致，差异：
 
-### 新增聚合输出字段（用于画 `M-size 均值 + 误差带`）
+| 参数 | 默认值 | 说明 |
+|---|---|---|
+| `--B` | 500 | Bootstrap 重复次数 |
+| `--power-M` | 500 | Power 评估 MC 次数 |
+| `--models` | 全部 6 个 | 可指定子集，如 `--models sparse_lasso_n20 lowrank_svd_n20` |
 
-展示增强版聚合 CSV 在原有 `value_mean/value_std` 之外新增：
+固定参数（脚本内定义）：`T=300`, `p=1`, `t=150`。
 
-| 字段 | 含义 |
-|---|---|
-| `rejections_total` | 所有 seed 的拒绝次数总和 |
-| `effective_iterations_total` | 所有 seed 的有效 Monte Carlo 次数总和 |
-| `mc_se_pooled` | 合并后比例估计的 Monte Carlo 标准误 |
-| `ci95_low`, `ci95_high` | 95% 误差带端点 |
-
-计算公式：
+### 输出目录
 
 ```text
-p_hat = R_total / M_total
-mc_se_pooled = sqrt(p_hat * (1 - p_hat) / M_total)
-ci95 = p_hat ± 1.96 * mc_se_pooled
+results/highdim_infeasible_runs/
+├── <run_name>/
+│   ├── highdim_infeasible_*.json
+│   ├── highdim_infeasible_raw_*.csv
+│   ├── highdim_infeasible_agg_*.csv
+│   ├── 真高维仿真报告_*.md
+│   ├── run_meta.json
+│   ├── seed_results/
+│   │   └── seed_<seed>.json
+│   └── progress/
+│       ├── progress.log
+│       ├── progress.jsonl
+│       ├── summary.json
+│       └── seed_<seed>_summary.json
 ```
 
-其中 `R_total` 为所有 seed 的拒绝次数总和，`M_total` 为所有 seed 的有效 Monte Carlo 次数总和。
+### 关键输出字段
 
-### 绘图建议
+Power 结果额外记录 `perturbation_type`（`sparse` / `lowrank` / `uniform_ones`），可用于验证扰动方向是否正确路由。
 
-推荐图像元素：
+聚合 CSV 包含跨 seed 的 `mc_se_pooled` 和 `ci95_low/ci95_high`，可直接用于绘制误差带。
 
-1. 横轴：`M_grid`
-2. 纵轴：`value_mean`（Type I error mean）
-3. 参考线：`y = 0.05`
-4. 阴影带：`[ci95_low, ci95_high]`
+### 验证清单
 
-说明：Type I error 曲线不要求随 `M` 单调逼近 `0.05`；正确的展示重点应为“随着 `M` 增大，估计围绕 `0.05` 的波动幅度减小”。
-
-### 专用绘图脚本
-
-已新增脚本：`plots/plot_highdim_size_band.py`
-
-作用：
-
-- 读取高维实验聚合 CSV；
-- 对 `N = 5, 10, 20` 分别绘制一张子图；
-- 每张子图叠加 4 条方法曲线（`OLS(LR)` / `OLS(F)` / `Lasso` / `SVD`）；
-- 绘制 `value_mean` 与 `[ci95_low, ci95_high]` 阴影带；
-- 自动添加 `y = 0.05` 参考线。
-
-推荐用法：
-
-```bash
-python3 plots/plot_highdim_size_band.py \
-  --run-dir results/highdim_runs/2026-03-11_095431_b500_seed2_band
-```
-
-或显式指定 CSV / 输出路径：
-
-```bash
-python3 plots/plot_highdim_size_band.py \
-  --agg-csv results/highdim_runs/<run_name>/highdim_agg_<stamp>.csv \
-  --output results/highdim_runs/<run_name>/高维_size_mean_band.png
-```
-
-默认输出文件：`<run_dir>/高维_size_mean_band.png`
+1. smoke test 确认 6 个模型正常完成
+2. Lasso/SVD 的 size@M=2000 在 [0.03, 0.07] 内
+3. OLS(F) 的 size 接近 1.0（size 爆炸）
+4. power 随 $\delta$ 单调增加
+5. actual_fro 接近 target_fro
+6. 报告中"扰动类型"字段记录正确

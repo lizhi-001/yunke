@@ -1,0 +1,14 @@
+{
+  "run_dir": "results/highdim_infeasible_runs/2026-03-12_171151_v1_structured_B200_seed42",
+  "json": "results/highdim_infeasible_runs/2026-03-12_171151_v1_structured_B200_seed42/highdim_infeasible_2026-03-12_171151_v1_structured_B200_seed42.json",
+  "raw_csv": "results/highdim_infeasible_runs/2026-03-12_171151_v1_structured_B200_seed42/highdim_infeasible_raw_2026-03-12_171151_v1_structured_B200_seed42.csv",
+  "agg_csv": "results/highdim_infeasible_runs/2026-03-12_171151_v1_structured_B200_seed42/highdim_infeasible_agg_2026-03-12_171151_v1_structured_B200_seed42.csv",
+  "markdown": "results/highdim_infeasible_runs/2026-03-12_171151_v1_structured_B200_seed42/真高维仿真报告_2026-03-12_171151_v1_structured_B200_seed42.md",
+  "run_meta": "results/highdim_infeasible_runs/2026-03-12_171151_v1_structured_B200_seed42/run_meta.json",
+  "seed_results_dir": "results/highdim_infeasible_runs/2026-03-12_171151_v1_structured_B200_seed42/seed_results",
+  "progress_dir": "results/highdim_infeasible_runs/2026-03-12_171151_v1_structured_B200_seed42/progress",
+  "progress_log": "results/highdim_infeasible_runs/2026-03-12_171151_v1_structured_B200_seed42/progress/progress.log",
+  "progress_jsonl": "results/highdim_infeasible_runs/2026-03-12_171151_v1_structured_B200_seed42/progress/progress.jsonl",
+  "progress_summary": "results/highdim_infeasible_runs/2026-03-12_171151_v1_structured_B200_seed42/progress/summary.json",
+  "seed_summary_pattern": "results/highdim_infeasible_runs/2026-03-12_171151_v1_structured_B200_seed42/progress/seed_<seed>_summary.json"
+}
