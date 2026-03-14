@@ -28,17 +28,17 @@
 # 正式实验（推荐参数）
 python3 -u experiments/run_structured_scenarios.py \
   --B 500 --seeds 42 2026 --jobs 10 --power-M 500 \
-  --deltas 0.1 0.3 0.5 1.0 --tag final
+  --deltas 0.1 0.2 0.3 0.4 0.5 0.6 0.75 1.0 --tag final
 
 # 仅跑指定模型
 python3 -u experiments/run_structured_scenarios.py \
   --B 500 --seeds 42 2026 --jobs 10 --power-M 500 \
-  --models lowrank_rrr --deltas 0.1 0.3 0.5 1.0 --tag lowrank_only
+  --models lowrank_rrr --deltas 0.1 0.2 0.3 0.4 0.5 0.6 0.75 1.0 --tag lowrank_only
 
 # 跳过 type1，仅跑 power
 python3 -u experiments/run_structured_scenarios.py \
   --B 500 --seeds 42 2026 --jobs 10 --power-M 500 \
-  --skip-type1 --deltas 0.1 0.3 0.5 1.0 --tag power_only
+  --skip-type1 --deltas 0.1 0.2 0.3 0.4 0.5 0.6 0.75 1.0 --tag power_only
 
 # 快速 smoke test
 python3 -u experiments/run_structured_scenarios.py \
@@ -137,7 +137,7 @@ Monte Carlo 外层并行使用 `ProcessPoolExecutor` 进程池。
 tmux new -s var_exp
 python3 -u experiments/run_structured_scenarios.py \
   --B 500 --seeds 42 2026 --jobs 10 --power-M 500 \
-  --deltas 0.1 0.3 0.5 1.0 --tag final
+  --deltas 0.1 0.2 0.3 0.4 0.5 0.6 0.75 1.0 --tag final
 ```
 
 ```bash

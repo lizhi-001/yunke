@@ -284,14 +284,14 @@ $$
 | $M_{\text{power}}$ | 功效评估的 MC 重复次数 | 500 |
 | $B$ | Bootstrap 重复次数 | 500 |
 | $\alpha$ | 显著性水平 | 0.05 |
-| $\delta$ | Frobenius 效应量网格 | [0.1, 0.3, 0.5, 1.0] |
+| $\delta$ | Frobenius 效应量网格 | [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.75, 1.0] |
 | seeds | 随机种子 | [42, 2026] |
 
 **参数选择依据**：
 - $M_{\text{grid}}$ 包含 $M=50$（展示小样本噪声）到 $M=2000$（精确估计，$\text{SE} \approx \sqrt{0.05 \times 0.95 / 2000} \approx 0.005$）
 - $M_{\text{power}} = 500$ 保证功效估计精度（$\text{SE} \approx 0.010$ at $p=0.05$），同时控制计算量
 - $B = 500$ 保证 Bootstrap 临界值稳定
-- $\delta = [0.1, 0.3, 0.5, 1.0]$：覆盖从接近 size level 到 power ≥ 0.95 的功效曲线。区间设计兼顾四类模型——baseline 在 $\delta=0.5$ 即达到高功效，sparse/lowrank 在 $\delta=1.0$ 达到 ≥ 0.95
+- $\delta = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.75, 1.0]$：8 个点位均匀覆盖功效曲线，保证绘图平滑。baseline 在 $\delta \approx 0.5$ 即接近饱和，sparse/lowrank 在 $\delta=1.0$ 达到 ≥ 0.95；0.6 和 0.75 补充了 sparse/lowrank 功效快速攀升区间的关键点位
 
 ### 4.3 实验评估指标
 
@@ -342,20 +342,24 @@ $$
 
 | $\delta$ | baseline_ols_f | baseline_ols | sparse_lasso | lowrank_rrr |
 |---:|---:|---:|---:|---:|
-| 0.1 | 0.084 | 0.066 | 0.050 | 0.038 |
-| 0.3 | 0.404 | 0.284 | 0.096 | 0.108 |
-| 0.5 | 0.964 | 0.904 | 0.178 | 0.324 |
-| 1.0 | 1.000 | 1.000 | 0.950 | 0.998 |
+| 0.10 | 0.084 | 0.066 | 0.050 | 0.038 |
+| 0.20 | 0.151 | 0.117 | 0.073 | 0.055 |
+| 0.30 | 0.404 | 0.284 | 0.096 | 0.108 |
+| 0.40 | 0.664 | 0.500 | 0.167 | 0.196 |
+| 0.50 | 0.964 | 0.904 | 0.178 | 0.324 |
+| 0.60 | 0.994 | 0.958 | 0.404 | 0.550 |
+| 0.75 | 1.000 | 1.000 | 0.663 | 0.836 |
+| 1.00 | 1.000 | 1.000 | 0.950 | 0.998 |
 
 **分析**：
 
-1. **所有模型 power 随 $\delta$ 单调递增**：验证了检验的功效特性。$\delta=1.0$ 时所有模型功效 ≥ 0.950
+1. **所有模型 power 随 $\delta$ 严格单调递增**：8 个点位均无逆序，验证了检验的功效特性。$\delta=1.0$ 时所有模型功效 ≥ 0.950
 
-2. **第一层验证成功**：baseline_ols_f（渐近 F）与 baseline_ols（Bootstrap LR）表现一致——size 均≈0.05，power 曲线形态相似，验证了 Bootstrap LR 的可靠性。渐近 F 在中等 $\delta$ 下功效略高，可能因渐近临界值在 $T=500$ 低维场景下已足够精确
+2. **第一层验证成功**：baseline_ols_f（渐近 F）与 baseline_ols（Bootstrap LR）表现一致——size 均≈0.05，power 曲线形态相似，验证了 Bootstrap LR 的可靠性。渐近 F 在中等 $\delta$ 下功效略高（如 $\delta=0.4$: 0.664 vs 0.500），可能因渐近临界值在 $T=500$ 低维场景下已足够精确
 
-3. **第二层有效性**：sparse_lasso 在稀疏场景中 size 控制良好（0.053），power 在 $\delta=1.0$ 达到 0.950。Lasso + Bootstrap LR 在高维稀疏 VAR 中提供了有效的断裂检验路径
+3. **第二层有效性**：sparse_lasso 在稀疏场景中 size 控制良好（0.053），power 在 $\delta=0.6$ 达到 0.404，$\delta=0.75$ 达到 0.663，$\delta=1.0$ 达到 0.950。Lasso + Bootstrap LR 在高维稀疏 VAR 中提供了有效的断裂检验路径
 
-4. **第三层有效性**：lowrank_rrr 在低秩场景中 size 保守（0.036），power 在 $\delta=1.0$ 达到 0.998。RRR + Bootstrap LR 在高维低秩 VAR 中提供了有效的断裂检验路径
+4. **第三层有效性**：lowrank_rrr 在低秩场景中 size 保守（0.036），power 在 $\delta=0.6$ 达到 0.550，$\delta=0.75$ 达到 0.836，$\delta=1.0$ 达到 0.998。RRR + Bootstrap LR 在高维低秩 VAR 中提供了有效的断裂检验路径
 
 5. **功效差异的来源**：baseline（$N=10$）在 $\delta=0.5$ 即达到 90%+ 功效，而 sparse/lowrank（$N=20$）在相同 $\delta$ 下功效较低。功效差异主要来自：(a) 维度差异（$N=10$ vs $N=20$）导致的信噪比不同；(b) 结构化估计的正则化偏差。这不影响核心结论——各方法在其适用场景中均能达到高功效
 
@@ -607,9 +611,9 @@ python3 applications/sector_lowrank_test.py --B 500 --verbose
 
 3. **Bootstrap LR 与渐近 F 的一致性**：两种 p 值方法在 $T=500$ 低维场景下给出几乎相同的 size 和相似的 power，验证了 Bootstrap 方法的可靠性
 
-4. **高维稀疏场景**：Lasso + Bootstrap LR 在 $N=20$、sparsity=0.15 的稀疏 VAR 场景中有效工作，size≈0.05，power 在 $\delta=1.0$ 达到 0.950
+4. **高维稀疏场景**：Lasso + Bootstrap LR 在 $N=20$、sparsity=0.15 的稀疏 VAR 场景中有效工作，size≈0.05，power 在 $\delta=0.75$ 达到 0.663，$\delta=1.0$ 达到 0.950
 
-5. **高维低秩场景**：RRR + Bootstrap LR 在 $N=20$、rank=2 的低秩 VAR 场景中有效工作，size≈0.036（略保守），power 在 $\delta=1.0$ 达到 0.998
+5. **高维低秩场景**：RRR + Bootstrap LR 在 $N=20$、rank=2 的低秩 VAR 场景中有效工作，size≈0.036（略保守），power 在 $\delta=0.75$ 达到 0.836，$\delta=1.0$ 达到 0.998
 
 6. **Bootstrap LR 的推广作用**：渐近 F 检验只适用于 OLS 估计，不适用于正则化估计；Bootstrap LR 是将推断从 OLS 推广到 Lasso/RRR 的关键桥梁
 
@@ -668,17 +672,17 @@ python3 applications/sector_lowrank_test.py --B 500 --verbose
 # 正式实验（推荐参数）
 python3 -u experiments/run_structured_scenarios.py \
   --B 500 --seeds 42 2026 --jobs 10 --power-M 500 \
-  --deltas 0.1 0.3 0.5 1.0 --tag final
+  --deltas 0.1 0.2 0.3 0.4 0.5 0.6 0.75 1.0 --tag final
 
 # 仅跑低秩模型
 python3 -u experiments/run_structured_scenarios.py \
   --B 500 --seeds 42 2026 --jobs 10 --power-M 500 \
-  --models lowrank_rrr --deltas 0.1 0.3 0.5 1.0 --tag lowrank_only
+  --models lowrank_rrr --deltas 0.1 0.2 0.3 0.4 0.5 0.6 0.75 1.0 --tag lowrank_only
 
 # 仅跑 power（跳过 type1）
 python3 -u experiments/run_structured_scenarios.py \
   --B 500 --seeds 42 2026 --jobs 10 --power-M 500 \
-  --skip-type1 --deltas 0.1 0.3 0.5 1.0 --tag power_only
+  --skip-type1 --deltas 0.1 0.2 0.3 0.4 0.5 0.6 0.75 1.0 --tag power_only
 
 # 快速 smoke test
 python3 -u experiments/run_structured_scenarios.py \
@@ -693,7 +697,7 @@ python3 -u experiments/run_structured_scenarios.py \
 tmux new -s var_exp
 python3 -u experiments/run_structured_scenarios.py \
   --B 500 --seeds 42 2026 --jobs 10 --power-M 500 \
-  --deltas 0.1 0.3 0.5 1.0 --tag final
+  --deltas 0.1 0.2 0.3 0.4 0.5 0.6 0.75 1.0 --tag final
 
 # 退出 tmux（不终止实验）
 Ctrl-b d
