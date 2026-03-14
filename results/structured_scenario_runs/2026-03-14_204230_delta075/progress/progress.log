@@ -1,0 +1,38 @@
+[2026-03-14 20:42:30] run started | seeds=[42, 2026] B=500 M_grid=[50, 100, 300, 500, 1000, 2000]
+[2026-03-14 20:42:30] seed 42 started | jobs=10
+[2026-03-14 20:42:30]   [42] baseline_ols_f started
+[2026-03-14 20:42:30]   [42] baseline_ols_f/power_delta_0.75 start
+[2026-03-14 20:42:32]   [42] baseline_ols_f/power_delta_0.75 done | 1.91s val=1.0000  [1/8]
+[2026-03-14 20:42:32]   [42] baseline_ols_f done | 1.91s
+[2026-03-14 20:42:32]   [42] baseline_ols started
+[2026-03-14 20:42:32]   [42] baseline_ols/power_delta_0.75 start
+[2026-03-14 20:43:19]   [42] baseline_ols/power_delta_0.75 done | 47.22s val=1.0000  [2/8]
+[2026-03-14 20:43:19]   [42] baseline_ols done | 47.22s
+[2026-03-14 20:43:19]   [42] sparse_lasso started
+[2026-03-14 20:43:19]   [42] sparse_lasso/power_delta_0.75 start
+[2026-03-14 20:52:58]   [42] sparse_lasso/power_delta_0.75 done | 579.08s val=0.7580  [3/8]
+[2026-03-14 20:52:58]   [42] sparse_lasso done | 579.09s
+[2026-03-14 20:52:58]   [42] lowrank_rrr started
+[2026-03-14 20:52:58]   [42] lowrank_rrr/power_delta_0.75 start
+[2026-03-14 20:54:20]   [42] lowrank_rrr/power_delta_0.75 done | 81.30s val=0.8540  [4/8]
+[2026-03-14 20:54:20]   [42] lowrank_rrr done | 81.30s
+[2026-03-14 20:54:20] seed 42 done | 709.53s
+[2026-03-14 20:54:20] seed 2026 started | jobs=10
+[2026-03-14 20:54:20]   [2026] baseline_ols_f started
+[2026-03-14 20:54:20]   [2026] baseline_ols_f/power_delta_0.75 start
+[2026-03-14 20:54:21]   [2026] baseline_ols_f/power_delta_0.75 done | 1.86s val=1.0000  [5/8]
+[2026-03-14 20:54:21]   [2026] baseline_ols_f done | 1.86s
+[2026-03-14 20:54:21]   [2026] baseline_ols started
+[2026-03-14 20:54:21]   [2026] baseline_ols/power_delta_0.75 start
+[2026-03-14 20:55:08]   [2026] baseline_ols/power_delta_0.75 done | 46.94s val=1.0000  [6/8]
+[2026-03-14 20:55:08]   [2026] baseline_ols done | 46.94s
+[2026-03-14 20:55:08]   [2026] sparse_lasso started
+[2026-03-14 20:55:08]   [2026] sparse_lasso/power_delta_0.75 start
+[2026-03-14 21:05:26]   [2026] sparse_lasso/power_delta_0.75 done | 617.47s val=0.5680  [7/8]
+[2026-03-14 21:05:26]   [2026] sparse_lasso done | 617.47s
+[2026-03-14 21:05:26]   [2026] lowrank_rrr started
+[2026-03-14 21:05:26]   [2026] lowrank_rrr/power_delta_0.75 start
+[2026-03-14 21:06:47]   [2026] lowrank_rrr/power_delta_0.75 done | 81.51s val=0.8180  [8/8]
+[2026-03-14 21:06:47]   [2026] lowrank_rrr done | 81.51s
+[2026-03-14 21:06:47] seed 2026 done | 747.78s
+[2026-03-14 21:06:47] run finished | runtime=1457.31s

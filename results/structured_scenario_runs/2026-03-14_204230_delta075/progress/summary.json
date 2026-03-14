@@ -1,0 +1,17 @@
+{
+  "updated_at": "2026-03-14 21:06:47",
+  "completed_stage_count": 8,
+  "total_stage_count": 8,
+  "progress_ratio": 1.0,
+  "active_stages": [],
+  "completed_stages": [
+    "seed_42/baseline_ols_f/power_delta_0.75",
+    "seed_42/baseline_ols/power_delta_0.75",
+    "seed_42/sparse_lasso/power_delta_0.75",
+    "seed_42/lowrank_rrr/power_delta_0.75",
+    "seed_2026/baseline_ols_f/power_delta_0.75",
+    "seed_2026/baseline_ols/power_delta_0.75",
+    "seed_2026/sparse_lasso/power_delta_0.75",
+    "seed_2026/lowrank_rrr/power_delta_0.75"
+  ]
+}
