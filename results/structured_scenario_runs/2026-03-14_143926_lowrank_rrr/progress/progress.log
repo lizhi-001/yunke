@@ -1,0 +1,58 @@
+[2026-03-14 14:39:26] run started | seeds=[42, 2026] B=500 M_grid=[50, 100, 300, 500, 1000, 2000]
+[2026-03-14 14:39:26] seed 42 started | jobs=10
+[2026-03-14 14:39:26]   [42] lowrank_rrr started
+[2026-03-14 14:39:26]   [42] lowrank_rrr/type1_M_50 start
+[2026-03-14 14:39:35]   [42] lowrank_rrr/type1_M_50 done | 9.13s val=0.0200  [1/24]
+[2026-03-14 14:39:35]   [42] lowrank_rrr/type1_M_100 start
+[2026-03-14 14:39:51]   [42] lowrank_rrr/type1_M_100 done | 16.18s val=0.0300  [2/24]
+[2026-03-14 14:39:51]   [42] lowrank_rrr/type1_M_300 start
+[2026-03-14 14:40:41]   [42] lowrank_rrr/type1_M_300 done | 50.21s val=0.0300  [3/24]
+[2026-03-14 14:40:41]   [42] lowrank_rrr/type1_M_500 start
+[2026-03-14 14:42:05]   [42] lowrank_rrr/type1_M_500 done | 83.67s val=0.0400  [4/24]
+[2026-03-14 14:42:05]   [42] lowrank_rrr/type1_M_1000 start
+[2026-03-14 14:44:39]   [42] lowrank_rrr/type1_M_1000 done | 154.44s val=0.0290  [5/24]
+[2026-03-14 14:44:39]   [42] lowrank_rrr/type1_M_2000 start
+[2026-03-14 14:49:36]   [42] lowrank_rrr/type1_M_2000 done | 296.99s val=0.0390  [6/24]
+[2026-03-14 14:49:36]   [42] lowrank_rrr/power_delta_0.05 start
+[2026-03-14 14:50:58]   [42] lowrank_rrr/power_delta_0.05 done | 82.05s val=0.0440  [7/24]
+[2026-03-14 14:50:58]   [42] lowrank_rrr/power_delta_0.10 start
+[2026-03-14 14:52:20]   [42] lowrank_rrr/power_delta_0.10 done | 81.44s val=0.0580  [8/24]
+[2026-03-14 14:52:20]   [42] lowrank_rrr/power_delta_0.15 start
+[2026-03-14 14:53:43]   [42] lowrank_rrr/power_delta_0.15 done | 83.61s val=0.0320  [9/24]
+[2026-03-14 14:53:43]   [42] lowrank_rrr/power_delta_0.20 start
+[2026-03-14 14:55:05]   [42] lowrank_rrr/power_delta_0.20 done | 81.36s val=0.0600  [10/24]
+[2026-03-14 14:55:05]   [42] lowrank_rrr/power_delta_0.30 start
+[2026-03-14 14:56:26]   [42] lowrank_rrr/power_delta_0.30 done | 81.06s val=0.0920  [11/24]
+[2026-03-14 14:56:26]   [42] lowrank_rrr/power_delta_0.50 start
+[2026-03-14 14:57:47]   [42] lowrank_rrr/power_delta_0.50 done | 81.24s val=0.3440  [12/24]
+[2026-03-14 14:57:47]   [42] lowrank_rrr done | 1101.43s
+[2026-03-14 14:57:47] seed 42 done | 1101.43s
+[2026-03-14 14:57:47] seed 2026 started | jobs=10
+[2026-03-14 14:57:47]   [2026] lowrank_rrr started
+[2026-03-14 14:57:47]   [2026] lowrank_rrr/type1_M_50 start
+[2026-03-14 14:57:56]   [2026] lowrank_rrr/type1_M_50 done | 9.04s val=0.0400  [13/24]
+[2026-03-14 14:57:56]   [2026] lowrank_rrr/type1_M_100 start
+[2026-03-14 14:58:13]   [2026] lowrank_rrr/type1_M_100 done | 16.77s val=0.0500  [14/24]
+[2026-03-14 14:58:13]   [2026] lowrank_rrr/type1_M_300 start
+[2026-03-14 14:59:02]   [2026] lowrank_rrr/type1_M_300 done | 49.27s val=0.0367  [15/24]
+[2026-03-14 14:59:02]   [2026] lowrank_rrr/type1_M_500 start
+[2026-03-14 15:00:25]   [2026] lowrank_rrr/type1_M_500 done | 83.30s val=0.0440  [16/24]
+[2026-03-14 15:00:25]   [2026] lowrank_rrr/type1_M_1000 start
+[2026-03-14 15:02:58]   [2026] lowrank_rrr/type1_M_1000 done | 152.66s val=0.0400  [17/24]
+[2026-03-14 15:02:58]   [2026] lowrank_rrr/type1_M_2000 start
+[2026-03-14 15:08:38]   [2026] lowrank_rrr/type1_M_2000 done | 340.00s val=0.0325  [18/24]
+[2026-03-14 15:08:38]   [2026] lowrank_rrr/power_delta_0.05 start
+[2026-03-14 15:10:04]   [2026] lowrank_rrr/power_delta_0.05 done | 85.66s val=0.0360  [19/24]
+[2026-03-14 15:10:04]   [2026] lowrank_rrr/power_delta_0.10 start
+[2026-03-14 15:11:34]   [2026] lowrank_rrr/power_delta_0.10 done | 90.01s val=0.0520  [20/24]
+[2026-03-14 15:11:34]   [2026] lowrank_rrr/power_delta_0.15 start
+[2026-03-14 15:13:02]   [2026] lowrank_rrr/power_delta_0.15 done | 88.05s val=0.0460  [21/24]
+[2026-03-14 15:13:02]   [2026] lowrank_rrr/power_delta_0.20 start
+[2026-03-14 15:14:31]   [2026] lowrank_rrr/power_delta_0.20 done | 89.41s val=0.0460  [22/24]
+[2026-03-14 15:14:31]   [2026] lowrank_rrr/power_delta_0.30 start
+[2026-03-14 15:15:59]   [2026] lowrank_rrr/power_delta_0.30 done | 87.32s val=0.1000  [23/24]
+[2026-03-14 15:15:59]   [2026] lowrank_rrr/power_delta_0.50 start
+[2026-03-14 15:17:26]   [2026] lowrank_rrr/power_delta_0.50 done | 87.72s val=0.3080  [24/24]
+[2026-03-14 15:17:26]   [2026] lowrank_rrr done | 1179.24s
+[2026-03-14 15:17:26] seed 2026 done | 1179.24s
+[2026-03-14 15:17:26] run finished | runtime=2280.68s

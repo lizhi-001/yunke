@@ -1,0 +1,16 @@
+{"timestamp": "2026-03-14 16:31:42", "event": "run_started", "config": {"seeds": [2026], "B": 500, "M_grid": [50, 100, 300, 500, 1000, 2000], "power_M": 500, "alpha": 0.05, "deltas": [1.0]}}
+{"timestamp": "2026-03-14 16:31:42", "event": "seed_started", "seed": 2026, "jobs": 5}
+{"timestamp": "2026-03-14 16:31:42", "event": "model_started", "seed": 2026, "model": "baseline_ols_f", "jobs": 5}
+{"timestamp": "2026-03-14 16:31:42", "event": "stage_started", "seed": 2026, "model": "baseline_ols_f", "stage": "power_delta_1.00", "task": "power", "M": 500, "base_delta": 1.0, "target_fro": 1.0}
+{"timestamp": "2026-03-14 16:31:45", "event": "stage_finished", "seed": 2026, "model": "baseline_ols_f", "stage": "power_delta_1.00", "runtime_sec": 2.4665160179138184, "task": "power", "M": 500, "base_delta": 1.0, "target_fro": 1.0, "metric_value": 1.0}
+{"timestamp": "2026-03-14 16:31:45", "event": "model_finished", "seed": 2026, "model": "baseline_ols_f", "runtime_sec": 2.4683661460876465}
+{"timestamp": "2026-03-14 16:31:45", "event": "model_started", "seed": 2026, "model": "baseline_ols", "jobs": 5}
+{"timestamp": "2026-03-14 16:31:45", "event": "stage_started", "seed": 2026, "model": "baseline_ols", "stage": "power_delta_1.00", "task": "power", "M": 500, "base_delta": 1.0, "target_fro": 1.0}
+{"timestamp": "2026-03-14 16:33:40", "event": "stage_finished", "seed": 2026, "model": "baseline_ols", "stage": "power_delta_1.00", "runtime_sec": 115.78609609603882, "task": "power", "M": 500, "base_delta": 1.0, "target_fro": 1.0, "metric_value": 1.0}
+{"timestamp": "2026-03-14 16:33:40", "event": "model_finished", "seed": 2026, "model": "baseline_ols", "runtime_sec": 115.7880048751831}
+{"timestamp": "2026-03-14 16:33:40", "event": "model_started", "seed": 2026, "model": "sparse_lasso", "jobs": 5}
+{"timestamp": "2026-03-14 16:33:40", "event": "stage_started", "seed": 2026, "model": "sparse_lasso", "stage": "power_delta_1.00", "task": "power", "M": 500, "base_delta": 1.0, "target_fro": 1.0}
+{"timestamp": "2026-03-14 16:54:18", "event": "stage_finished", "seed": 2026, "model": "sparse_lasso", "stage": "power_delta_1.00", "runtime_sec": 1237.7967081069946, "task": "power", "M": 500, "base_delta": 1.0, "target_fro": 1.0, "metric_value": 0.95}
+{"timestamp": "2026-03-14 16:54:18", "event": "model_finished", "seed": 2026, "model": "sparse_lasso", "runtime_sec": 1237.8015217781067}
+{"timestamp": "2026-03-14 16:54:18", "event": "seed_finished", "seed": 2026, "runtime_sec": 1356.0592150688171}
+{"timestamp": "2026-03-14 16:54:18", "event": "run_finished", "runtime_sec": 1356.061115026474}

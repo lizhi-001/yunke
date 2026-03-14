@@ -1,0 +1,33 @@
+[2026-03-14 10:55:58] run started | seeds=[42, 2026] B=500 M_grid=[50, 100, 300, 500, 1000, 2000]
+[2026-03-14 10:55:58] seed 42 started | jobs=10
+[2026-03-14 10:55:58]   [42] lowrank_svd started
+[2026-03-14 10:55:58]   [42] lowrank_svd/type1_M_50 start
+[2026-03-14 10:56:07]   [42] lowrank_svd/type1_M_50 done | 8.29s val=0.0200  [1/12]
+[2026-03-14 10:56:07]   [42] lowrank_svd/type1_M_100 start
+[2026-03-14 10:56:21]   [42] lowrank_svd/type1_M_100 done | 14.15s val=0.0400  [2/12]
+[2026-03-14 10:56:21]   [42] lowrank_svd/type1_M_300 start
+[2026-03-14 10:57:03]   [42] lowrank_svd/type1_M_300 done | 42.42s val=0.0433  [3/12]
+[2026-03-14 10:57:03]   [42] lowrank_svd/type1_M_500 start
+[2026-03-14 10:58:10]   [42] lowrank_svd/type1_M_500 done | 67.38s val=0.0280  [4/12]
+[2026-03-14 10:58:10]   [42] lowrank_svd/type1_M_1000 start
+[2026-03-14 11:00:25]   [42] lowrank_svd/type1_M_1000 done | 134.06s val=0.0320  [5/12]
+[2026-03-14 11:00:25]   [42] lowrank_svd/type1_M_2000 start
+[2026-03-14 11:04:22]   [42] lowrank_svd/type1_M_2000 done | 237.63s val=0.0375  [6/12]
+[2026-03-14 11:04:22]   [42] lowrank_svd done | 503.94s
+[2026-03-14 11:04:22] seed 42 done | 503.94s
+[2026-03-14 11:04:22] seed 2026 started | jobs=10
+[2026-03-14 11:04:22]   [2026] lowrank_svd started
+[2026-03-14 11:04:22]   [2026] lowrank_svd/type1_M_50 start
+[2026-03-14 11:04:30]   [2026] lowrank_svd/type1_M_50 done | 7.61s val=0.0000  [7/12]
+[2026-03-14 11:04:30]   [2026] lowrank_svd/type1_M_100 start
+[2026-03-14 11:04:43]   [2026] lowrank_svd/type1_M_100 done | 13.35s val=0.0600  [8/12]
+[2026-03-14 11:04:43]   [2026] lowrank_svd/type1_M_300 start
+[2026-03-14 11:05:23]   [2026] lowrank_svd/type1_M_300 done | 39.77s val=0.0400  [9/12]
+[2026-03-14 11:05:23]   [2026] lowrank_svd/type1_M_500 start
+[2026-03-14 11:06:30]   [2026] lowrank_svd/type1_M_500 done | 66.68s val=0.0520  [10/12]
+[2026-03-14 11:06:30]   [2026] lowrank_svd/type1_M_1000 start
+[2026-03-14 11:08:29]   [2026] lowrank_svd/type1_M_1000 done | 119.83s val=0.0410  [11/12]
+[2026-03-14 11:08:29]   [2026] lowrank_svd/type1_M_2000 start
+[2026-03-14 11:12:28]   [2026] lowrank_svd/type1_M_2000 done | 238.89s val=0.0370  [12/12]
+[2026-03-14 11:12:28]   [2026] lowrank_svd done | 486.13s
+[2026-03-14 11:12:28] seed 2026 done | 486.13s

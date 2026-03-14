@@ -1,0 +1,12 @@
+{
+  "updated_at": "2026-03-14 16:54:18",
+  "completed_stage_count": 3,
+  "total_stage_count": 3,
+  "progress_ratio": 1.0,
+  "active_stages": [],
+  "completed_stages": [
+    "seed_2026/baseline_ols_f/power_delta_1.00",
+    "seed_2026/baseline_ols/power_delta_1.00",
+    "seed_2026/sparse_lasso/power_delta_1.00"
+  ]
+}

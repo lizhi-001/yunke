@@ -1,0 +1,26 @@
+[2026-03-14 16:31:39] run started | seeds=[42, 2026] B=500 M_grid=[50, 100, 300, 500, 1000, 2000]
+[2026-03-14 16:31:39] seed 42 started | jobs=10
+[2026-03-14 16:31:39]   [42] lowrank_rrr started
+[2026-03-14 16:31:39]   [42] lowrank_rrr/power_delta_0.10 start
+[2026-03-14 16:33:40]   [42] lowrank_rrr/power_delta_0.10 done | 120.29s val=0.0400  [1/8]
+[2026-03-14 16:33:40]   [42] lowrank_rrr/power_delta_0.30 start
+[2026-03-14 16:35:44]   [42] lowrank_rrr/power_delta_0.30 done | 123.81s val=0.1080  [2/8]
+[2026-03-14 16:35:44]   [42] lowrank_rrr/power_delta_0.50 start
+[2026-03-14 16:37:49]   [42] lowrank_rrr/power_delta_0.50 done | 125.24s val=0.3280  [3/8]
+[2026-03-14 16:37:49]   [42] lowrank_rrr/power_delta_1.00 start
+[2026-03-14 16:39:54]   [42] lowrank_rrr/power_delta_1.00 done | 125.46s val=0.9980  [4/8]
+[2026-03-14 16:39:54]   [42] lowrank_rrr done | 494.81s
+[2026-03-14 16:39:54] seed 42 done | 494.81s
+[2026-03-14 16:39:54] seed 2026 started | jobs=10
+[2026-03-14 16:39:54]   [2026] lowrank_rrr started
+[2026-03-14 16:39:54]   [2026] lowrank_rrr/power_delta_0.10 start
+[2026-03-14 16:42:05]   [2026] lowrank_rrr/power_delta_0.10 done | 130.25s val=0.0360  [5/8]
+[2026-03-14 16:42:05]   [2026] lowrank_rrr/power_delta_0.30 start
+[2026-03-14 16:44:26]   [2026] lowrank_rrr/power_delta_0.30 done | 141.60s val=0.1080  [6/8]
+[2026-03-14 16:44:26]   [2026] lowrank_rrr/power_delta_0.50 start
+[2026-03-14 16:46:37]   [2026] lowrank_rrr/power_delta_0.50 done | 130.98s val=0.3200  [7/8]
+[2026-03-14 16:46:37]   [2026] lowrank_rrr/power_delta_1.00 start
+[2026-03-14 16:48:45]   [2026] lowrank_rrr/power_delta_1.00 done | 128.01s val=0.9980  [8/8]
+[2026-03-14 16:48:45]   [2026] lowrank_rrr done | 530.85s
+[2026-03-14 16:48:45] seed 2026 done | 530.85s
+[2026-03-14 16:48:45] run finished | runtime=1025.66s

@@ -1,23 +1,22 @@
 """Lightweight helpers for running independent simulation tasks in parallel.
 
-Uses loky (via joblib) as the default process-pool backend.  loky avoids the
-POSIX-semaphore permission issues that cause stdlib ProcessPoolExecutor to fail
-in restricted environments (containers, some cloud VMs).  It also reuses worker
-processes across calls, cutting fork/spawn overhead.
+Uses ProcessPoolExecutor as the default process-pool backend (one fresh pool
+per call), so that concurrent callers from different threads each get their own
+independent worker pool and the full n_jobs budget is honoured.
 
-Fallback chain: loky → ProcessPoolExecutor → ThreadPoolExecutor.
+Fallback chain: ProcessPoolExecutor → ThreadPoolExecutor.
+
+Note: loky's get_reusable_executor is a process-level singleton — sharing it
+across threads causes all callers to compete for the same fixed-size pool,
+defeating the per-caller n_jobs budget.  We therefore use a fresh
+ProcessPoolExecutor per call instead.
 """
 
 from __future__ import annotations
 
+import multiprocessing
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from typing import Callable, List, Sequence, TypeVar
-
-try:
-    from joblib.externals.loky import get_reusable_executor as _get_loky_executor
-    _HAS_LOKY = True
-except ImportError:
-    _HAS_LOKY = False
 
 
 T = TypeVar("T")
@@ -34,8 +33,8 @@ def run_task_map(
 ) -> List[R]:
     """Map independent tasks either serially or with a process pool.
 
-    Attempts loky first (robust process pool), then falls back to stdlib
-    ProcessPoolExecutor, and finally to ThreadPoolExecutor.
+    Each call creates its own ProcessPoolExecutor so concurrent callers
+    (e.g. two seed threads) each maintain their own n_jobs workers.
     """
     if n_jobs <= 1 or len(tasks) <= 1:
         results: List[R] = []
@@ -47,23 +46,11 @@ def run_task_map(
 
     chunksize = max(1, len(tasks) // (n_jobs * 4))
 
-    # --- loky (preferred) ------------------------------------------------
-    if _HAS_LOKY:
-        try:
-            executor = _get_loky_executor(max_workers=n_jobs)
-            results = []
-            for idx, result in enumerate(executor.map(worker, tasks, chunksize=chunksize), start=1):
-                results.append(result)
-                if verbose and idx % progress_every == 0:
-                    print(f"{progress_label} {idx}/{len(tasks)}")
-            return results
-        except Exception:
-            pass  # fall through to stdlib
-
-    # --- stdlib ProcessPoolExecutor --------------------------------------
+    # --- ProcessPoolExecutor (fresh pool per call) -----------------------
     try:
+        ctx = multiprocessing.get_context("spawn")
         results = []
-        with ProcessPoolExecutor(max_workers=n_jobs) as executor:
+        with ProcessPoolExecutor(max_workers=n_jobs, mp_context=ctx) as executor:
             for idx, result in enumerate(executor.map(worker, tasks, chunksize=chunksize), start=1):
                 results.append(result)
                 if verbose and idx % progress_every == 0:

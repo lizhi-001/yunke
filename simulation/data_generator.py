@@ -92,7 +92,9 @@ class VARDataGenerator:
         raise ValueError(f"无法在{max_attempts}次尝试内生成平稳的VAR系数矩阵")
 
     def generate_lowrank_phi(self, N: int, p: int = 1, rank: int = 2,
-                              scale: float = 0.3, max_attempts: int = 100) -> np.ndarray:
+                              scale: float = 0.3,
+                              target_spectral_radius: Optional[float] = None,
+                              max_attempts: int = 100) -> np.ndarray:
         """
         生成低秩的VAR系数矩阵
 
@@ -105,7 +107,12 @@ class VARDataGenerator:
         rank : int
             目标秩
         scale : float
-            系数的缩放因子
+            系数的缩放因子（用于生成初始随机矩阵）
+        target_spectral_radius : float, optional
+            目标谱半径。若指定，则对生成的矩阵等比缩放至该谱半径，
+            消除 seed 间因随机方向不同导致的谱半径差异。
+            低秩矩阵自由度少（rank 个奇异值决定整体大小），不指定时
+            seed 间谱半径方差极大（CV≈0.45），指定后完全消除该方差来源。
         max_attempts : int
             最大尝试次数
 
@@ -119,6 +126,13 @@ class VARDataGenerator:
             U = self._rng.normal(loc=0.0, scale=scale, size=(N, rank))
             V = self._rng.normal(loc=0.0, scale=scale, size=(N * p, rank))
             Phi = U @ V.T
+
+            if target_spectral_radius is not None:
+                # 直接归一化到目标谱半径，保留低秩方向（U, V），仅调整幅度
+                r = np.max(np.abs(eigvals(Phi)))
+                if r < 1e-10:
+                    continue
+                return Phi * (target_spectral_radius / r)
 
             if VARDataGenerator.check_stationarity(Phi):
                 return Phi

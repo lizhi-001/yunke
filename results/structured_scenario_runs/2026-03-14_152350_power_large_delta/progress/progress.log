@@ -1,0 +1,28 @@
+[2026-03-14 15:23:50] run started | seeds=[42, 2026] B=500 M_grid=[50, 100, 300, 500, 1000, 2000]
+[2026-03-14 15:23:50] seed 42 started | jobs=10
+[2026-03-14 15:23:50]   [42] baseline_ols_f started
+[2026-03-14 15:23:50]   [42] baseline_ols_f/power_delta_0.50 start
+[2026-03-14 15:23:51]   [42] baseline_ols_f/power_delta_0.50 done | 1.79s val=0.8740  [1/40]
+[2026-03-14 15:23:51]   [42] baseline_ols_f/power_delta_1.00 start
+[2026-03-14 15:23:53]   [42] baseline_ols_f/power_delta_1.00 done | 1.68s val=1.0000  [2/40]
+[2026-03-14 15:23:53]   [42] baseline_ols_f/power_delta_1.50 start
+[2026-03-14 15:23:55]   [42] baseline_ols_f/power_delta_1.50 done | 1.87s val=1.0000  [3/40]
+[2026-03-14 15:23:55]   [42] baseline_ols_f/power_delta_2.00 start
+[2026-03-14 15:23:57]   [42] baseline_ols_f/power_delta_2.00 done | 2.49s val=1.0000  [4/40]
+[2026-03-14 15:23:57]   [42] baseline_ols_f/power_delta_3.00 start
+[2026-03-14 15:23:59]   [42] baseline_ols_f/power_delta_3.00 done | 1.77s val=1.0000  [5/40]
+[2026-03-14 15:23:59]   [42] baseline_ols_f done | 9.60s
+[2026-03-14 15:23:59]   [42] baseline_ols started
+[2026-03-14 15:23:59]   [42] baseline_ols/power_delta_0.50 start
+[2026-03-14 15:24:49]   [42] baseline_ols/power_delta_0.50 done | 49.35s val=0.7740  [6/40]
+[2026-03-14 15:24:49]   [42] baseline_ols/power_delta_1.00 start
+[2026-03-14 15:25:38]   [42] baseline_ols/power_delta_1.00 done | 49.05s val=1.0000  [7/40]
+[2026-03-14 15:25:38]   [42] baseline_ols/power_delta_1.50 start
+[2026-03-14 15:26:25]   [42] baseline_ols/power_delta_1.50 done | 47.04s val=1.0000  [8/40]
+[2026-03-14 15:26:25]   [42] baseline_ols/power_delta_2.00 start
+[2026-03-14 15:27:11]   [42] baseline_ols/power_delta_2.00 done | 46.63s val=1.0000  [9/40]
+[2026-03-14 15:27:11]   [42] baseline_ols/power_delta_3.00 start
+[2026-03-14 15:27:58]   [42] baseline_ols/power_delta_3.00 done | 46.20s val=1.0000  [10/40]
+[2026-03-14 15:27:58]   [42] baseline_ols done | 238.28s
+[2026-03-14 15:27:58]   [42] sparse_lasso started
+[2026-03-14 15:27:58]   [42] sparse_lasso/power_delta_0.50 start

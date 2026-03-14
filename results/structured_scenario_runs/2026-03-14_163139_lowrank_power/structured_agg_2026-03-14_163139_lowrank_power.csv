@@ -1,0 +1,5 @@
+scope,seed,model,metric,M,delta,target_fro_mean,actual_fro_mean,value_mean,value_std,size_distortion_mean,rejections_mean,effective_iterations_mean,runtime_sec_mean,seed_count,perturbation_type
+aggregate,,lowrank_rrr,power,500,0.1,0.1,0.1,0.038,0.0020000000000000018,,19.0,500.0,125.270010471344,2,lowrank
+aggregate,,lowrank_rrr,power,500,0.3,0.3,0.3,0.108,0.0,,54.0,500.0,132.70492100715637,2,lowrank
+aggregate,,lowrank_rrr,power,500,0.5,0.5,0.5,0.324,0.0040000000000000036,,162.0,500.0,128.1098438501358,2,lowrank
+aggregate,,lowrank_rrr,power,500,1.0,1.0,1.0,0.998,0.0,,499.0,500.0,126.73267948627472,2,lowrank

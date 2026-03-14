@@ -48,6 +48,14 @@ class LowRankLRTest:
                 )
                 rank = rank_result['selected_rank']
             return estimator.fit_svd(Y, p, rank=rank, include_const=include_const)
+        elif self.method == 'rrr':
+            if rank is None:
+                selector = RankSelector()
+                rank_result = selector.select_by_information_criterion(
+                    Y, p, max_rank=min(Y.shape[1], 10), criterion='bic'
+                )
+                rank = rank_result['selected_rank']
+            return estimator.fit_rrr(Y, p, rank=rank, include_const=include_const)
         else:
             return estimator.fit_cvxpy(Y, p, include_const=include_const)
 

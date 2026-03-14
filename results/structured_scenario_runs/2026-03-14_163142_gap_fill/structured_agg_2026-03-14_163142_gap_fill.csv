@@ -1,0 +1,4 @@
+scope,seed,model,metric,M,delta,target_fro_mean,actual_fro_mean,value_mean,value_std,size_distortion_mean,rejections_mean,effective_iterations_mean,runtime_sec_mean,seed_count,perturbation_type
+aggregate,,baseline_ols_f,power,500,1.0,1.0,0.81,1.0,0.0,,500.0,500.0,2.4665160179138184,1,uniform
+aggregate,,baseline_ols,power,500,1.0,1.0,0.81,1.0,0.0,,500.0,500.0,115.78609609603882,1,uniform
+aggregate,,sparse_lasso,power,500,1.0,1.0,1.0,0.95,0.0,,475.0,500.0,1237.7967081069946,1,sparse

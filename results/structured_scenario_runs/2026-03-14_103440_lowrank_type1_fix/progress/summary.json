@@ -1,0 +1,26 @@
+{
+  "updated_at": "2026-03-14 10:49:26",
+  "completed_stage_count": 15,
+  "total_stage_count": 12,
+  "progress_ratio": 1.25,
+  "active_stages": [
+    "seed_42/sparse_lasso/type1_M_500"
+  ],
+  "completed_stages": [
+    "seed_42/baseline_ols_f/type1_M_50",
+    "seed_42/baseline_ols_f/type1_M_100",
+    "seed_42/baseline_ols_f/type1_M_300",
+    "seed_42/baseline_ols_f/type1_M_500",
+    "seed_42/baseline_ols_f/type1_M_1000",
+    "seed_42/baseline_ols_f/type1_M_2000",
+    "seed_42/baseline_ols/type1_M_50",
+    "seed_42/baseline_ols/type1_M_100",
+    "seed_42/baseline_ols/type1_M_300",
+    "seed_42/baseline_ols/type1_M_500",
+    "seed_42/baseline_ols/type1_M_1000",
+    "seed_42/baseline_ols/type1_M_2000",
+    "seed_42/sparse_lasso/type1_M_50",
+    "seed_42/sparse_lasso/type1_M_100",
+    "seed_42/sparse_lasso/type1_M_300"
+  ]
+}

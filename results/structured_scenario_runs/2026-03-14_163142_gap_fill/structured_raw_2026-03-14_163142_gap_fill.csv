@@ -1,0 +1,4 @@
+scope,seed,model,metric,M,delta,target_fro,actual_fro,value,size_distortion,rejections,effective_iterations,runtime_sec,perturbation_type
+seed,2026,baseline_ols_f,power,500,1.0,1.0,0.81,1.0,,500,500,2.4665160179138184,uniform
+seed,2026,baseline_ols,power,500,1.0,1.0,0.81,1.0,,500,500,115.78609609603882,uniform
+seed,2026,sparse_lasso,power,500,1.0,1.0,1.0,0.95,,475,500,1237.7967081069946,sparse

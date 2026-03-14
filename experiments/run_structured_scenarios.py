@@ -1,26 +1,25 @@
 """结构化 VAR 断裂检验仿真实验
 
 叙事框架（三层）：
-  第一层 — OLS 基准（N=10，T=500，稠密 DGP）
-    baseline_ols:   OLS + LR+Bootstrap  → 验证 Bootstrap 推断有效性
-    baseline_ols_f: OLS + 渐近 F 检验   → 理论锚点，与 Bootstrap 对比
+  第一层 — 普通多元时间序列基准（N=10，T=500，稠密 DGP）
+    baseline_ols_f: OLS + 渐近 F 检验   → 常规断裂检验（理论锚点）
+    baseline_ols:   OLS + LR+Bootstrap  → 提出的 LR+Bootstrap 方法
 
-  第二层 — 稀疏场景（N=20，T=500，稀疏 DGP，稀疏度 0.15）
-    sparse_lasso:   Lasso + LR+Bootstrap → 证明稀疏场景下断裂检验路径可行
-    sparse_ols_f:   OLS   + 渐近 F 检验  → 对照：忽略稀疏结构的效果
+  第二层 — 高维稀疏多元时间序列（N=20，T=500，稀疏 DGP，稀疏度 0.15）
+    sparse_lasso:   Lasso + LR+Bootstrap → 稀疏背景下使用 LR+Bootstrap 进行断裂检验
 
-  第三层 — 低秩场景（N=20，T=500，低秩 DGP，rank=2）
-    lowrank_svd:    SVD   + LR+Bootstrap → 证明低秩场景下断裂检验路径可行
-    lowrank_ols_f:  OLS   + 渐近 F 检验  → 对照：忽略低秩结构的效果
+  第三层 — 高维低秩多元时间序列（N=20，T=500，低秩 DGP，rank=2）
+    lowrank_rrr:    RRR   + LR+Bootstrap → 低秩背景下使用 LR+Bootstrap 进行断裂检验
 
-同一场景内两个模型共享相同的 φ 实现（相同 seed + 相同生成调用），
-并面对相同类型的结构断裂（稀疏扰动 / 低秩扰动），使功效对比公平。
+核心叙事逻辑：
+  在稀疏和低秩背景下，可以用提出的 LR+Bootstrap 方法进行断裂检验，
+  不要求性能高于 OLS。
 
 预期结果：
-  - 所有模型 size@M=2000 ∈ [0.03, 0.07]（检验有效）
+  - 第一层：F 检验与 LR+Bootstrap 的 size 和 power 表现一致
+  - 第二/三层：LR+Bootstrap 的 size 随 M 增大逐渐稳定在 0.05
+  - 第二/三层：M 固定时，power 随 δ 增大越来越大
   - 所有模型 power 随 δ 单调递增（检验有功效）
-  - 第一层：baseline_ols 与 baseline_ols_f 的 size/power 高度一致
-  - 第二/三层：结构化方法 power ≥ OLS 对照（结构化估计更高效）
 """
 
 from __future__ import annotations
@@ -66,26 +65,23 @@ _N_LOWRANK:  int = 20   # 第三层：低秩场景
 _SPARSE_SPARSITY: float = 0.15   # 15% 非零元素
 _LOWRANK_RANK:    int   = 2      # 真实 rank
 _LASSO_ALPHA:     float = 0.02   # Lasso 正则化参数
-_SVD_RANK:        int   = 2      # SVD 截断秩（匹配真实 rank）
+_RRR_RANK:        int   = 2      # RRR 目标秩（匹配真实 rank）
+_LOWRANK_TARGET_SR: float = 0.40 # 低秩 DGP 目标谱半径（直接控制，消除 seed 间方差）
 
 # 系数矩阵 scale（随 N 自适应）
-def _dense_scale(N: int)   -> float: return min(0.3, 0.85 / N ** 0.5)
-def _lowrank_scale(N: int) -> float: return min(0.3, (0.7 / N) ** 0.5)
+def _dense_scale(N: int) -> float: return min(0.3, 0.85 / N ** 0.5)
 
 # 模型执行顺序
 MODEL_EXECUTION_ORDER: Tuple[str, ...] = (
-    "baseline_ols",    # 第一层
-    "baseline_ols_f",
-    "sparse_lasso",    # 第二层
-    "sparse_ols_f",
-    "lowrank_svd",     # 第三层
-    "lowrank_ols_f",
+    "baseline_ols_f",  # 第一层：F 检验
+    "baseline_ols",    # 第一层：LR+Bootstrap
+    "sparse_lasso",    # 第二层：稀疏 LR+Bootstrap
+    "lowrank_rrr",     # 第三层：低秩 LR+Bootstrap
 )
 
 # 作业优先级（慢模型优先分配资源）
 MODEL_JOB_PRIORITY: Tuple[str, ...] = (
-    "sparse_lasso", "lowrank_svd",
-    "sparse_ols_f", "lowrank_ols_f",
+    "sparse_lasso", "lowrank_rrr",
     "baseline_ols", "baseline_ols_f",
 )
 
@@ -120,9 +116,10 @@ class ExperimentConfig:
     deltas:   Tuple[float, ...] = (0.05, 0.1, 0.15, 0.2, 0.3, 0.5)
     seeds:    Tuple[int, ...]   = (42, 2026)
     jobs:     int               = 4
-    seed_workers: int           = 0
+    seed_workers: int           = 1   # 默认顺序跑seed，单seed独占全部jobs
     _power_M: int               = 0
     skip_type1: bool            = False
+    skip_power: bool            = False
 
     @property
     def power_M(self) -> int:
@@ -346,10 +343,11 @@ def _ols_f_mc(M, B, seed, jobs, _ignored):
     return MonteCarloSimulation(M=M, B=B, seed=seed, n_jobs=jobs, baseline_pvalue_method="asymptotic_f")
 
 def _lasso_mc(M, B, seed, jobs, _ignored):
-    return SparseMonteCarloSimulation(M=M, B=B, seed=seed, estimator_type="lasso", alpha=_LASSO_ALPHA, n_jobs=jobs)
+    return SparseMonteCarloSimulation(M=M, B=B, seed=seed, estimator_type="lasso", alpha=_LASSO_ALPHA,
+                                      post_lasso_ols=False, n_jobs=jobs)
 
-def _svd_mc(M, B, seed, jobs, _ignored):
-    return LowRankMonteCarloSimulation(M=M, B=B, seed=seed, method="svd", rank=_SVD_RANK, n_jobs=jobs)
+def _rrr_mc(M, B, seed, jobs, _ignored):
+    return LowRankMonteCarloSimulation(M=M, B=B, seed=seed, method="rrr", rank=_RRR_RANK, n_jobs=jobs)
 
 
 # ===========================================================================
@@ -417,55 +415,24 @@ def get_model_setup(model_name: str, seed: int) -> Dict[str, Any]:
                 mc.evaluate_power(_N, _T, _p, phi1, phi2, sigma, break_point=_t, t=_t, test_alpha=alpha, verbose=False),
         }
 
-    if model_name == "sparse_ols_f":
-        N, T, p, t = _N_SPARSE, _T, _p, _t
-        gen = VARDataGenerator(seed=seed)          # 相同 seed + 相同调用 → 与 sparse_lasso 相同 φ
-        phi = gen.generate_stationary_phi(N, p, sparsity=_SPARSE_SPARSITY, scale=_dense_scale(N))
-        Sigma = np.eye(N) * 0.5
-        return {
-            "model": model_name, "N": N, "T": T, "p": p, "t": t,
-            "Sigma": Sigma, "phi": phi,
-            "extra_parameters": {"pvalue_method": "asymptotic_f", "sparsity": _SPARSE_SPARSITY},
-            "mc_factory": _ols_f_mc,
-            "type1_fn": lambda mc, phi_mat, sigma, alpha, _N=N, _T=T, _p=p, _t=t:
-                mc.evaluate_type1_error_at_point(_N, _T, _p, phi_mat, sigma, t=_t, alpha=alpha, verbose=False),
-            "power_fn": lambda mc, phi1, phi2, sigma, alpha, _N=N, _T=T, _p=p, _t=t:
-                mc.evaluate_power_at_point(_N, _T, _p, phi1, phi2, sigma, break_point=_t, t=_t, alpha=alpha, verbose=False),
-        }
-
     # ------------------------------------------------------------------
     # 第三层：低秩场景（N=20，低秩 DGP，rank=2）
     # ------------------------------------------------------------------
-    if model_name == "lowrank_svd":
+    if model_name == "lowrank_rrr":
         N, T, p, t = _N_LOWRANK, _T, _p, _t
         gen = VARDataGenerator(seed=seed)
-        phi = gen.generate_lowrank_phi(N, p, rank=_LOWRANK_RANK, scale=_lowrank_scale(N))
+        phi = gen.generate_lowrank_phi(N, p, rank=_LOWRANK_RANK, scale=0.3,
+                                       target_spectral_radius=_LOWRANK_TARGET_SR)
         Sigma = np.eye(N) * 0.5
         return {
             "model": model_name, "N": N, "T": T, "p": p, "t": t,
             "Sigma": Sigma, "phi": phi,
-            "extra_parameters": {"pvalue_method": "bootstrap_lr", "rank": _SVD_RANK},
-            "mc_factory": _svd_mc,
+            "extra_parameters": {"pvalue_method": "bootstrap_lr", "rank": _RRR_RANK},
+            "mc_factory": _rrr_mc,
             "type1_fn": lambda mc, phi_mat, sigma, alpha, _N=N, _T=T, _p=p, _t=t:
                 mc.evaluate_type1_error(_N, _T, _p, phi_mat, sigma, t=_t, test_alpha=alpha, verbose=False),
             "power_fn": lambda mc, phi1, phi2, sigma, alpha, _N=N, _T=T, _p=p, _t=t:
                 mc.evaluate_power(_N, _T, _p, phi1, phi2, sigma, break_point=_t, t=_t, test_alpha=alpha, verbose=False),
-        }
-
-    if model_name == "lowrank_ols_f":
-        N, T, p, t = _N_LOWRANK, _T, _p, _t
-        gen = VARDataGenerator(seed=seed)          # 相同 seed + 相同调用 → 与 lowrank_svd 相同 φ
-        phi = gen.generate_lowrank_phi(N, p, rank=_LOWRANK_RANK, scale=_lowrank_scale(N))
-        Sigma = np.eye(N) * 0.5
-        return {
-            "model": model_name, "N": N, "T": T, "p": p, "t": t,
-            "Sigma": Sigma, "phi": phi,
-            "extra_parameters": {"pvalue_method": "asymptotic_f", "rank": _LOWRANK_RANK},
-            "mc_factory": _ols_f_mc,
-            "type1_fn": lambda mc, phi_mat, sigma, alpha, _N=N, _T=T, _p=p, _t=t:
-                mc.evaluate_type1_error_at_point(_N, _T, _p, phi_mat, sigma, t=_t, alpha=alpha, verbose=False),
-            "power_fn": lambda mc, phi1, phi2, sigma, alpha, _N=N, _T=T, _p=p, _t=t:
-                mc.evaluate_power_at_point(_N, _T, _p, phi1, phi2, sigma, break_point=_t, t=_t, alpha=alpha, verbose=False),
         }
 
     raise ValueError(f"未知模型：{model_name}")
@@ -483,7 +450,7 @@ def _build_phi2(phi: np.ndarray, target_fro: float, perturbation_type: str) -> T
     if perturbation_type == "sparse":
         return build_phi2_sparse(phi, target_fro)
     if perturbation_type == "lowrank":
-        return build_phi2_lowrank(phi, target_fro, rank=_SVD_RANK)
+        return build_phi2_lowrank(phi, target_fro, rank=_RRR_RANK)
     return build_phi2_uniform(phi, target_fro)
 
 
@@ -556,51 +523,52 @@ def run_model_for_seed(
     # ---- Power ----
     power_curve: List[Dict[str, Any]] = []
     power_M = cfg.power_M
-    mc = setup["mc_factory"](power_M, cfg.B, seed, model_jobs, None)
-    for base_delta in cfg.deltas:
-        stage_name = f"power_delta_{base_delta:.2f}"
-        target_fro = scale_base_delta_to_target_fro(phi, base_delta)
-        if tracker is not None:
-            tracker.start_stage(seed, model_name, stage_name, task="power", M=int(power_M), base_delta=float(base_delta), target_fro=float(target_fro))
+    if not cfg.skip_power:
+        mc = setup["mc_factory"](power_M, cfg.B, seed, model_jobs, None)
+        for base_delta in cfg.deltas:
+            stage_name = f"power_delta_{base_delta:.2f}"
+            target_fro = scale_base_delta_to_target_fro(phi, base_delta)
+            if tracker is not None:
+                tracker.start_stage(seed, model_name, stage_name, task="power", M=int(power_M), base_delta=float(base_delta), target_fro=float(target_fro))
 
-        phi2, ok, shrinks, actual_fro = _build_phi2(phi, target_fro, perturbation_type)
-        if not ok:
-            skipped = {
+            phi2, ok, shrinks, actual_fro = _build_phi2(phi, target_fro, perturbation_type)
+            if not ok:
+                skipped = {
+                    "M": int(power_M), "delta": float(base_delta),
+                    "target_fro": float(target_fro), "actual_fro": float("nan"),
+                    "power": math.nan, "M_effective": 0, "rejections": 0,
+                    "runtime_sec": 0.0, "stationarity_shrinks": int(shrinks),
+                    "skipped": True, "reason": "nonstationary_after_shrink",
+                    "perturbation_type": perturbation_type,
+                }
+                power_curve.append(skipped)
+                if tracker is not None:
+                    tracker.finish_stage(seed, model_name, stage_name, 0.0, task="power", M=int(power_M), base_delta=float(base_delta), target_fro=float(target_fro), skipped=True)
+                continue
+
+            t0 = time.time()
+            try:
+                power = setup["power_fn"](mc, phi, phi2, sigma, cfg.alpha)
+            except Exception as exc:
+                if tracker is not None:
+                    tracker.fail_stage(seed, model_name, stage_name, str(exc), time.time() - t0, task="power", M=int(power_M), base_delta=float(base_delta), target_fro=float(target_fro))
+                raise
+            rt = time.time() - t0
+            payload = {
                 "M": int(power_M), "delta": float(base_delta),
-                "target_fro": float(target_fro), "actual_fro": float("nan"),
-                "power": math.nan, "M_effective": 0, "rejections": 0,
-                "runtime_sec": 0.0, "stationarity_shrinks": int(shrinks),
-                "skipped": True, "reason": "nonstationary_after_shrink",
+                "target_fro": float(target_fro), "actual_fro": float(actual_fro),
+                "power": float(power["power"]),
+                "M_effective": int(power["M_effective"]),
+                "rejections": int(power["rejections"]),
+                "runtime_sec": float(rt),
+                "stationarity_shrinks": int(shrinks),
+                "skipped": False,
                 "perturbation_type": perturbation_type,
+                "pvalue_summary": summarize_pvalues(power["p_values"]),
             }
-            power_curve.append(skipped)
+            power_curve.append(payload)
             if tracker is not None:
-                tracker.finish_stage(seed, model_name, stage_name, 0.0, task="power", M=int(power_M), base_delta=float(base_delta), target_fro=float(target_fro), skipped=True)
-            continue
-
-        t0 = time.time()
-        try:
-            power = setup["power_fn"](mc, phi, phi2, sigma, cfg.alpha)
-        except Exception as exc:
-            if tracker is not None:
-                tracker.fail_stage(seed, model_name, stage_name, str(exc), time.time() - t0, task="power", M=int(power_M), base_delta=float(base_delta), target_fro=float(target_fro))
-            raise
-        rt = time.time() - t0
-        payload = {
-            "M": int(power_M), "delta": float(base_delta),
-            "target_fro": float(target_fro), "actual_fro": float(actual_fro),
-            "power": float(power["power"]),
-            "M_effective": int(power["M_effective"]),
-            "rejections": int(power["rejections"]),
-            "runtime_sec": float(rt),
-            "stationarity_shrinks": int(shrinks),
-            "skipped": False,
-            "perturbation_type": perturbation_type,
-            "pvalue_summary": summarize_pvalues(power["p_values"]),
-        }
-        power_curve.append(payload)
-        if tracker is not None:
-            tracker.finish_stage(seed, model_name, stage_name, rt, task="power", M=int(power_M), base_delta=float(base_delta), target_fro=float(target_fro), metric_value=payload["power"])
+                tracker.finish_stage(seed, model_name, stage_name, rt, task="power", M=int(power_M), base_delta=float(base_delta), target_fro=float(target_fro), metric_value=payload["power"])
 
     model_runtime = time.time() - model_start
     if tracker is not None:
@@ -628,16 +596,9 @@ def run_all_models_for_seed(
     tracker: ProgressTracker | None = None,
 ) -> Dict[str, Dict[str, Any]]:
     results: Dict[str, Dict[str, Any]] = {}
-    # OLS 基准层（快，串行）
-    for m in ("baseline_ols", "baseline_ols_f"):
+    for m in MODEL_EXECUTION_ORDER:
         results[m] = run_model_for_seed(m, cfg, seed, seed_jobs, tracker)
-    # 稀疏场景层（慢，串行，充分利用 CPU）
-    for m in ("sparse_lasso", "sparse_ols_f"):
-        results[m] = run_model_for_seed(m, cfg, seed, seed_jobs, tracker)
-    # 低秩场景层
-    for m in ("lowrank_svd", "lowrank_ols_f"):
-        results[m] = run_model_for_seed(m, cfg, seed, seed_jobs, tracker)
-    return {name: results[name] for name in MODEL_EXECUTION_ORDER}
+    return results
 
 
 def write_seed_result(run_dir: str, seed: int, data: Dict[str, Any]) -> None:
@@ -895,14 +856,16 @@ def write_markdown_report(results: Dict[str, Any], path: str) -> None:
         f"- deltas：{cfg_dict['deltas']}",
         f"- 总耗时：{info['total_runtime_sec']:.2f}s", "",
         "## 实验设计", "",
-        "| 层次 | 模型 | DGP | N | 估计 | 推断 | 扰动类型 |",
-        "|---|---|---|---:|---|---|---|",
-        "| 第一层 | baseline_ols   | 稠密 | 10 | OLS   | LR+Bootstrap | uniform |",
-        "| 第一层 | baseline_ols_f | 稠密 | 10 | OLS   | 渐近 F       | uniform |",
-        "| 第二层 | sparse_lasso   | 稀疏(0.15) | 20 | Lasso | LR+Bootstrap | sparse  |",
-        "| 第二层 | sparse_ols_f   | 稀疏(0.15) | 20 | OLS   | 渐近 F       | sparse  |",
-        "| 第三层 | lowrank_svd    | 低秩(r=2)  | 20 | SVD   | LR+Bootstrap | lowrank |",
-        "| 第三层 | lowrank_ols_f  | 低秩(r=2)  | 20 | OLS   | 渐近 F       | lowrank |",
+        "核心叙事：在稀疏和低秩背景下使用 LR+Bootstrap 进行断裂检验，不要求性能高于 OLS。",
+        "",
+        "| 层次 | 模型 | DGP | N | 估计 | 推断 | 扰动类型 | 角色 |",
+        "|---|---|---|---:|---|---|---|---|",
+        "| 第一层 | baseline_ols_f | 稠密 | 10 | OLS   | 渐近 F       | uniform | 普通多元时间序列基准 |",
+        "| 第一层 | baseline_ols   | 稠密 | 10 | OLS   | LR+Bootstrap | uniform | 提出方法，与 F 检验一致 |",
+        "| 第二层 | sparse_lasso   | 稀疏(0.15) | 20 | Lasso | LR+Bootstrap | sparse  | 高维稀疏断裂检验 |",
+        "| 第三层 | lowrank_rrr    | 低秩(r=2)  | 20 | RRR   | LR+Bootstrap | lowrank | 高维低秩断裂检验 |",
+        "",
+        "预期：第一层两方法 size/power 一致；第二/三层 size→0.05（随 M 增大），power 随 δ 单调递增。",
         "",
     ]
 
@@ -912,9 +875,10 @@ def write_markdown_report(results: Dict[str, Any], path: str) -> None:
               "|---|---|---:|---:|---:|---|---:|"]
     size_M = max(cfg_dict["M_grid"])
     layer_map = {
-        "baseline_ols": "第一层", "baseline_ols_f": "第一层",
-        "sparse_lasso": "第二层", "sparse_ols_f":   "第二层",
-        "lowrank_svd":  "第三层", "lowrank_ols_f":  "第三层",
+        "baseline_ols_f": "第一层",
+        "baseline_ols": "第一层",
+        "sparse_lasso": "第二层",
+        "lowrank_rrr":  "第三层",
     }
     for m in MODEL_EXECUTION_ORDER:
         row = next((r for r in agg[m]["type1_error_by_M"] if r["M"] == size_M), None)
@@ -941,6 +905,12 @@ def write_markdown_report(results: Dict[str, Any], path: str) -> None:
 
     # Summary
     lines += ["## 3. 结论摘要", ""]
+    role_map = {
+        "baseline_ols_f": "普通多元时间序列 F 检验基准",
+        "baseline_ols":   "LR+Bootstrap（与 F 检验对比）",
+        "sparse_lasso":   "高维稀疏 LR+Bootstrap",
+        "lowrank_rrr":    "高维低秩 RRR+LR+Bootstrap",
+    }
     for m in MODEL_EXECUTION_ORDER:
         pc = agg[m]["power_curve"]
         pvals = [r["power_mean"] for r in pc if not math.isnan(r["power_mean"])]
@@ -952,7 +922,7 @@ def write_markdown_report(results: Dict[str, Any], path: str) -> None:
             size_str = f"size@M={size_M}={sr['value_mean']:.4f}; "
         final = pc[-1] if pc else {}
         lines.append(
-            f"- **{m}** ({layer_map[m]}): {size_str}"
+            f"- **{m}** [{role_map.get(m, layer_map.get(m, '?'))}]: {size_str}"
             f"power@δ={final.get('delta', '?'):.2f}={final.get('power_mean', math.nan):.4f}; "
             f"power单调={'✓' if mono else '✗'}"
         )
@@ -966,7 +936,7 @@ def write_markdown_report(results: Dict[str, Any], path: str) -> None:
 # ===========================================================================
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="结构化 VAR 断裂检验：三层场景实验")
+    parser = argparse.ArgumentParser(description="结构化 VAR 断裂检验：普通/稀疏/低秩三层场景实验")
     parser.add_argument("--M-grid",    type=int,   nargs="+", default=[50, 100, 300, 500, 1000, 2000])
     parser.add_argument("--power-M",   type=int,   default=0,   help="0 = use max(M_grid)")
     parser.add_argument("--B",         type=int,   default=500)
@@ -974,8 +944,10 @@ def main() -> None:
     parser.add_argument("--deltas",    type=float, nargs="+", default=[0.05, 0.1, 0.15, 0.2, 0.3, 0.5])
     parser.add_argument("--seeds",     type=int,   nargs="+", default=[42, 2026])
     parser.add_argument("--jobs",      type=int,   default=4)
-    parser.add_argument("--seed-workers", type=int, default=0)
+    parser.add_argument("--seed-workers", type=int, default=1,
+                        help="并发seed数（默认1：顺序跑seed，单seed独占全部jobs）")
     parser.add_argument("--skip-type1",   action="store_true")
+    parser.add_argument("--skip-power",   action="store_true")
     parser.add_argument("--models",    type=str,   nargs="+", default=None,
                         help="仅运行指定模型（默认全部）：" + " ".join(MODEL_EXECUTION_ORDER))
     parser.add_argument("--tag",       type=str,   default="")
@@ -991,6 +963,7 @@ def main() -> None:
         seed_workers=max(0, int(args.seed_workers)),
         _power_M=max(0, int(args.power_M)),
         skip_type1=args.skip_type1,
+        skip_power=args.skip_power,
     )
 
     # 支持只跑部分模型（覆盖全局 MODEL_EXECUTION_ORDER）
@@ -1011,7 +984,7 @@ def main() -> None:
 
     # 计算总阶段数
     n_type1 = 0 if cfg.skip_type1 else len(cfg.M_grid)
-    n_power = len(cfg.deltas)
+    n_power = 0 if cfg.skip_power else len(cfg.deltas)
     stages_per_model = n_type1 + n_power
     total_stages = len(cfg.seeds) * len(MODEL_EXECUTION_ORDER) * stages_per_model
 
@@ -1049,7 +1022,7 @@ def main() -> None:
                 "T": _T, "p": _p, "t_star": _t,
                 "N_baseline": _N_BASELINE, "N_sparse": _N_SPARSE, "N_lowrank": _N_LOWRANK,
                 "sparse_sparsity": _SPARSE_SPARSITY, "lowrank_rank": _LOWRANK_RANK,
-                "lasso_alpha": _LASSO_ALPHA, "svd_rank": _SVD_RANK,
+                "lasso_alpha": _LASSO_ALPHA, "rrr_rank": _RRR_RANK,
             },
         },
         "aggregates": agg,

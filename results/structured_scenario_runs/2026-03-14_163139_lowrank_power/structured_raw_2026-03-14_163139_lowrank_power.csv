@@ -1,0 +1,9 @@
+scope,seed,model,metric,M,delta,target_fro,actual_fro,value,size_distortion,rejections,effective_iterations,runtime_sec,perturbation_type
+seed,42,lowrank_rrr,power,500,0.1,0.1,0.1,0.04,,20,500,120.29044604301453,lowrank
+seed,42,lowrank_rrr,power,500,0.3,0.3,0.3,0.108,,54,500,123.81408095359802,lowrank
+seed,42,lowrank_rrr,power,500,0.5,0.5,0.5,0.328,,164,500,125.23879599571228,lowrank
+seed,42,lowrank_rrr,power,500,1.0,1.0,1.0,0.998,,499,500,125.45636487007141,lowrank
+seed,2026,lowrank_rrr,power,500,0.1,0.1,0.1,0.036,,18,500,130.24957489967346,lowrank
+seed,2026,lowrank_rrr,power,500,0.3,0.3,0.3,0.108,,54,500,141.59576106071472,lowrank
+seed,2026,lowrank_rrr,power,500,0.5,0.5,0.5,0.32,,160,500,130.98089170455933,lowrank
+seed,2026,lowrank_rrr,power,500,1.0,1.0,1.0,0.998,,499,500,128.00899410247803,lowrank
