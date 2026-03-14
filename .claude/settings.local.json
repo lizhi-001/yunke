@@ -14,7 +14,8 @@
       "Bash(ls:*)",
       "Bash(ps aux --sort=-%mem)",
       "Bash(top -bn1 | head -12)",
-      "Bash(top -bn1 | head -15)"
+      "Bash(top -bn1 | head -15)",
+      "Bash(make clean && make all 2>&1 | tail -20)"
     ]
   }
 }
