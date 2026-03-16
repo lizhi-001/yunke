@@ -1,0 +1,10 @@
+{
+  "updated_at": "2026-03-15 00:25:36",
+  "completed_stage_count": 1,
+  "total_stage_count": 1,
+  "progress_ratio": 1.0,
+  "active_stages": [],
+  "completed_stages": [
+    "seed_42/sparse_lasso/type1_M_200"
+  ]
+}

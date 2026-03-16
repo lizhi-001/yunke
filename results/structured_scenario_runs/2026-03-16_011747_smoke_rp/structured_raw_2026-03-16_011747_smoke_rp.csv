@@ -1,0 +1,3 @@
+scope,seed,model,metric,M,delta,target_fro,actual_fro,value,size_distortion,rejections,effective_iterations,runtime_sec,perturbation_type
+seed,42,lowrank_rrr_rp,type1_error,50,,,,0.18,0.13,9,50,3.4676170349121094,
+seed,42,lowrank_rrr_rp,power,50,0.3,0.3,0.3,0.24,,12,50,3.2864530086517334,lowrank_fixedV

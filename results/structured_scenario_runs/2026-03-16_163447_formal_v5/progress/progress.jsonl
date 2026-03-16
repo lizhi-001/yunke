@@ -1,0 +1,12 @@
+{"timestamp": "2026-03-16 16:34:47", "event": "run_started", "config": {"seeds": [42, 2026], "B": 500, "M_grid": [50, 100, 300, 500, 1000, 2000], "power_M": 500, "alpha": 0.05, "deltas": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.75, 1.0]}}
+{"timestamp": "2026-03-16 16:34:47", "event": "seed_started", "seed": 42, "jobs": 10}
+{"timestamp": "2026-03-16 16:34:47", "event": "model_started", "seed": 42, "model": "sparse_lasso", "jobs": 10}
+{"timestamp": "2026-03-16 16:34:47", "event": "stage_started", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_50", "task": "type1_error", "M": 50}
+{"timestamp": "2026-03-16 16:35:15", "event": "stage_finished", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_50", "runtime_sec": 28.043416023254395, "task": "type1_error", "M": 50, "metric_value": 0.04}
+{"timestamp": "2026-03-16 16:35:15", "event": "stage_started", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_100", "task": "type1_error", "M": 100}
+{"timestamp": "2026-03-16 16:36:09", "event": "stage_finished", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_100", "runtime_sec": 53.40788292884827, "task": "type1_error", "M": 100, "metric_value": 0.02}
+{"timestamp": "2026-03-16 16:36:09", "event": "stage_started", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_300", "task": "type1_error", "M": 300}
+{"timestamp": "2026-03-16 16:38:46", "event": "stage_finished", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_300", "runtime_sec": 157.50188994407654, "task": "type1_error", "M": 300, "metric_value": 0.056666666666666664}
+{"timestamp": "2026-03-16 16:38:46", "event": "stage_started", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_500", "task": "type1_error", "M": 500}
+{"timestamp": "2026-03-16 16:43:29", "event": "stage_finished", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_500", "runtime_sec": 282.3916940689087, "task": "type1_error", "M": 500, "metric_value": 0.042}
+{"timestamp": "2026-03-16 16:43:29", "event": "stage_started", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_1000", "task": "type1_error", "M": 1000}

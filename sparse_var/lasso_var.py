@@ -225,6 +225,94 @@ class LassoVAREstimator:
         residuals = Y_response - X @ B_refit
         return B_refit, residuals
 
+    def select_support(self, Y: np.ndarray, p: int,
+                       include_const: bool = True) -> np.ndarray:
+        """
+        在给定数据上运行 Lasso，返回各方程的支撑集掩码。
+
+        Returns
+        -------
+        support_mask : np.ndarray, shape (n_features, N), dtype bool
+            True 表示该变量被选入支撑集（常数项行始终为 True）
+        """
+        X, Y_response = self.build_design_matrix(Y, p, include_const)
+        T_eff, N = Y_response.shape
+        n_features = X.shape[1]
+        support_mask = np.zeros((n_features, N), dtype=bool)
+        self.alphas_used = []
+
+        for i in range(N):
+            y_i = Y_response[:, i]
+            model = self._get_cached_lasso(i)
+            model.fit(X, y_i)
+            if self.alpha is None:
+                self.alphas_used.append(model.alpha_)
+            else:
+                self.alphas_used.append(self.alpha)
+
+            if include_const:
+                support_mask[0, i] = True                          # 常数项始终选入
+                support_mask[1:, i] = np.abs(model.coef_[1:]) > 1e-10
+            else:
+                support_mask[:, i] = np.abs(model.coef_) > 1e-10
+
+        return support_mask
+
+    def fit_with_support(self, Y: np.ndarray, p: int,
+                         support_mask: np.ndarray,
+                         include_const: bool = True) -> Dict[str, Any]:
+        """
+        在固定支撑集上用 OLS 拟合 VAR 模型（固定支撑 Post-Lasso OLS）。
+
+        Parameters
+        ----------
+        support_mask : np.ndarray, shape (n_features, N), dtype bool
+            由 select_support() 返回的支撑集掩码，H0/H1/bootstrap 共用同一份。
+        """
+        X, Y_response = self.build_design_matrix(Y, p, include_const)
+        T_eff, N = Y_response.shape
+        n_features = X.shape[1]
+        B_hat = np.zeros((n_features, N))
+
+        for i in range(N):
+            y_i = Y_response[:, i]
+            sel = support_mask[:, i].copy()
+            if np.sum(sel) == 0:
+                if include_const:
+                    sel[0] = True
+                else:
+                    continue
+            X_sel = X[:, sel]
+            beta_ols = np.linalg.lstsq(X_sel, y_i, rcond=None)[0]
+            B_hat[sel, i] = beta_ols
+
+        if include_const:
+            self.c_hat = B_hat[0, :]
+            self.Phi_hat = B_hat[1:, :].T
+        else:
+            self.c_hat = np.zeros(N)
+            self.Phi_hat = B_hat.T
+
+        Y_fitted = X @ B_hat
+        self.residuals = Y_response - Y_fitted
+        self.Sigma_hat = (self.residuals.T @ self.residuals) / T_eff
+
+        det_Sigma = det(self.Sigma_hat)
+        if det_Sigma <= 0:
+            det_Sigma = 1e-10
+        log_likelihood = -0.5 * T_eff * (N * np.log(2 * np.pi) + np.log(det_Sigma) + N)
+
+        return {
+            'Phi': self.Phi_hat,
+            'c': self.c_hat,
+            'Sigma': self.Sigma_hat,
+            'residuals': self.residuals,
+            'log_likelihood': log_likelihood,
+            'T_eff': T_eff,
+            'alphas_used': getattr(self, 'alphas_used', []),
+            'sparsity': float(np.mean(np.abs(self.Phi_hat) < 1e-10)),
+        }
+
     def get_nonzero_coefficients(self) -> Dict[str, Any]:
         """
         获取非零系数的位置和值

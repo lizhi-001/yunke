@@ -6,7 +6,7 @@
 
 ### 实验逻辑
 
-- 三层实验框架：第一层（OLS 基准）→ 第二层（稀疏 Lasso）→ 第三层（低秩 RRR）
+- 三层实验框架：第一层（OLS 基准）→ 第二层（稀疏 Debiased Lasso）→ 第三层（低秩 RRR）
 - 第一类错误（size）：在 `M_grid` 下逐个评估
 - 功效（power）：固定使用 `power_M`（默认 `max(M_grid)`，可通过 `--power-M` 独立指定）评估
 - 支持单 seed 或多 seed，支持 seed 并行
@@ -17,10 +17,10 @@
 
 | 模型 | N | T | t | p | 估计器 | p 值方法 | DGP | 扰动类型 |
 |---|---:|---:|---:|---:|---|---|---|---|
-| baseline_ols_f | 10 | 500 | 250 | 1 | OLS | asymptotic_f | 稠密 | uniform |
-| baseline_ols | 10 | 500 | 250 | 1 | OLS | bootstrap_lr | 稠密 | uniform |
-| sparse_lasso | 20 | 500 | 250 | 1 | Lasso(α=0.02) | bootstrap_lr | 稀疏(0.15) | sparse |
-| lowrank_rrr | 20 | 500 | 250 | 1 | RRR(rank=2) | bootstrap_lr | 低秩(rank=2) | lowrank |
+| baseline_ols_f | 10 | 500 | 250 | 3 | OLS | asymptotic_f | 稠密 | uniform |
+| baseline_ols | 10 | 500 | 250 | 3 | OLS | bootstrap_lr | 稠密 | uniform |
+| sparse_lasso | 20 | 500 | 250 | 3 | Debiased Lasso(α=0.02) | bootstrap_lr | 稀疏(0.15) | sparse |
+| lowrank_rrr | 20 | 500 | 250 | 3 | RRR(rank=2) | bootstrap_lr | 低秩(rank=2) | lowrank |
 
 ### 启动命令
 
@@ -70,13 +70,13 @@ python3 -u experiments/run_structured_scenarios.py \
 |---|---|---|
 | T | 500 | 总样本长度 |
 | t* | 250 | 已知断点位置 |
-| p | 1 | VAR 滞后阶数 |
+| p | 3 | VAR 滞后阶数 |
 | N_baseline | 10 | 第一层维度 |
 | N_sparse | 20 | 第二层维度 |
 | N_lowrank | 20 | 第三层维度 |
 | sparsity | 0.15 | 稀疏 DGP 非零元素比例 |
 | lowrank_rank | 2 | 低秩 DGP 真实秩 |
-| lasso_alpha | 0.02 | Lasso 正则化参数 |
+| lasso_alpha | 0.02 | Debiased Lasso 正则化参数 |
 | rrr_rank | 2 | RRR 目标秩 |
 | lowrank_target_sr | 0.40 | 低秩 DGP 目标谱半径 |
 
@@ -118,7 +118,7 @@ results/structured_scenario_runs/
 四个模型按固定顺序依次执行，每个模型独占全部 `--jobs` 个 worker：
 
 ```
-baseline_ols_f(全部w) → baseline_ols(全部w) → sparse_lasso(全部w) → lowrank_rrr(全部w)
+sparse_lasso(全部w) → lowrank_rrr(全部w) → baseline_ols_f(全部w) → baseline_ols(全部w)
 ```
 
 顺序独占的原因：同一进程内多模型并行时 worker pool 共享，实际并行度 = max(各请求 n_jobs) 而非求和。顺序独占使每个模型使用全部 worker，CPU 利用率最大化。
@@ -171,7 +171,7 @@ tail -f results/structured_scenario_runs/<run_name>/progress/progress.log
 |---|---|---|
 | baseline_ols_f | ~0.1s | 渐近 F，无 bootstrap |
 | baseline_ols | ~2s | Bootstrap LR，N=10 |
-| sparse_lasso | ~600s / delta | Lasso 求解慢，N=20 |
+| sparse_lasso | ~600s / delta | Debiased Lasso 求解，N=20 |
 | lowrank_rrr | ~125s / delta | RRR 求解，N=20 |
 
 计算量瓶颈在 sparse_lasso（每个 delta 点约 10 分钟）和 lowrank_rrr（每个 delta 点约 2 分钟）。

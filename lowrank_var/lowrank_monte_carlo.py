@@ -19,14 +19,16 @@ def _iteration_seed(base_seed: Optional[int], iteration: int) -> Optional[int]:
 
 
 def _type1_worker(task):
-    seed, N, T, p, Phi, Sigma, t, test_alpha, B, method, rank, lambda_nuc = task
+    seed, N, T, p, Phi, Sigma, t, test_alpha, B, method, rank, lambda_nuc, fixed_space = task
     if seed is not None:
         np.random.seed(seed)
 
     generator = VARDataGenerator()
     try:
         Y = generator.generate_var_series(T, N, p, Phi, Sigma)
-        bootstrap = LowRankBootstrapInference(B=B, method=method, rank=rank, lambda_nuc=lambda_nuc)
+        bootstrap = LowRankBootstrapInference(B=B, method=method, rank=rank,
+                                              lambda_nuc=lambda_nuc,
+                                              fixed_space=fixed_space)
         result = bootstrap.test(Y, p, t, alpha=test_alpha)
         return {'success': True, 'p_value': result['p_value'], 'reject_h0': result['reject_h0']}
     except Exception:
@@ -34,14 +36,16 @@ def _type1_worker(task):
 
 
 def _power_worker(task):
-    seed, N, T, p, Phi1, Phi2, Sigma, break_point, t, test_alpha, B, method, rank, lambda_nuc = task
+    seed, N, T, p, Phi1, Phi2, Sigma, break_point, t, test_alpha, B, method, rank, lambda_nuc, fixed_space = task
     if seed is not None:
         np.random.seed(seed)
 
     generator = VARDataGenerator()
     try:
         Y, _ = generator.generate_var_with_break(T, N, p, Phi1, Phi2, Sigma, break_point)
-        bootstrap = LowRankBootstrapInference(B=B, method=method, rank=rank, lambda_nuc=lambda_nuc)
+        bootstrap = LowRankBootstrapInference(B=B, method=method, rank=rank,
+                                              lambda_nuc=lambda_nuc,
+                                              fixed_space=fixed_space)
         result = bootstrap.test(Y, p, t, alpha=test_alpha)
         return {'success': True, 'p_value': result['p_value'], 'reject_h0': result['reject_h0']}
     except Exception:
@@ -55,6 +59,7 @@ class LowRankMonteCarloSimulation:
                  seed: Optional[int] = None, method: str = 'svd',
                  rank: Optional[int] = None,
                  lambda_nuc: Optional[float] = None,
+                 fixed_space: bool = False,
                  n_jobs: int = 1):
         """
         Parameters
@@ -66,11 +71,15 @@ class LowRankMonteCarloSimulation:
         seed : int, optional
             随机种子
         method : str
-            估计方法：'svd' 或 'cvxpy'
+            估计方法：'svd', 'rrr' 或 'cvxpy'
         rank : int, optional
             指定秩
         lambda_nuc : float, optional
             核范数正则化参数
+        fixed_space : bool
+            固定秩空间 Post-RRR：在原始全样本上运行一次 RRR 确定 V_r 子空间，
+            H0/H1/bootstrap 所有拟合统一使用该 V_r。
+            类比稀疏场景中的固定支撑集（fixed support）。
         """
         self.M = M
         self.B = B
@@ -78,6 +87,7 @@ class LowRankMonteCarloSimulation:
         self.method = method
         self.rank = rank
         self.lambda_nuc = lambda_nuc
+        self.fixed_space = fixed_space
         self.n_jobs = max(1, n_jobs)
 
     def _run_tasks(self, worker, tasks, verbose: bool):
@@ -126,7 +136,7 @@ class LowRankMonteCarloSimulation:
         """
         tasks = [
             (_iteration_seed(self.seed, m), N, T, p, Phi, Sigma, t, test_alpha,
-             self.B, self.method, self.rank, self.lambda_nuc)
+             self.B, self.method, self.rank, self.lambda_nuc, self.fixed_space)
             for m in range(self.M)
         ]
         results = self._run_tasks(_type1_worker, tasks, verbose)
@@ -167,7 +177,7 @@ class LowRankMonteCarloSimulation:
         """
         tasks = [
             (_iteration_seed(self.seed, m), N, T, p, Phi1, Phi2, Sigma, break_point,
-             t, test_alpha, self.B, self.method, self.rank, self.lambda_nuc)
+             t, test_alpha, self.B, self.method, self.rank, self.lambda_nuc, self.fixed_space)
             for m in range(self.M)
         ]
         results = self._run_tasks(_power_worker, tasks, verbose)

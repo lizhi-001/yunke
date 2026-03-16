@@ -1,0 +1,10 @@
+[2026-03-16 01:17:47] run started | seeds=[42] B=20 M_grid=[50]
+[2026-03-16 01:17:47] seed 42 started | jobs=4
+[2026-03-16 01:17:47]   [42] lowrank_rrr_rp started
+[2026-03-16 01:17:47]   [42] lowrank_rrr_rp/type1_M_50 start
+[2026-03-16 01:17:51]   [42] lowrank_rrr_rp/type1_M_50 done | 3.47s val=0.1800  [1/2]
+[2026-03-16 01:17:51]   [42] lowrank_rrr_rp/power_delta_0.30 start
+[2026-03-16 01:17:54]   [42] lowrank_rrr_rp/power_delta_0.30 done | 3.29s val=0.2400  [2/2]
+[2026-03-16 01:17:54]   [42] lowrank_rrr_rp done | 6.76s
+[2026-03-16 01:17:54] seed 42 done | 6.76s
+[2026-03-16 01:17:54] run finished | runtime=6.76s

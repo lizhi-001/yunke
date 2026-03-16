@@ -1,0 +1,13 @@
+[2026-03-16 01:21:50] run started | seeds=[42, 2026] B=100 M_grid=[1000]
+[2026-03-16 01:21:50] seed 42 started | jobs=10
+[2026-03-16 01:21:50]   [42] lowrank_rrr_fv started
+[2026-03-16 01:21:50]   [42] lowrank_rrr_fv/type1_M_1000 start
+[2026-03-16 01:24:05]   [42] lowrank_rrr_fv/type1_M_1000 done | 134.65s val=0.0600  [1/2]
+[2026-03-16 01:24:05]   [42] lowrank_rrr_fv done | 134.66s
+[2026-03-16 01:24:05] seed 42 done | 134.66s
+[2026-03-16 01:24:05] seed 2026 started | jobs=10
+[2026-03-16 01:24:05]   [2026] lowrank_rrr_fv started
+[2026-03-16 01:24:05]   [2026] lowrank_rrr_fv/type1_M_1000 start
+[2026-03-16 01:26:05]   [2026] lowrank_rrr_fv/type1_M_1000 done | 120.48s val=0.0670  [2/2]
+[2026-03-16 01:26:05]   [2026] lowrank_rrr_fv done | 120.49s
+[2026-03-16 01:26:05] seed 2026 done | 120.49s

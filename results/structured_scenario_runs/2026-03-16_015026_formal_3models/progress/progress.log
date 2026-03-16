@@ -1,0 +1,8 @@
+[2026-03-16 01:50:26] run started | seeds=[42, 2026] B=500 M_grid=[50, 100, 300, 500, 1000, 2000]
+[2026-03-16 01:50:26] seed 42 started | jobs=10
+[2026-03-16 01:50:26]   [42] sparse_lasso started
+[2026-03-16 01:50:26]   [42] sparse_lasso/type1_M_50 start
+[2026-03-16 01:51:02]   [42] sparse_lasso/type1_M_50 done | 36.62s val=0.0600  [1/84]
+[2026-03-16 01:51:02]   [42] sparse_lasso/type1_M_100 start
+[2026-03-16 01:52:08]   [42] sparse_lasso/type1_M_100 done | 65.90s val=0.0500  [2/84]
+[2026-03-16 01:52:08]   [42] sparse_lasso/type1_M_300 start

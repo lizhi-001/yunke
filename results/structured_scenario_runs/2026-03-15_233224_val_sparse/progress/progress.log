@@ -1,0 +1,10 @@
+[2026-03-15 23:32:24] run started | seeds=[42, 2026] B=100 M_grid=[100, 300]
+[2026-03-15 23:32:24] seed 42 started | jobs=4
+[2026-03-15 23:32:24]   [42] sparse_lasso started
+[2026-03-15 23:32:24]   [42] sparse_lasso/type1_M_100 start
+[2026-03-15 23:32:52]   [42] sparse_lasso/type1_M_100 done | 27.60s val=0.0900  [1/10]
+[2026-03-15 23:32:52]   [42] sparse_lasso/type1_M_300 start
+[2026-03-15 23:34:12]   [42] sparse_lasso/type1_M_300 done | 80.41s val=0.0567  [2/10]
+[2026-03-15 23:34:12]   [42] sparse_lasso/power_delta_0.10 start
+[2026-03-15 23:34:24] run FAILED | terminated_by_signal_15
+[2026-03-15 23:34:55] run FAILED | terminated_by_signal_15

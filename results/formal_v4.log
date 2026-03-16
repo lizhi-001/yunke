@@ -1,0 +1,5 @@
+输出目录：/Users/lizhi/Developer/python/yunke/results/structured_scenario_runs/2026-03-16_142046_formal_v4
+模型：['sparse_lasso', 'lowrank_rrr_fv']
+seeds=[42, 2026]  B=500  power_M=500  jobs=10
+seeds=[42, 2026] | seed_workers=1 | job_split=[10]
+[seed 42] start (jobs=10, B=500, power_M=500)

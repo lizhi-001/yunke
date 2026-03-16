@@ -1,0 +1,38 @@
+[2026-03-16 01:53:06] run started | seeds=[42, 2026] B=500 M_grid=[50, 100, 300, 500, 1000, 2000]
+[2026-03-16 01:53:06] seed 42 started | jobs=10
+[2026-03-16 01:53:06]   [42] sparse_lasso started
+[2026-03-16 01:53:06]   [42] sparse_lasso/type1_M_50 start
+[2026-03-16 01:53:46]   [42] sparse_lasso/type1_M_50 done | 40.73s val=0.0600  [1/84]
+[2026-03-16 01:53:46]   [42] sparse_lasso/type1_M_100 start
+[2026-03-16 01:54:47]   [42] sparse_lasso/type1_M_100 done | 61.12s val=0.0100  [2/84]
+[2026-03-16 01:54:47]   [42] sparse_lasso/type1_M_300 start
+[2026-03-16 01:57:39]   [42] sparse_lasso/type1_M_300 done | 171.93s val=0.0267  [3/84]
+[2026-03-16 01:57:39]   [42] sparse_lasso/type1_M_500 start
+[2026-03-16 02:02:31]   [42] sparse_lasso/type1_M_500 done | 291.88s val=0.0380  [4/84]
+[2026-03-16 02:02:31]   [42] sparse_lasso/type1_M_1000 start
+[2026-03-16 02:11:17]   [42] sparse_lasso/type1_M_1000 done | 525.54s val=0.0560  [5/84]
+[2026-03-16 02:11:17]   [42] sparse_lasso/type1_M_2000 start
+[2026-03-16 02:29:26]   [42] sparse_lasso/type1_M_2000 done | 1088.90s val=0.0570  [6/84]
+[2026-03-16 02:29:26]   [42] sparse_lasso/power_delta_0.10 start
+[2026-03-16 02:34:14]   [42] sparse_lasso/power_delta_0.10 done | 288.05s val=0.0420  [7/84]
+[2026-03-16 02:34:14]   [42] sparse_lasso/power_delta_0.20 start
+[2026-03-16 02:39:03]   [42] sparse_lasso/power_delta_0.20 done | 289.61s val=0.0500  [8/84]
+[2026-03-16 02:39:03]   [42] sparse_lasso/power_delta_0.30 start
+[2026-03-16 02:43:49]   [42] sparse_lasso/power_delta_0.30 done | 285.97s val=0.0460  [9/84]
+[2026-03-16 02:43:49]   [42] sparse_lasso/power_delta_0.40 start
+[2026-03-16 02:48:41]   [42] sparse_lasso/power_delta_0.40 done | 291.74s val=0.0680  [10/84]
+[2026-03-16 02:48:41]   [42] sparse_lasso/power_delta_0.50 start
+[2026-03-16 02:53:42]   [42] sparse_lasso/power_delta_0.50 done | 300.81s val=0.0660  [11/84]
+[2026-03-16 02:53:42]   [42] sparse_lasso/power_delta_0.60 start
+[2026-03-16 02:58:36]   [42] sparse_lasso/power_delta_0.60 done | 294.28s val=0.0920  [12/84]
+[2026-03-16 02:58:36]   [42] sparse_lasso/power_delta_0.75 start
+[2026-03-16 03:03:44]   [42] sparse_lasso/power_delta_0.75 done | 307.31s val=0.1300  [13/84]
+[2026-03-16 03:03:44]   [42] sparse_lasso/power_delta_1.00 start
+[2026-03-16 03:09:05]   [42] sparse_lasso/power_delta_1.00 done | 321.33s val=0.2880  [14/84]
+[2026-03-16 03:09:05]   [42] sparse_lasso done | 4559.25s
+[2026-03-16 03:09:05]   [42] sparse_lasso_free started
+[2026-03-16 03:09:05]   [42] sparse_lasso_free/type1_M_50 start
+[2026-03-16 04:18:29]   [42] sparse_lasso_free/type1_M_50 done | 4164.61s val=0.0400  [15/84]
+[2026-03-16 04:18:29]   [42] sparse_lasso_free/type1_M_100 start
+[2026-03-16 06:38:23]   [42] sparse_lasso_free/type1_M_100 done | 8393.76s val=0.0500  [16/84]
+[2026-03-16 06:38:23]   [42] sparse_lasso_free/type1_M_300 start

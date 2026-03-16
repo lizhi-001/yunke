@@ -1,0 +1,49 @@
+[2026-03-15 11:41:08] run started | seeds=[42, 2026] B=500 M_grid=[50, 100, 300, 500, 1000, 2000]
+[2026-03-15 11:41:08] seed 42 started | jobs=10
+[2026-03-15 11:41:08]   [42] sparse_lasso started
+[2026-03-15 11:41:08]   [42] sparse_lasso/type1_M_50 start
+[2026-03-15 11:42:26]   [42] sparse_lasso/type1_M_50 done | 77.67s val=0.0400  [1/28]
+[2026-03-15 11:42:26]   [42] sparse_lasso/type1_M_100 start
+[2026-03-15 11:44:54]   [42] sparse_lasso/type1_M_100 done | 148.61s val=0.0700  [2/28]
+[2026-03-15 11:44:54]   [42] sparse_lasso/type1_M_300 start
+[2026-03-15 11:52:52]   [42] sparse_lasso/type1_M_300 done | 477.81s val=0.0467  [3/28]
+[2026-03-15 11:52:52]   [42] sparse_lasso/type1_M_500 start
+[2026-03-15 12:05:53]   [42] sparse_lasso/type1_M_500 done | 781.07s val=0.0620  [4/28]
+[2026-03-15 12:05:53]   [42] sparse_lasso/type1_M_1000 start
+[2026-03-15 12:31:27]   [42] sparse_lasso/type1_M_1000 done | 1534.00s val=0.0470  [5/28]
+[2026-03-15 12:31:27]   [42] sparse_lasso/type1_M_2000 start
+[2026-03-15 13:22:34]   [42] sparse_lasso/type1_M_2000 done | 3066.94s val=0.0365  [6/28]
+[2026-03-15 13:22:34]   [42] sparse_lasso/power_delta_0.10 start
+[2026-03-15 13:51:42]   [42] sparse_lasso/power_delta_0.10 done | 1747.24s val=0.0480  [7/28]
+[2026-03-15 13:51:42]   [42] sparse_lasso/power_delta_0.20 start
+[2026-03-15 14:56:58]   [42] sparse_lasso/power_delta_0.20 done | 3916.14s val=0.0640  [8/28]
+[2026-03-15 14:56:58]   [42] sparse_lasso/power_delta_0.30 start
+[2026-03-15 15:10:18]   [42] sparse_lasso/power_delta_0.30 done | 799.91s val=0.0680  [9/28]
+[2026-03-15 15:10:18]   [42] sparse_lasso/power_delta_0.40 start
+[2026-03-15 15:23:41]   [42] sparse_lasso/power_delta_0.40 done | 803.43s val=0.0920  [10/28]
+[2026-03-15 15:23:41]   [42] sparse_lasso/power_delta_0.50 start
+[2026-03-15 15:36:33]   [42] sparse_lasso/power_delta_0.50 done | 772.46s val=0.1300  [11/28]
+[2026-03-15 15:36:33]   [42] sparse_lasso/power_delta_0.60 start
+[2026-03-15 15:49:42]   [42] sparse_lasso/power_delta_0.60 done | 788.43s val=0.2040  [12/28]
+[2026-03-15 15:49:42]   [42] sparse_lasso/power_delta_0.75 start
+[2026-03-15 16:02:42]   [42] sparse_lasso/power_delta_0.75 done | 779.85s val=0.2880  [13/28]
+[2026-03-15 16:02:42]   [42] sparse_lasso/power_delta_1.00 start
+[2026-03-15 16:15:29]   [42] sparse_lasso/power_delta_1.00 done | 767.56s val=0.6120  [14/28]
+[2026-03-15 16:15:29]   [42] sparse_lasso done | 16461.18s
+[2026-03-15 16:15:29] seed 42 done | 16461.18s
+[2026-03-15 16:15:29] seed 2026 started | jobs=10
+[2026-03-15 16:15:29]   [2026] sparse_lasso started
+[2026-03-15 16:15:29]   [2026] sparse_lasso/type1_M_50 start
+[2026-03-15 16:16:45]   [2026] sparse_lasso/type1_M_50 done | 75.56s val=0.0600  [15/28]
+[2026-03-15 16:16:45]   [2026] sparse_lasso/type1_M_100 start
+[2026-03-15 16:19:05]   [2026] sparse_lasso/type1_M_100 done | 139.81s val=0.0300  [16/28]
+[2026-03-15 16:19:05]   [2026] sparse_lasso/type1_M_300 start
+[2026-03-15 16:26:35]   [2026] sparse_lasso/type1_M_300 done | 450.03s val=0.0500  [17/28]
+[2026-03-15 16:26:35]   [2026] sparse_lasso/type1_M_500 start
+[2026-03-15 16:40:03]   [2026] sparse_lasso/type1_M_500 done | 808.55s val=0.0500  [18/28]
+[2026-03-15 16:40:03]   [2026] sparse_lasso/type1_M_1000 start
+[2026-03-15 17:05:22]   [2026] sparse_lasso/type1_M_1000 done | 1519.09s val=0.0420  [19/28]
+[2026-03-15 17:05:22]   [2026] sparse_lasso/type1_M_2000 start
+[2026-03-15 18:06:58]   [2026] sparse_lasso/type1_M_2000 done | 3695.90s val=0.0415  [20/28]
+[2026-03-15 18:06:58]   [2026] sparse_lasso/power_delta_0.10 start
+[2026-03-15 18:08:03] run FAILED | terminated_by_signal_2

@@ -129,7 +129,12 @@ class VARDataGenerator:
 
             if target_spectral_radius is not None:
                 # 直接归一化到目标谱半径，保留低秩方向（U, V），仅调整幅度
-                r = np.max(np.abs(eigvals(Phi)))
+                # 用伴随矩阵计算谱半径（支持 p>1）
+                companion = np.zeros((N * p, N * p))
+                companion[:N, :] = Phi
+                if p > 1:
+                    companion[N:, :-N] = np.eye(N * (p - 1))
+                r = np.max(np.abs(eigvals(companion)))
                 if r < 1e-10:
                     continue
                 return Phi * (target_spectral_radius / r)

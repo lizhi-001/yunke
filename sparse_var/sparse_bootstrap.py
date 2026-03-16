@@ -15,7 +15,7 @@ class SparseBootstrapInference:
 
     def __init__(self, B: int = 500, seed: Optional[int] = None,
                  estimator_type: str = 'lasso', alpha: Optional[float] = None,
-                 post_lasso_ols: bool = False):
+                 post_lasso_ols: bool = False, fixed_support: bool = False):
         """
         初始化Bootstrap推断
 
@@ -30,13 +30,17 @@ class SparseBootstrapInference:
         alpha : float, optional
             正则化参数
         post_lasso_ols : bool
-            是否使用Post-Lasso OLS重拟合
+            是否使用逐次 Post-Lasso OLS（每次拟合独立选支撑，已弃用，用 fixed_support 替代）
+        fixed_support : bool
+            固定支撑 Post-Lasso OLS：在原始全样本上运行一次 Lasso 选出支撑集 S，
+            H0/H1/bootstrap 所有拟合统一使用 OLS on S，保证 Bootstrap LR 正确校准。
         """
         self.B = B
         self.seed = seed
         self.estimator_type = estimator_type
         self.alpha = alpha
         self.post_lasso_ols = post_lasso_ols
+        self.fixed_support = fixed_support
         self.bootstrap_statistics = None
         self.p_value = None
         self.critical_values = None
@@ -113,16 +117,34 @@ class SparseBootstrapInference:
         Dict[str, Any]
             Bootstrap检验结果
         """
+        # Step 0: 固定支撑选择（仅在原始数据上运行一次 Lasso）
+        support_mask = None
+        if self.fixed_support:
+            selector = LassoVAREstimator(alpha=self.alpha)
+            support_mask = selector.select_support(Y, p)
+
         # Step 1: 计算原始数据的LR统计量
         lr_test = SparseLRTest(estimator_type=self.estimator_type, alpha=self.alpha,
                                post_lasso_ols=self.post_lasso_ols)
-        original_result = lr_test.compute_lr_at_point(Y, p, t)
+        original_result = lr_test.compute_lr_at_point(Y, p, t, support_mask=support_mask)
         original_lr = original_result['lr_statistic']
 
         # 获取H0下的估计结果
         restricted_result = original_result['restricted_result']
         Phi_r, c_r = self._get_phi_and_c(restricted_result)
         residuals_r = restricted_result['residuals']
+
+        # 速度优化：若原始拟合使用了 CV（alpha=None），提取 H0 下 CV 选定的 α，
+        # bootstrap 迭代中固定使用该 α，避免每次重跑 LassoCV（慢 ~100 倍）。
+        # 仅在 support_mask=None（自适应支撑）时生效；固定支撑路径已用 OLS，无需此优化。
+        if self.alpha is None and support_mask is None:
+            h0_alphas = restricted_result.get('alphas_used', [])
+            fixed_alpha = float(np.median(h0_alphas)) if h0_alphas else None
+            lr_test_boot = SparseLRTest(estimator_type=self.estimator_type,
+                                        alpha=fixed_alpha,
+                                        post_lasso_ols=self.post_lasso_ols)
+        else:
+            lr_test_boot = lr_test
 
         # Step 2: Bootstrap循环
         bootstrap_lr_values = []
@@ -135,8 +157,8 @@ class SparseBootstrapInference:
                 # 生成伪序列
                 Y_star = self.generate_pseudo_series(Y, p, Phi_r, c_r, residuals_r)
 
-                # 计算伪序列的LR统计量
-                result_b = lr_test.compute_lr_at_point(Y_star, p, t)
+                # 计算伪序列的LR统计量（bootstrap 用固定 α，原始数据同支撑集）
+                result_b = lr_test_boot.compute_lr_at_point(Y_star, p, t, support_mask=support_mask)
                 bootstrap_lr_values.append(result_b['lr_statistic'])
             except Exception:
                 continue

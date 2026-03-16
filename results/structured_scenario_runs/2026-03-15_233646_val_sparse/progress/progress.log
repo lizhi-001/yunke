@@ -1,0 +1,30 @@
+[2026-03-15 23:36:46] run started | seeds=[42, 2026] B=100 M_grid=[100, 300]
+[2026-03-15 23:36:46] seed 42 started | jobs=4
+[2026-03-15 23:36:46]   [42] sparse_lasso started
+[2026-03-15 23:36:46]   [42] sparse_lasso/type1_M_100 start
+[2026-03-15 23:37:33]   [42] sparse_lasso/type1_M_100 done | 46.42s val=0.0300  [1/10]
+[2026-03-15 23:37:33]   [42] sparse_lasso/type1_M_300 start
+[2026-03-15 23:39:56]   [42] sparse_lasso/type1_M_300 done | 143.55s val=0.0533  [2/10]
+[2026-03-15 23:39:56]   [42] sparse_lasso/power_delta_0.10 start
+[2026-03-15 23:42:14]   [42] sparse_lasso/power_delta_0.10 done | 137.34s val=0.0767  [3/10]
+[2026-03-15 23:42:14]   [42] sparse_lasso/power_delta_0.30 start
+[2026-03-15 23:44:23]   [42] sparse_lasso/power_delta_0.30 done | 128.91s val=0.0567  [4/10]
+[2026-03-15 23:44:23]   [42] sparse_lasso/power_delta_0.50 start
+[2026-03-15 23:46:04]   [42] sparse_lasso/power_delta_0.50 done | 101.54s val=0.1333  [5/10]
+[2026-03-15 23:46:04]   [42] sparse_lasso done | 557.78s
+[2026-03-15 23:46:04] seed 42 done | 557.78s
+[2026-03-15 23:46:04] seed 2026 started | jobs=4
+[2026-03-15 23:46:04]   [2026] sparse_lasso started
+[2026-03-15 23:46:04]   [2026] sparse_lasso/type1_M_100 start
+[2026-03-15 23:46:40]   [2026] sparse_lasso/type1_M_100 done | 35.39s val=0.0900  [6/10]
+[2026-03-15 23:46:40]   [2026] sparse_lasso/type1_M_300 start
+[2026-03-15 23:48:21]   [2026] sparse_lasso/type1_M_300 done | 101.70s val=0.0500  [7/10]
+[2026-03-15 23:48:21]   [2026] sparse_lasso/power_delta_0.10 start
+[2026-03-15 23:50:05]   [2026] sparse_lasso/power_delta_0.10 done | 103.42s val=0.0600  [8/10]
+[2026-03-15 23:50:05]   [2026] sparse_lasso/power_delta_0.30 start
+[2026-03-15 23:51:49]   [2026] sparse_lasso/power_delta_0.30 done | 104.28s val=0.1000  [9/10]
+[2026-03-15 23:51:49]   [2026] sparse_lasso/power_delta_0.50 start
+[2026-03-15 23:53:34]   [2026] sparse_lasso/power_delta_0.50 done | 104.46s val=0.1533  [10/10]
+[2026-03-15 23:53:34]   [2026] sparse_lasso done | 449.26s
+[2026-03-15 23:53:34] seed 2026 done | 449.26s
+[2026-03-15 23:53:34] run finished | runtime=1007.04s

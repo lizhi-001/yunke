@@ -1,0 +1,18 @@
+{"timestamp": "2026-03-15 23:36:56", "event": "run_started", "config": {"seeds": [42, 2026], "B": 50, "M_grid": [20], "power_M": 20, "alpha": 0.05, "deltas": [0.3]}}
+{"timestamp": "2026-03-15 23:36:56", "event": "seed_started", "seed": 42, "jobs": 4}
+{"timestamp": "2026-03-15 23:36:56", "event": "model_started", "seed": 42, "model": "sparse_lasso_free", "jobs": 4}
+{"timestamp": "2026-03-15 23:36:56", "event": "stage_started", "seed": 42, "model": "sparse_lasso_free", "stage": "type1_M_20", "task": "type1_error", "M": 20}
+{"timestamp": "2026-03-15 23:44:46", "event": "stage_finished", "seed": 42, "model": "sparse_lasso_free", "stage": "type1_M_20", "runtime_sec": 470.00578260421753, "task": "type1_error", "M": 20, "metric_value": 0.15}
+{"timestamp": "2026-03-15 23:44:46", "event": "stage_started", "seed": 42, "model": "sparse_lasso_free", "stage": "power_delta_0.30", "task": "power", "M": 20, "base_delta": 0.3, "target_fro": 0.3}
+{"timestamp": "2026-03-15 23:50:40", "event": "stage_finished", "seed": 42, "model": "sparse_lasso_free", "stage": "power_delta_0.30", "runtime_sec": 353.2148163318634, "task": "power", "M": 20, "base_delta": 0.3, "target_fro": 0.3, "metric_value": 0.2}
+{"timestamp": "2026-03-15 23:50:40", "event": "model_finished", "seed": 42, "model": "sparse_lasso_free", "runtime_sec": 823.2277038097382}
+{"timestamp": "2026-03-15 23:50:40", "event": "seed_finished", "seed": 42, "runtime_sec": 823.2291510105133}
+{"timestamp": "2026-03-15 23:50:40", "event": "seed_started", "seed": 2026, "jobs": 4}
+{"timestamp": "2026-03-15 23:50:40", "event": "model_started", "seed": 2026, "model": "sparse_lasso_free", "jobs": 4}
+{"timestamp": "2026-03-15 23:50:40", "event": "stage_started", "seed": 2026, "model": "sparse_lasso_free", "stage": "type1_M_20", "task": "type1_error", "M": 20}
+{"timestamp": "2026-03-15 23:55:44", "event": "stage_finished", "seed": 2026, "model": "sparse_lasso_free", "stage": "type1_M_20", "runtime_sec": 304.093631029129, "task": "type1_error", "M": 20, "metric_value": 0.15}
+{"timestamp": "2026-03-15 23:55:44", "event": "stage_started", "seed": 2026, "model": "sparse_lasso_free", "stage": "power_delta_0.30", "task": "power", "M": 20, "base_delta": 0.3, "target_fro": 0.3}
+{"timestamp": "2026-03-15 23:59:58", "event": "stage_finished", "seed": 2026, "model": "sparse_lasso_free", "stage": "power_delta_0.30", "runtime_sec": 254.60212087631226, "task": "power", "M": 20, "base_delta": 0.3, "target_fro": 0.3, "metric_value": 0.15}
+{"timestamp": "2026-03-15 23:59:58", "event": "model_finished", "seed": 2026, "model": "sparse_lasso_free", "runtime_sec": 558.7017178535461}
+{"timestamp": "2026-03-15 23:59:58", "event": "seed_finished", "seed": 2026, "runtime_sec": 558.7026863098145}
+{"timestamp": "2026-03-15 23:59:58", "event": "run_finished", "runtime_sec": 1381.9345500469208}

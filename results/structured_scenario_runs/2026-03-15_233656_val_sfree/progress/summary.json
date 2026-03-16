@@ -1,0 +1,13 @@
+{
+  "updated_at": "2026-03-15 23:59:58",
+  "completed_stage_count": 4,
+  "total_stage_count": 4,
+  "progress_ratio": 1.0,
+  "active_stages": [],
+  "completed_stages": [
+    "seed_42/sparse_lasso_free/type1_M_20",
+    "seed_42/sparse_lasso_free/power_delta_0.30",
+    "seed_2026/sparse_lasso_free/type1_M_20",
+    "seed_2026/sparse_lasso_free/power_delta_0.30"
+  ]
+}

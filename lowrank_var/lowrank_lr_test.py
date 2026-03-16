@@ -35,8 +35,16 @@ class LowRankLRTest:
         self.lr_statistic = None
 
     def _fit_model(self, Y: np.ndarray, p: int,
-                   include_const: bool = True) -> Dict[str, Any]:
-        """使用低秩方法拟合VAR模型"""
+                   include_const: bool = True,
+                   V_r_fixed: Optional[np.ndarray] = None) -> Dict[str, Any]:
+        """使用低秩方法拟合VAR模型
+
+        Parameters
+        ----------
+        V_r_fixed : np.ndarray, optional
+            预先指定的行空间正交基（形状 rank × N*p，仅用于 rrr 方法）。
+            若提供，则所有拟合共用同一行空间，类比稀疏的固定支撑集。
+        """
         estimator = NuclearNormVAR(lambda_nuc=self.lambda_nuc)
 
         rank = self.rank
@@ -55,12 +63,14 @@ class LowRankLRTest:
                     Y, p, max_rank=min(Y.shape[1], 10), criterion='bic'
                 )
                 rank = rank_result['selected_rank']
-            return estimator.fit_rrr(Y, p, rank=rank, include_const=include_const)
+            return estimator.fit_rrr(Y, p, rank=rank, include_const=include_const,
+                                     V_r_fixed=V_r_fixed)
         else:
             return estimator.fit_cvxpy(Y, p, include_const=include_const)
 
     def compute_lr_at_point(self, Y: np.ndarray, p: int, t: int,
-                            include_const: bool = True) -> Dict[str, Any]:
+                            include_const: bool = True,
+                            V_r_fixed: Optional[np.ndarray] = None) -> Dict[str, Any]:
         """
         针对已知时间点t计算LR统计量（使用低秩估计）
 
@@ -74,6 +84,10 @@ class LowRankLRTest:
             已知的变点位置
         include_const : bool
             是否包含常数项
+        V_r_fixed : np.ndarray, optional
+            预先指定的行空间正交基（形状 rank × N*p）。
+            若提供，则 H0/H1 所有拟合均固定因子构成 z_t = V_r @ x_t，
+            类比稀疏场景中的固定支撑集（fixed support）。
 
         Returns
         -------
@@ -89,17 +103,17 @@ class LowRankLRTest:
             raise ValueError(f"变点位置t={t}无效，第二段样本量不足")
 
         # H0: 无结构变化（约束模型）
-        result_r = self._fit_model(Y, p, include_const)
+        result_r = self._fit_model(Y, p, include_const, V_r_fixed=V_r_fixed)
         log_lik_r = result_r['log_likelihood']
 
         # H1: 在已知时间点t发生结构变化（结构断裂拟合）
         Y1 = Y[:t, :]
         Y2 = Y[t - p:, :]
 
-        result1 = self._fit_model(Y1, p, include_const)
+        result1 = self._fit_model(Y1, p, include_const, V_r_fixed=V_r_fixed)
         log_lik_1 = result1['log_likelihood']
 
-        result2 = self._fit_model(Y2, p, include_const)
+        result2 = self._fit_model(Y2, p, include_const, V_r_fixed=V_r_fixed)
         log_lik_2 = result2['log_likelihood']
 
         if result_r['T_eff'] != result1['T_eff'] + result2['T_eff']:

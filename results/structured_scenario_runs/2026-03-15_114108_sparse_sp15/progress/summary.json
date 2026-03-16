@@ -1,0 +1,31 @@
+{
+  "updated_at": "2026-03-15 18:06:58",
+  "completed_stage_count": 20,
+  "total_stage_count": 28,
+  "progress_ratio": 0.7142857142857143,
+  "active_stages": [
+    "seed_2026/sparse_lasso/power_delta_0.10"
+  ],
+  "completed_stages": [
+    "seed_42/sparse_lasso/type1_M_50",
+    "seed_42/sparse_lasso/type1_M_100",
+    "seed_42/sparse_lasso/type1_M_300",
+    "seed_42/sparse_lasso/type1_M_500",
+    "seed_42/sparse_lasso/type1_M_1000",
+    "seed_42/sparse_lasso/type1_M_2000",
+    "seed_42/sparse_lasso/power_delta_0.10",
+    "seed_42/sparse_lasso/power_delta_0.20",
+    "seed_42/sparse_lasso/power_delta_0.30",
+    "seed_42/sparse_lasso/power_delta_0.40",
+    "seed_42/sparse_lasso/power_delta_0.50",
+    "seed_42/sparse_lasso/power_delta_0.60",
+    "seed_42/sparse_lasso/power_delta_0.75",
+    "seed_42/sparse_lasso/power_delta_1.00",
+    "seed_2026/sparse_lasso/type1_M_50",
+    "seed_2026/sparse_lasso/type1_M_100",
+    "seed_2026/sparse_lasso/type1_M_300",
+    "seed_2026/sparse_lasso/type1_M_500",
+    "seed_2026/sparse_lasso/type1_M_1000",
+    "seed_2026/sparse_lasso/type1_M_2000"
+  ]
+}

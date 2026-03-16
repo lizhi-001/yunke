@@ -1,0 +1,3 @@
+scope,seed,model,metric,M,delta,target_fro,actual_fro,value_mean,value_std,size_distortion_mean,rejections_mean,effective_iterations_mean,runtime_sec_mean,mc_se,ci95_low,ci95_high,seed_count,perturbation_type,target_fro_mean,actual_fro_mean
+aggregate,,lowrank_rrr_rp,type1_error,50,,,,0.18,0.0,0.13,9.0,50.0,3.4676170349121094,0.054332310828824504,0.07350867077550396,0.28649132922449605,1,,,
+aggregate,,lowrank_rrr_rp,power,50,0.3,,,0.24,0.0,,12.0,50.0,3.2864530086517334,,,,1,lowrank_fixedV,0.3,0.3
