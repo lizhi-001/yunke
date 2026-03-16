@@ -1,0 +1,14 @@
+{"timestamp": "2026-03-16 13:33:46", "event": "run_started", "config": {"seeds": [42, 2026], "B": 500, "M_grid": [50, 100, 300, 500, 1000, 2000], "power_M": 500, "alpha": 0.05, "deltas": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.75, 1.0]}}
+{"timestamp": "2026-03-16 13:33:46", "event": "seed_started", "seed": 42, "jobs": 10}
+{"timestamp": "2026-03-16 13:33:46", "event": "model_started", "seed": 42, "model": "sparse_lasso", "jobs": 10}
+{"timestamp": "2026-03-16 13:33:46", "event": "stage_started", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_50", "task": "type1_error", "M": 50}
+{"timestamp": "2026-03-16 13:34:18", "event": "stage_finished", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_50", "runtime_sec": 31.20083785057068, "task": "type1_error", "M": 50, "metric_value": 0.04}
+{"timestamp": "2026-03-16 13:34:18", "event": "stage_started", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_100", "task": "type1_error", "M": 100}
+{"timestamp": "2026-03-16 13:35:16", "event": "stage_finished", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_100", "runtime_sec": 58.80529499053955, "task": "type1_error", "M": 100, "metric_value": 0.07}
+{"timestamp": "2026-03-16 13:35:16", "event": "stage_started", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_300", "task": "type1_error", "M": 300}
+{"timestamp": "2026-03-16 13:38:20", "event": "stage_finished", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_300", "runtime_sec": 183.54263281822205, "task": "type1_error", "M": 300, "metric_value": 0.03}
+{"timestamp": "2026-03-16 13:38:20", "event": "stage_started", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_500", "task": "type1_error", "M": 500}
+{"timestamp": "2026-03-16 13:44:00", "event": "stage_finished", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_500", "runtime_sec": 340.00688886642456, "task": "type1_error", "M": 500, "metric_value": 0.064}
+{"timestamp": "2026-03-16 13:44:00", "event": "stage_started", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_1000", "task": "type1_error", "M": 1000}
+{"timestamp": "2026-03-16 13:53:46", "event": "stage_finished", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_1000", "runtime_sec": 586.3325200080872, "task": "type1_error", "M": 1000, "metric_value": 0.045}
+{"timestamp": "2026-03-16 13:53:46", "event": "stage_started", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_2000", "task": "type1_error", "M": 2000}

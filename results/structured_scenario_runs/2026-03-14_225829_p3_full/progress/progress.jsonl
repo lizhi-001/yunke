@@ -1,0 +1,74 @@
+{"timestamp": "2026-03-14 22:58:29", "event": "run_started", "config": {"seeds": [42, 2026], "B": 500, "M_grid": [50, 100, 300, 500, 1000, 2000], "power_M": 500, "alpha": 0.05, "deltas": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.75, 1.0]}}
+{"timestamp": "2026-03-14 22:58:29", "event": "seed_started", "seed": 42, "jobs": 10}
+{"timestamp": "2026-03-14 22:58:29", "event": "model_started", "seed": 42, "model": "baseline_ols_f", "jobs": 10}
+{"timestamp": "2026-03-14 22:58:29", "event": "stage_started", "seed": 42, "model": "baseline_ols_f", "stage": "type1_M_50", "task": "type1_error", "M": 50}
+{"timestamp": "2026-03-14 22:58:31", "event": "stage_finished", "seed": 42, "model": "baseline_ols_f", "stage": "type1_M_50", "runtime_sec": 1.7730708122253418, "task": "type1_error", "M": 50, "metric_value": 0.02}
+{"timestamp": "2026-03-14 22:58:31", "event": "stage_started", "seed": 42, "model": "baseline_ols_f", "stage": "type1_M_100", "task": "type1_error", "M": 100}
+{"timestamp": "2026-03-14 22:58:32", "event": "stage_finished", "seed": 42, "model": "baseline_ols_f", "stage": "type1_M_100", "runtime_sec": 1.5783681869506836, "task": "type1_error", "M": 100, "metric_value": 0.04}
+{"timestamp": "2026-03-14 22:58:32", "event": "stage_started", "seed": 42, "model": "baseline_ols_f", "stage": "type1_M_300", "task": "type1_error", "M": 300}
+{"timestamp": "2026-03-14 22:58:34", "event": "stage_finished", "seed": 42, "model": "baseline_ols_f", "stage": "type1_M_300", "runtime_sec": 1.8352930545806885, "task": "type1_error", "M": 300, "metric_value": 0.02666666666666667}
+{"timestamp": "2026-03-14 22:58:34", "event": "stage_started", "seed": 42, "model": "baseline_ols_f", "stage": "type1_M_500", "task": "type1_error", "M": 500}
+{"timestamp": "2026-03-14 22:58:36", "event": "stage_finished", "seed": 42, "model": "baseline_ols_f", "stage": "type1_M_500", "runtime_sec": 2.050384283065796, "task": "type1_error", "M": 500, "metric_value": 0.044}
+{"timestamp": "2026-03-14 22:58:36", "event": "stage_started", "seed": 42, "model": "baseline_ols_f", "stage": "type1_M_1000", "task": "type1_error", "M": 1000}
+{"timestamp": "2026-03-14 22:58:38", "event": "stage_finished", "seed": 42, "model": "baseline_ols_f", "stage": "type1_M_1000", "runtime_sec": 2.032737970352173, "task": "type1_error", "M": 1000, "metric_value": 0.055}
+{"timestamp": "2026-03-14 22:58:38", "event": "stage_started", "seed": 42, "model": "baseline_ols_f", "stage": "type1_M_2000", "task": "type1_error", "M": 2000}
+{"timestamp": "2026-03-14 22:58:40", "event": "stage_finished", "seed": 42, "model": "baseline_ols_f", "stage": "type1_M_2000", "runtime_sec": 2.2875277996063232, "task": "type1_error", "M": 2000, "metric_value": 0.051}
+{"timestamp": "2026-03-14 22:58:40", "event": "stage_started", "seed": 42, "model": "baseline_ols_f", "stage": "power_delta_0.10", "task": "power", "M": 500, "base_delta": 0.1, "target_fro": 0.1}
+{"timestamp": "2026-03-14 22:58:42", "event": "stage_finished", "seed": 42, "model": "baseline_ols_f", "stage": "power_delta_0.10", "runtime_sec": 1.963068962097168, "task": "power", "M": 500, "base_delta": 0.1, "target_fro": 0.1, "metric_value": 0.056}
+{"timestamp": "2026-03-14 22:58:42", "event": "stage_started", "seed": 42, "model": "baseline_ols_f", "stage": "power_delta_0.20", "task": "power", "M": 500, "base_delta": 0.2, "target_fro": 0.2}
+{"timestamp": "2026-03-14 22:58:44", "event": "stage_finished", "seed": 42, "model": "baseline_ols_f", "stage": "power_delta_0.20", "runtime_sec": 1.8072738647460938, "task": "power", "M": 500, "base_delta": 0.2, "target_fro": 0.2, "metric_value": 0.15}
+{"timestamp": "2026-03-14 22:58:44", "event": "stage_started", "seed": 42, "model": "baseline_ols_f", "stage": "power_delta_0.30", "task": "power", "M": 500, "base_delta": 0.3, "target_fro": 0.3}
+{"timestamp": "2026-03-14 22:58:46", "event": "stage_finished", "seed": 42, "model": "baseline_ols_f", "stage": "power_delta_0.30", "runtime_sec": 1.8806641101837158, "task": "power", "M": 500, "base_delta": 0.3, "target_fro": 0.3, "metric_value": 0.376}
+{"timestamp": "2026-03-14 22:58:46", "event": "stage_started", "seed": 42, "model": "baseline_ols_f", "stage": "power_delta_0.40", "task": "power", "M": 500, "base_delta": 0.4, "target_fro": 0.4}
+{"timestamp": "2026-03-14 22:58:48", "event": "stage_finished", "seed": 42, "model": "baseline_ols_f", "stage": "power_delta_0.40", "runtime_sec": 1.7401840686798096, "task": "power", "M": 500, "base_delta": 0.4, "target_fro": 0.4, "metric_value": 0.704}
+{"timestamp": "2026-03-14 22:58:48", "event": "stage_started", "seed": 42, "model": "baseline_ols_f", "stage": "power_delta_0.50", "task": "power", "M": 500, "base_delta": 0.5, "target_fro": 0.5}
+{"timestamp": "2026-03-14 22:58:50", "event": "stage_finished", "seed": 42, "model": "baseline_ols_f", "stage": "power_delta_0.50", "runtime_sec": 1.753763198852539, "task": "power", "M": 500, "base_delta": 0.5, "target_fro": 0.5, "metric_value": 0.95}
+{"timestamp": "2026-03-14 22:58:50", "event": "stage_started", "seed": 42, "model": "baseline_ols_f", "stage": "power_delta_0.60", "task": "power", "M": 500, "base_delta": 0.6, "target_fro": 0.6}
+{"timestamp": "2026-03-14 22:58:51", "event": "stage_finished", "seed": 42, "model": "baseline_ols_f", "stage": "power_delta_0.60", "runtime_sec": 1.831995964050293, "task": "power", "M": 500, "base_delta": 0.6, "target_fro": 0.6, "metric_value": 1.0}
+{"timestamp": "2026-03-14 22:58:51", "event": "stage_started", "seed": 42, "model": "baseline_ols_f", "stage": "power_delta_0.75", "task": "power", "M": 500, "base_delta": 0.75, "target_fro": 0.75}
+{"timestamp": "2026-03-14 22:58:54", "event": "stage_finished", "seed": 42, "model": "baseline_ols_f", "stage": "power_delta_0.75", "runtime_sec": 2.1744749546051025, "task": "power", "M": 500, "base_delta": 0.75, "target_fro": 0.75, "metric_value": 1.0}
+{"timestamp": "2026-03-14 22:58:54", "event": "stage_started", "seed": 42, "model": "baseline_ols_f", "stage": "power_delta_1.00", "task": "power", "M": 500, "base_delta": 1.0, "target_fro": 1.0}
+{"timestamp": "2026-03-14 22:58:56", "event": "stage_finished", "seed": 42, "model": "baseline_ols_f", "stage": "power_delta_1.00", "runtime_sec": 1.861933946609497, "task": "power", "M": 500, "base_delta": 1.0, "target_fro": 1.0, "metric_value": 1.0}
+{"timestamp": "2026-03-14 22:58:56", "event": "model_finished", "seed": 42, "model": "baseline_ols_f", "runtime_sec": 26.58912205696106}
+{"timestamp": "2026-03-14 22:58:56", "event": "model_started", "seed": 42, "model": "baseline_ols", "jobs": 10}
+{"timestamp": "2026-03-14 22:58:56", "event": "stage_started", "seed": 42, "model": "baseline_ols", "stage": "type1_M_50", "task": "type1_error", "M": 50}
+{"timestamp": "2026-03-14 22:59:05", "event": "stage_finished", "seed": 42, "model": "baseline_ols", "stage": "type1_M_50", "runtime_sec": 9.008519887924194, "task": "type1_error", "M": 50, "metric_value": 0.04}
+{"timestamp": "2026-03-14 22:59:05", "event": "stage_started", "seed": 42, "model": "baseline_ols", "stage": "type1_M_100", "task": "type1_error", "M": 100}
+{"timestamp": "2026-03-14 22:59:19", "event": "stage_finished", "seed": 42, "model": "baseline_ols", "stage": "type1_M_100", "runtime_sec": 14.546751022338867, "task": "type1_error", "M": 100, "metric_value": 0.04}
+{"timestamp": "2026-03-14 22:59:19", "event": "stage_started", "seed": 42, "model": "baseline_ols", "stage": "type1_M_300", "task": "type1_error", "M": 300}
+{"timestamp": "2026-03-14 23:00:02", "event": "stage_finished", "seed": 42, "model": "baseline_ols", "stage": "type1_M_300", "runtime_sec": 42.943175077438354, "task": "type1_error", "M": 300, "metric_value": 0.05}
+{"timestamp": "2026-03-14 23:00:02", "event": "stage_started", "seed": 42, "model": "baseline_ols", "stage": "type1_M_500", "task": "type1_error", "M": 500}
+{"timestamp": "2026-03-14 23:01:12", "event": "stage_finished", "seed": 42, "model": "baseline_ols", "stage": "type1_M_500", "runtime_sec": 69.51125121116638, "task": "type1_error", "M": 500, "metric_value": 0.048}
+{"timestamp": "2026-03-14 23:01:12", "event": "stage_started", "seed": 42, "model": "baseline_ols", "stage": "type1_M_1000", "task": "type1_error", "M": 1000}
+{"timestamp": "2026-03-14 23:03:12", "event": "stage_finished", "seed": 42, "model": "baseline_ols", "stage": "type1_M_1000", "runtime_sec": 120.86059808731079, "task": "type1_error", "M": 1000, "metric_value": 0.054}
+{"timestamp": "2026-03-14 23:03:12", "event": "stage_started", "seed": 42, "model": "baseline_ols", "stage": "type1_M_2000", "task": "type1_error", "M": 2000}
+{"timestamp": "2026-03-14 23:07:14", "event": "stage_finished", "seed": 42, "model": "baseline_ols", "stage": "type1_M_2000", "runtime_sec": 241.32219004631042, "task": "type1_error", "M": 2000, "metric_value": 0.0535}
+{"timestamp": "2026-03-14 23:07:14", "event": "stage_started", "seed": 42, "model": "baseline_ols", "stage": "power_delta_0.10", "task": "power", "M": 500, "base_delta": 0.1, "target_fro": 0.1}
+{"timestamp": "2026-03-14 23:08:21", "event": "stage_finished", "seed": 42, "model": "baseline_ols", "stage": "power_delta_0.10", "runtime_sec": 67.66681909561157, "task": "power", "M": 500, "base_delta": 0.1, "target_fro": 0.1, "metric_value": 0.068}
+{"timestamp": "2026-03-14 23:08:21", "event": "stage_started", "seed": 42, "model": "baseline_ols", "stage": "power_delta_0.20", "task": "power", "M": 500, "base_delta": 0.2, "target_fro": 0.2}
+{"timestamp": "2026-03-14 23:09:29", "event": "stage_finished", "seed": 42, "model": "baseline_ols", "stage": "power_delta_0.20", "runtime_sec": 67.54205179214478, "task": "power", "M": 500, "base_delta": 0.2, "target_fro": 0.2, "metric_value": 0.118}
+{"timestamp": "2026-03-14 23:09:29", "event": "stage_started", "seed": 42, "model": "baseline_ols", "stage": "power_delta_0.30", "task": "power", "M": 500, "base_delta": 0.3, "target_fro": 0.3}
+{"timestamp": "2026-03-14 23:10:37", "event": "stage_finished", "seed": 42, "model": "baseline_ols", "stage": "power_delta_0.30", "runtime_sec": 67.5985472202301, "task": "power", "M": 500, "base_delta": 0.3, "target_fro": 0.3, "metric_value": 0.288}
+{"timestamp": "2026-03-14 23:10:37", "event": "stage_started", "seed": 42, "model": "baseline_ols", "stage": "power_delta_0.40", "task": "power", "M": 500, "base_delta": 0.4, "target_fro": 0.4}
+{"timestamp": "2026-03-14 23:11:44", "event": "stage_finished", "seed": 42, "model": "baseline_ols", "stage": "power_delta_0.40", "runtime_sec": 67.52964282035828, "task": "power", "M": 500, "base_delta": 0.4, "target_fro": 0.4, "metric_value": 0.648}
+{"timestamp": "2026-03-14 23:11:44", "event": "stage_started", "seed": 42, "model": "baseline_ols", "stage": "power_delta_0.50", "task": "power", "M": 500, "base_delta": 0.5, "target_fro": 0.5}
+{"timestamp": "2026-03-14 23:12:55", "event": "stage_finished", "seed": 42, "model": "baseline_ols", "stage": "power_delta_0.50", "runtime_sec": 71.29842114448547, "task": "power", "M": 500, "base_delta": 0.5, "target_fro": 0.5, "metric_value": 0.868}
+{"timestamp": "2026-03-14 23:12:55", "event": "stage_started", "seed": 42, "model": "baseline_ols", "stage": "power_delta_0.60", "task": "power", "M": 500, "base_delta": 0.6, "target_fro": 0.6}
+{"timestamp": "2026-03-14 23:14:10", "event": "stage_finished", "seed": 42, "model": "baseline_ols", "stage": "power_delta_0.60", "runtime_sec": 74.47469186782837, "task": "power", "M": 500, "base_delta": 0.6, "target_fro": 0.6, "metric_value": 0.992}
+{"timestamp": "2026-03-14 23:14:10", "event": "stage_started", "seed": 42, "model": "baseline_ols", "stage": "power_delta_0.75", "task": "power", "M": 500, "base_delta": 0.75, "target_fro": 0.75}
+{"timestamp": "2026-03-14 23:15:17", "event": "stage_finished", "seed": 42, "model": "baseline_ols", "stage": "power_delta_0.75", "runtime_sec": 67.61821007728577, "task": "power", "M": 500, "base_delta": 0.75, "target_fro": 0.75, "metric_value": 1.0}
+{"timestamp": "2026-03-14 23:15:17", "event": "stage_started", "seed": 42, "model": "baseline_ols", "stage": "power_delta_1.00", "task": "power", "M": 500, "base_delta": 1.0, "target_fro": 1.0}
+{"timestamp": "2026-03-14 23:16:25", "event": "stage_finished", "seed": 42, "model": "baseline_ols", "stage": "power_delta_1.00", "runtime_sec": 67.23881006240845, "task": "power", "M": 500, "base_delta": 1.0, "target_fro": 1.0, "metric_value": 0.998}
+{"timestamp": "2026-03-14 23:16:25", "event": "model_finished", "seed": 42, "model": "baseline_ols", "runtime_sec": 1049.1905999183655}
+{"timestamp": "2026-03-14 23:16:25", "event": "model_started", "seed": 42, "model": "sparse_lasso", "jobs": 10}
+{"timestamp": "2026-03-14 23:16:25", "event": "stage_started", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_50", "task": "type1_error", "M": 50}
+{"timestamp": "2026-03-14 23:17:44", "event": "stage_finished", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_50", "runtime_sec": 79.01806712150574, "task": "type1_error", "M": 50, "metric_value": 0.22}
+{"timestamp": "2026-03-14 23:17:44", "event": "stage_started", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_100", "task": "type1_error", "M": 100}
+{"timestamp": "2026-03-14 23:20:20", "event": "stage_finished", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_100", "runtime_sec": 156.36250114440918, "task": "type1_error", "M": 100, "metric_value": 0.23}
+{"timestamp": "2026-03-14 23:20:20", "event": "stage_started", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_300", "task": "type1_error", "M": 300}
+{"timestamp": "2026-03-14 23:28:44", "event": "stage_finished", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_300", "runtime_sec": 503.7532711029053, "task": "type1_error", "M": 300, "metric_value": 0.22333333333333333}
+{"timestamp": "2026-03-14 23:28:44", "event": "stage_started", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_500", "task": "type1_error", "M": 500}
+{"timestamp": "2026-03-14 23:42:59", "event": "stage_finished", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_500", "runtime_sec": 855.4671700000763, "task": "type1_error", "M": 500, "metric_value": 0.174}
+{"timestamp": "2026-03-14 23:42:59", "event": "stage_started", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_1000", "task": "type1_error", "M": 1000}
+{"timestamp": "2026-03-15 00:10:29", "event": "stage_finished", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_1000", "runtime_sec": 1649.8658559322357, "task": "type1_error", "M": 1000, "metric_value": 0.181}
+{"timestamp": "2026-03-15 00:10:29", "event": "stage_started", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_2000", "task": "type1_error", "M": 2000}

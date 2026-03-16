@@ -66,7 +66,8 @@ class SparseLRTest:
             return -0.5 * T_eff * (N * np.log(2 * np.pi) + np.log(det_Sigma) + N)
 
     def compute_lr_at_point(self, Y: np.ndarray, p: int, t: int,
-                            include_const: bool = True) -> Dict[str, Any]:
+                            include_const: bool = True,
+                            support_mask: Optional[np.ndarray] = None) -> Dict[str, Any]:
         """
         针对特定时间点t计算LR统计量（使用稀疏估计）
 
@@ -80,6 +81,9 @@ class SparseLRTest:
             待检验的变点位置
         include_const : bool
             是否包含常数项
+        support_mask : np.ndarray, optional
+            固定支撑集掩码（shape: n_features × N）。
+            若提供，则 H0/H1 均用 OLS on 固定支撑集，实现固定支撑 Post-Lasso OLS。
 
         Returns
         -------
@@ -96,19 +100,28 @@ class SparseLRTest:
             raise ValueError(f"变点位置t={t}无效，第二段样本量不足")
 
         # H0: 无结构变化（约束模型）
-        estimator = self._get_estimator()
-        result_r = estimator.fit(Y, p, include_const)
+        if support_mask is not None:
+            estimator = LassoVAREstimator(alpha=self.alpha)
+            result_r = estimator.fit_with_support(Y, p, support_mask, include_const)
+        else:
+            estimator = self._get_estimator()
+            result_r = estimator.fit(Y, p, include_const)
         log_lik_r = self._get_log_likelihood(result_r, self.estimator_type)
 
         # H1: 在时间点t发生结构变化（结构断裂拟合）
         Y1 = Y[:t, :]
         Y2 = Y[t - p:, :]
 
-        result1 = estimator.fit(Y1, p, include_const)
-        log_lik_1 = self._get_log_likelihood(result1, self.estimator_type)
-
-        result2 = estimator.fit(Y2, p, include_const)
-        log_lik_2 = self._get_log_likelihood(result2, self.estimator_type)
+        if support_mask is not None:
+            result1 = estimator.fit_with_support(Y1, p, support_mask, include_const)
+            log_lik_1 = self._get_log_likelihood(result1, self.estimator_type)
+            result2 = estimator.fit_with_support(Y2, p, support_mask, include_const)
+            log_lik_2 = self._get_log_likelihood(result2, self.estimator_type)
+        else:
+            result1 = estimator.fit(Y1, p, include_const)
+            log_lik_1 = self._get_log_likelihood(result1, self.estimator_type)
+            result2 = estimator.fit(Y2, p, include_const)
+            log_lik_2 = self._get_log_likelihood(result2, self.estimator_type)
 
         if result_r['T_eff'] != result1['T_eff'] + result2['T_eff']:
             raise ValueError('H0 与 H1 的有效样本量不一致')

@@ -6,6 +6,7 @@
 import numpy as np
 from typing import Dict, Any, Optional
 from .lowrank_lr_test import LowRankLRTest
+from .nuclear_norm import NuclearNormVAR
 
 
 class LowRankBootstrapInference:
@@ -13,7 +14,8 @@ class LowRankBootstrapInference:
 
     def __init__(self, B: int = 500, seed: Optional[int] = None,
                  method: str = 'svd', rank: Optional[int] = None,
-                 lambda_nuc: Optional[float] = None):
+                 lambda_nuc: Optional[float] = None,
+                 fixed_space: bool = False):
         """
         Parameters
         ----------
@@ -22,17 +24,23 @@ class LowRankBootstrapInference:
         seed : int, optional
             随机种子
         method : str
-            估计方法：'svd' 或 'cvxpy'
+            估计方法：'svd', 'rrr' 或 'cvxpy'
         rank : int, optional
-            指定秩（仅用于svd方法）
+            指定秩（仅用于svd/rrr方法）
         lambda_nuc : float, optional
             核范数正则化参数
+        fixed_space : bool
+            固定秩空间 Post-RRR：在原始全样本上运行一次 RRR 确定 V_r 子空间，
+            H0/H1/bootstrap 所有拟合统一使用该 V_r，保证 Bootstrap LR 正确校准。
+            类比稀疏场景中的固定支撑集（fixed support）。
+            仅在 method='rrr' 时生效。
         """
         self.B = B
         self.seed = seed
         self.method = method
         self.rank = rank
         self.lambda_nuc = lambda_nuc
+        self.fixed_space = fixed_space
         self.rng = np.random.default_rng(seed)
 
     def generate_pseudo_series(self, Y: np.ndarray, p: int,
@@ -74,10 +82,21 @@ class LowRankBootstrapInference:
         verbose : bool
             是否显示进度
         """
+        # Step 0: 固定秩空间选择（仅在原始数据上运行一次 RRR 确定行空间）
+        V_r_fixed = None
+        if self.fixed_space and self.method == 'rrr' and self.rank is not None:
+            estimator = NuclearNormVAR(lambda_nuc=self.lambda_nuc)
+            init_result = estimator.fit_rrr(Y, p, rank=self.rank, include_const=True)
+            # 从全样本 Phi_hat 的 SVD 中提取行空间基 (rank × N*p)
+            # 与扰动 build_phi2_lowrank_fixedV 保持同一子空间方向
+            Phi_hat = init_result['Phi']
+            _, _, Vt_phi = np.linalg.svd(Phi_hat, full_matrices=False)
+            V_r_fixed = Vt_phi[:self.rank, :]    # rank × (N*p)
+
         # Step 1: 计算原始数据的LR统计量
         lr_test = LowRankLRTest(method=self.method, rank=self.rank,
                                  lambda_nuc=self.lambda_nuc)
-        original_result = lr_test.compute_lr_at_point(Y, p, t)
+        original_result = lr_test.compute_lr_at_point(Y, p, t, V_r_fixed=V_r_fixed)
         original_lr = original_result['lr_statistic']
 
         # 获取H0下的估计结果
@@ -97,7 +116,8 @@ class LowRankBootstrapInference:
                 Y_star = self.generate_pseudo_series(Y, p, Phi_r, c_r, residuals_r)
                 lr_test_b = LowRankLRTest(method=self.method, rank=self.rank,
                                            lambda_nuc=self.lambda_nuc)
-                result_b = lr_test_b.compute_lr_at_point(Y_star, p, t)
+                result_b = lr_test_b.compute_lr_at_point(Y_star, p, t,
+                                                          V_r_fixed=V_r_fixed)
                 bootstrap_lr_values.append(result_b['lr_statistic'])
             except Exception:
                 continue

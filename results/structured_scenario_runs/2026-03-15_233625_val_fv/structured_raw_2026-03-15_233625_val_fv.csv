@@ -1,0 +1,11 @@
+scope,seed,model,metric,M,delta,target_fro,actual_fro,value,size_distortion,rejections,effective_iterations,runtime_sec,perturbation_type
+seed,42,lowrank_rrr_fv,type1_error,100,,,,0.08,0.03,8,100,12.47729206085205,
+seed,42,lowrank_rrr_fv,type1_error,300,,,,0.05,0.0,15,300,48.28240609169006,
+seed,42,lowrank_rrr_fv,power,300,0.1,0.1,0.1,0.07,,21,300,56.62209987640381,lowrank_fixedV
+seed,42,lowrank_rrr_fv,power,300,0.3,0.3,0.30000000000000004,0.07333333333333333,,22,300,56.27990007400513,lowrank_fixedV
+seed,42,lowrank_rrr_fv,power,300,0.5,0.5,0.5,0.11,,33,300,52.28651285171509,lowrank_fixedV
+seed,2026,lowrank_rrr_fv,type1_error,100,,,,0.09,0.039999999999999994,9,100,19.390733003616333,
+seed,2026,lowrank_rrr_fv,type1_error,300,,,,0.04666666666666667,-0.003333333333333334,14,300,54.42424201965332,
+seed,2026,lowrank_rrr_fv,power,300,0.1,0.1,0.1,0.04666666666666667,,14,300,50.2919979095459,lowrank_fixedV
+seed,2026,lowrank_rrr_fv,power,300,0.3,0.3,0.29999999999999993,0.08333333333333333,,25,300,53.54597091674805,lowrank_fixedV
+seed,2026,lowrank_rrr_fv,power,300,0.5,0.5,0.5,0.11666666666666667,,35,300,54.60048222541809,lowrank_fixedV

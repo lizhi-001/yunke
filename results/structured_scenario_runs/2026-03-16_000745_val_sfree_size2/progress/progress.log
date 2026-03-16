@@ -1,0 +1,13 @@
+[2026-03-16 00:07:45] run started | seeds=[42, 2026] B=50 M_grid=[100]
+[2026-03-16 00:07:45] seed 2026 started | jobs=5
+[2026-03-16 00:07:45] seed 42 started | jobs=5
+[2026-03-16 00:07:45]   [2026] sparse_lasso_free started
+[2026-03-16 00:07:45]   [42] sparse_lasso_free started
+[2026-03-16 00:07:45]   [2026] sparse_lasso_free/type1_M_100 start
+[2026-03-16 00:07:45]   [42] sparse_lasso_free/type1_M_100 start
+[2026-03-16 00:32:34]   [2026] sparse_lasso_free/type1_M_100 done | 1488.39s val=0.0700  [1/2]
+[2026-03-16 00:32:34]   [2026] sparse_lasso_free done | 1488.39s
+[2026-03-16 00:32:34] seed 2026 done | 1488.39s
+[2026-03-16 00:32:35]   [42] sparse_lasso_free/type1_M_100 done | 1489.31s val=0.0400  [2/2]
+[2026-03-16 00:32:35]   [42] sparse_lasso_free done | 1489.31s
+[2026-03-16 00:32:35] seed 42 done | 1489.32s

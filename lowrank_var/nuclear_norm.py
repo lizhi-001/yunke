@@ -223,13 +223,19 @@ class NuclearNormVAR:
         }
 
     def fit_rrr(self, Y: np.ndarray, p: int, rank: int,
-                include_const: bool = True) -> Dict[str, Any]:
+                include_const: bool = True,
+                V_r_fixed: Optional[np.ndarray] = None) -> Dict[str, Any]:
         """
         降秩回归（Reduced-Rank Regression）估计低秩VAR参数。
 
-        直接求解 min_{B: rank(B)≤r} ||Y_resp - X_full @ B||²_F
-        解析解：B_RRR = B_OLS @ V_r @ V_r.T
-        其中 V_r 是拟合值矩阵 Ŷ = X_full @ B_OLS 的前 r 个右奇异向量。
+        两种模式：
+        1. 自适应模式（V_r_fixed=None）：标准 RRR 解析解
+           B_RRR = B_OLS @ V_r @ V_r.T
+           其中 V_r 是拟合值矩阵 Ŷ = X_full @ B_OLS 的前 r 个右奇异向量。
+        2. 行空间固定模式（V_r_fixed 提供）：
+           固定 Φ 的行空间基 V_r（rank × Np），将 x_t 投影为因子
+           z_t = V_r @ x_t，再用 OLS 估计载荷 Λ，重构 Φ = Λ @ V_r。
+           类比稀疏场景中的固定支撑集（fixed support）。
 
         参考文献：
         - Anderson (1951). Estimating linear restrictions on regression
@@ -246,44 +252,79 @@ class NuclearNormVAR:
             目标秩
         include_const : bool
             是否包含常数项
+        V_r_fixed : np.ndarray, optional
+            预先指定的行空间正交基（形状 rank × N*p）。
+            若提供，则固定因子构成 z_t = V_r @ x_t，仅估计载荷 Λ。
 
         Returns
         -------
         Dict[str, Any]
-            估计结果（与 fit_svd 返回格式一致）
+            估计结果（与 fit_svd 返回格式一致），额外含 'V_r' 键
         """
         T, N = Y.shape
         X, Y_response = self.build_design_matrix(Y, p)
         T_eff = T - p
 
-        if include_const:
-            X_full = np.column_stack([np.ones(T_eff), X])
+        if V_r_fixed is not None:
+            # ── 行空间固定模式 ──────────────────────────────────
+            # V_r_fixed: rank × (N*p)，Φ 行空间的正交基
+            # Φ = Λ @ V_r，其中 Λ (N×rank) 为待估计载荷矩阵
+            # 等价于 y_t = c + Λ @ z_t + ε_t，z_t = V_r @ x_t
+            Vr = V_r_fixed                                  # rank × (N*p)
+            Z = X @ Vr.T                                    # T_eff × rank
+
+            if include_const:
+                Z_full = np.column_stack([np.ones(T_eff), Z])
+            else:
+                Z_full = Z
+
+            B_factor = np.linalg.lstsq(Z_full, Y_response, rcond=None)[0]
+
+            if include_const:
+                self.c_hat = B_factor[0, :]
+                Lambda_hat = B_factor[1:, :].T               # N × rank
+            else:
+                self.c_hat = np.zeros(N)
+                Lambda_hat = B_factor.T                      # N × rank
+
+            self.Phi_hat = Lambda_hat @ Vr                   # N × (N*p)
+            self.rank = rank
+
+            Y_fitted = Z_full @ B_factor
+            self.residuals = Y_response - Y_fitted
+
+            V_r_out = Vr                                     # rank × (N*p)
         else:
-            X_full = X
+            # ── 自适应模式 ─────────────────────────────────────
+            if include_const:
+                X_full = np.column_stack([np.ones(T_eff), X])
+            else:
+                X_full = X
 
-        # OLS 估计
-        B_ols = np.linalg.lstsq(X_full, Y_response, rcond=None)[0]  # K × N
-        Y_hat = X_full @ B_ols                                       # T_eff × N
+            # OLS 估计
+            B_ols = np.linalg.lstsq(X_full, Y_response, rcond=None)[0]  # K × N
+            Y_hat = X_full @ B_ols                                       # T_eff × N
 
-        # 拟合值矩阵的 SVD；V_r 张成最优 rank 维响应子空间
-        _, s_yhat, Vt_yhat = svd(Y_hat, full_matrices=False)
-        V_r = Vt_yhat[:rank, :].T                                    # N × rank
+            # 从拟合值 SVD 中选取列空间基 V_r（N × rank）
+            _, s_yhat, Vt_yhat = svd(Y_hat, full_matrices=False)
+            V_r = Vt_yhat[:rank, :].T                                # N × rank
 
-        # 降秩投影：将 B_OLS 各列投影到 V_r 子空间
-        B_rrr = B_ols @ (V_r @ V_r.T)                               # K × N
+            # 降秩投影：将 B_OLS 各列投影到 V_r 子空间
+            B_rrr = B_ols @ (V_r @ V_r.T)                               # K × N
 
-        if include_const:
-            self.c_hat = B_rrr[0, :]
-            self.Phi_hat = B_rrr[1:, :].T                            # N × (N*p)
-        else:
-            self.c_hat = np.zeros(N)
-            self.Phi_hat = B_rrr.T
+            if include_const:
+                self.c_hat = B_rrr[0, :]
+                self.Phi_hat = B_rrr[1:, :].T                            # N × (N*p)
+            else:
+                self.c_hat = np.zeros(N)
+                self.Phi_hat = B_rrr.T
 
-        self.rank = rank
+            self.rank = rank
 
-        # 残差
-        Y_fitted = X_full @ B_rrr
-        self.residuals = Y_response - Y_fitted
+            Y_fitted = X_full @ B_rrr
+            self.residuals = Y_response - Y_fitted
+
+            V_r_out = V_r                                    # N × rank
 
         # 残差协方差
         self.Sigma_hat = (self.residuals.T @ self.residuals) / T_eff
@@ -305,7 +346,8 @@ class NuclearNormVAR:
             'log_likelihood': log_likelihood,
             'rank': self.rank,
             'T_eff': T_eff,
-            'singular_values': s_phi
+            'singular_values': s_phi,
+            'V_r': V_r_out,
         }
 
     def fit(self, Y: np.ndarray, p: int, method: str = 'cvxpy',

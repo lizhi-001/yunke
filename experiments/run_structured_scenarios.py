@@ -55,7 +55,7 @@ from lowrank_var import LowRankMonteCarloSimulation             # noqa: E402
 # 固定实验参数
 # ---------------------------------------------------------------------------
 _T: int = 500
-_p: int = 1
+_p: int = 3
 _t: int = 250
 
 _N_BASELINE: int = 10   # 第一层：OLS 基准
@@ -69,14 +69,21 @@ _RRR_RANK:        int   = 2      # RRR 目标秩（匹配真实 rank）
 _LOWRANK_TARGET_SR: float = 0.40 # 低秩 DGP 目标谱半径（直接控制，消除 seed 间方差）
 
 # 系数矩阵 scale（随 N 自适应）
-def _dense_scale(N: int) -> float: return min(0.3, 0.85 / N ** 0.5)
+def _dense_scale(N: int, p: int = 1) -> float: return min(0.3, 0.85 / (N * p) ** 0.5)
 
-# 模型执行顺序
+# 默认模型执行顺序
 MODEL_EXECUTION_ORDER: Tuple[str, ...] = (
+    "sparse_lasso",    # 第二层：稀疏 LR+Bootstrap（优先，方便观察校准效果）
+    "lowrank_rrr",     # 第三层：低秩 LR+Bootstrap
     "baseline_ols_f",  # 第一层：F 检验
     "baseline_ols",    # 第一层：LR+Bootstrap
-    "sparse_lasso",    # 第二层：稀疏 LR+Bootstrap
-    "lowrank_rrr",     # 第三层：低秩 LR+Bootstrap
+)
+
+# 所有可用模型（含扩展实验）
+ALL_AVAILABLE_MODELS: Tuple[str, ...] = MODEL_EXECUTION_ORDER + (
+    "lowrank_rrr_fv",    # 第三层扩展：低秩固定秩空间（载荷矩阵检验）
+    "lowrank_rrr_rp",    # 第三层扩展：低秩随机载荷扰动（自适应 RRR）
+    "sparse_lasso_free", # 第二层扩展：稀疏自适应支撑（支撑集可变）
 )
 
 # 作业优先级（慢模型优先分配资源）
@@ -274,6 +281,52 @@ def build_phi2_uniform(phi: np.ndarray, target_fro: float, shrink: float = 0.9, 
     return candidate, VARDataGenerator.check_stationarity(candidate), attempts, actual_fro
 
 
+def build_phi2_random(phi: np.ndarray, target_fro: float, shrink: float = 0.9, max_attempts: int = 30,
+                      rng: np.random.Generator | None = None) -> Tuple[np.ndarray, bool, int, float]:
+    """全元素随机高斯方向扰动：ΔΦ ~ N(0,1)^{N×Np}，归一化后缩放到 ||ΔΦ||_F = δ。
+
+    与 uniform 扰动（固定全 1 方向）不同，每次调用产生不同的随机扰动方向，
+    适用于自适应支撑场景（sparse_lasso_free），消除方向固定导致的偏倚。
+    """
+    _rng = rng if rng is not None else np.random.default_rng()
+    direction = _rng.standard_normal(phi.shape)
+    direction /= float(np.linalg.norm(direction, 'fro'))
+    scale = float(target_fro)
+    candidate = phi + scale * direction
+    attempts = 0
+    while not VARDataGenerator.check_stationarity(candidate) and attempts < max_attempts:
+        scale *= shrink
+        candidate = phi + scale * direction
+        attempts += 1
+    actual_fro = float(np.linalg.norm(candidate - phi))
+    return candidate, VARDataGenerator.check_stationarity(candidate), attempts, actual_fro
+
+
+def build_phi2_sparse_random(phi: np.ndarray, target_fro: float, shrink: float = 0.9, max_attempts: int = 30,
+                             rng: np.random.Generator | None = None) -> Tuple[np.ndarray, bool, int, float]:
+    """支撑集内随机高斯方向扰动：仅在非零元素位置施加随机扰动，零元素保持不变。
+
+    结合支撑集保持（稀疏估计可完整感知扰动）与随机方向（无固定方向偏倚），
+    有效扰动比例 = 100%（全部落在支撑集内）。
+    """
+    support_mask = np.abs(phi) > 1e-10
+    if not support_mask.any():
+        return build_phi2_random(phi, target_fro, shrink, max_attempts, rng)
+    _rng = rng if rng is not None else np.random.default_rng()
+    direction = np.zeros_like(phi, dtype=float)
+    direction[support_mask] = _rng.standard_normal(support_mask.sum())
+    direction /= float(np.linalg.norm(direction, 'fro'))
+    scale = float(target_fro)
+    candidate = phi + scale * direction
+    attempts = 0
+    while not VARDataGenerator.check_stationarity(candidate) and attempts < max_attempts:
+        scale *= shrink
+        candidate = phi + scale * direction
+        attempts += 1
+    actual_fro = float(np.linalg.norm(candidate - phi))
+    return candidate, VARDataGenerator.check_stationarity(candidate), attempts, actual_fro
+
+
 def build_phi2_sparse(phi: np.ndarray, target_fro: float, shrink: float = 0.9, max_attempts: int = 30) -> Tuple[np.ndarray, bool, int, float]:
     """稀疏扰动：仅在 φ 的非零支撑集上施加扰动，匹配稀疏场景。"""
     support = (np.abs(phi) > 1e-10).astype(float)
@@ -315,6 +368,40 @@ def build_phi2_lowrank(phi: np.ndarray, target_fro: float, rank: int = 2, shrink
     return candidate, VARDataGenerator.check_stationarity(candidate), attempts, actual_fro
 
 
+def build_phi2_lowrank_fixedV(phi: np.ndarray, target_fro: float, rank: int = 2, shrink: float = 0.9, max_attempts: int = 30,
+                              rng: np.random.Generator | None = None) -> Tuple[np.ndarray, bool, int, float]:
+    """载荷矩阵扰动：保持因子构成 V_r 不变，在载荷矩阵 Λ=UΣ 空间内施加随机扰动。
+
+    因子模型视角：Phi = Λ V_r，其中 Λ ∈ R^{N×r} 为载荷矩阵，V_r 为因子构成矩阵。
+    - 因子构成 V_r：不变（潜在因子是滞后变量的哪种线性组合不改变）
+    - 载荷矩阵 Λ：发生变化（因子对观测变量的影响方式改变）
+
+    扰动方向：ΔΛ ~ N(0,1)^{N×r}，归一化后乘以目标范数 δ。
+    由于 V_r 行正交（V_r V_r' = I_r），||ΔΦ||_F = ||ΔΛ||_F，范数控制简洁。
+    """
+    _, _, Vt = np.linalg.svd(phi, full_matrices=False)
+    Vr = Vt[:rank, :]   # r × N*p，因子构成矩阵（行正交）
+
+    N = phi.shape[0]
+    # 随机载荷扰动方向：N×r 高斯随机矩阵，归一化使 ||ΔΛ||_F = 1
+    _rng = rng if rng is not None else np.random.default_rng()
+    Lambda_dir = _rng.standard_normal((N, rank))
+    Lambda_dir /= float(np.linalg.norm(Lambda_dir, 'fro'))
+    # 对应的系数矩阵扰动方向：ΔΦ = ΔΛ @ V_r，由 V_r 行正交知 ||direction||_F = 1
+    direction = Lambda_dir @ Vr   # N × N*p
+
+    scale = float(target_fro)
+    candidate = phi + scale * direction
+    attempts = 0
+    while not VARDataGenerator.check_stationarity(candidate) and attempts < max_attempts:
+        scale *= shrink
+        candidate = phi + scale * direction
+        attempts += 1
+
+    actual_fro = float(np.linalg.norm(candidate - phi))
+    return candidate, VARDataGenerator.check_stationarity(candidate), attempts, actual_fro
+
+
 def scale_base_delta_to_target_fro(phi: np.ndarray, base_delta: float) -> float:
     return float(base_delta)
 
@@ -343,11 +430,21 @@ def _ols_f_mc(M, B, seed, jobs, _ignored):
     return MonteCarloSimulation(M=M, B=B, seed=seed, n_jobs=jobs, baseline_pvalue_method="asymptotic_f")
 
 def _lasso_mc(M, B, seed, jobs, _ignored):
-    return SparseMonteCarloSimulation(M=M, B=B, seed=seed, estimator_type="lasso", alpha=_LASSO_ALPHA,
-                                      post_lasso_ols=False, n_jobs=jobs)
+    return SparseMonteCarloSimulation(M=M, B=B, seed=seed, estimator_type="lasso", alpha=None,
+                                      fixed_support=True, n_jobs=jobs)
+
+def _lasso_free_mc(M, B, seed, jobs, _ignored):
+    """稀疏自由扰动：每次拟合独立选支撑集（支撑集在断点前后可变）"""
+    return SparseMonteCarloSimulation(M=M, B=B, seed=seed, estimator_type="lasso", alpha=None,
+                                      fixed_support=False, n_jobs=jobs)
 
 def _rrr_mc(M, B, seed, jobs, _ignored):
     return LowRankMonteCarloSimulation(M=M, B=B, seed=seed, method="rrr", rank=_RRR_RANK, n_jobs=jobs)
+
+def _rrr_fv_mc(M, B, seed, jobs, _ignored):
+    """低秩固定空间：从全样本选定 V_r 后所有拟合共用同一秩空间"""
+    return LowRankMonteCarloSimulation(M=M, B=B, seed=seed, method="rrr", rank=_RRR_RANK,
+                                       fixed_space=True, n_jobs=jobs)
 
 
 # ===========================================================================
@@ -367,7 +464,7 @@ def get_model_setup(model_name: str, seed: int) -> Dict[str, Any]:
     if model_name == "baseline_ols":
         N, T, p, t = _N_BASELINE, _T, _p, _t
         gen = VARDataGenerator(seed=seed)
-        phi = gen.generate_stationary_phi(N, p, scale=_dense_scale(N))
+        phi = gen.generate_stationary_phi(N, p, scale=_dense_scale(N, p))
         Sigma = np.eye(N) * 0.5
         return {
             "model": model_name, "N": N, "T": T, "p": p, "t": t,
@@ -383,7 +480,7 @@ def get_model_setup(model_name: str, seed: int) -> Dict[str, Any]:
     if model_name == "baseline_ols_f":
         N, T, p, t = _N_BASELINE, _T, _p, _t
         gen = VARDataGenerator(seed=seed)          # 与 baseline_ols 相同 seed + 相同调用 → 相同 φ
-        phi = gen.generate_stationary_phi(N, p, scale=_dense_scale(N))
+        phi = gen.generate_stationary_phi(N, p, scale=_dense_scale(N, p))
         Sigma = np.eye(N) * 0.5
         return {
             "model": model_name, "N": N, "T": T, "p": p, "t": t,
@@ -402,12 +499,12 @@ def get_model_setup(model_name: str, seed: int) -> Dict[str, Any]:
     if model_name == "sparse_lasso":
         N, T, p, t = _N_SPARSE, _T, _p, _t
         gen = VARDataGenerator(seed=seed)
-        phi = gen.generate_stationary_phi(N, p, sparsity=_SPARSE_SPARSITY, scale=_dense_scale(N))
+        phi = gen.generate_stationary_phi(N, p, sparsity=_SPARSE_SPARSITY, scale=_dense_scale(N, p))
         Sigma = np.eye(N) * 0.5
         return {
             "model": model_name, "N": N, "T": T, "p": p, "t": t,
             "Sigma": Sigma, "phi": phi,
-            "extra_parameters": {"pvalue_method": "bootstrap_lr", "sparsity": _SPARSE_SPARSITY, "lasso_alpha": _LASSO_ALPHA},
+            "extra_parameters": {"pvalue_method": "bootstrap_lr", "estimator": "fixed_support_post_lasso_ols", "sparsity": _SPARSE_SPARSITY, "lasso_alpha": "cv"},
             "mc_factory": _lasso_mc,
             "type1_fn": lambda mc, phi_mat, sigma, alpha, _N=N, _T=T, _p=p, _t=t:
                 mc.evaluate_type1_error(_N, _T, _p, phi_mat, sigma, t=_t, test_alpha=alpha, verbose=False),
@@ -435,22 +532,98 @@ def get_model_setup(model_name: str, seed: int) -> Dict[str, Any]:
                 mc.evaluate_power(_N, _T, _p, phi1, phi2, sigma, break_point=_t, t=_t, test_alpha=alpha, verbose=False),
         }
 
+    # ------------------------------------------------------------------
+    # 第三层扩展：低秩固定秩空间（rank-space preserving perturbation + fixed V_r）
+    # ------------------------------------------------------------------
+    if model_name == "lowrank_rrr_fv":
+        N, T, p, t = _N_LOWRANK, _T, _p, _t
+        gen = VARDataGenerator(seed=seed)
+        phi = gen.generate_lowrank_phi(N, p, rank=_LOWRANK_RANK, scale=0.3,
+                                       target_spectral_radius=_LOWRANK_TARGET_SR)
+        Sigma = np.eye(N) * 0.5
+        return {
+            "model": model_name, "N": N, "T": T, "p": p, "t": t,
+            "Sigma": Sigma, "phi": phi,
+            "extra_parameters": {"pvalue_method": "bootstrap_lr", "rank": _RRR_RANK,
+                                 "estimator": "fixed_space_rrr"},
+            "mc_factory": _rrr_fv_mc,
+            "type1_fn": lambda mc, phi_mat, sigma, alpha, _N=N, _T=T, _p=p, _t=t:
+                mc.evaluate_type1_error(_N, _T, _p, phi_mat, sigma, t=_t, test_alpha=alpha, verbose=False),
+            "power_fn": lambda mc, phi1, phi2, sigma, alpha, _N=N, _T=T, _p=p, _t=t:
+                mc.evaluate_power(_N, _T, _p, phi1, phi2, sigma, break_point=_t, t=_t, test_alpha=alpha, verbose=False),
+        }
+
+    # ------------------------------------------------------------------
+    # 第三层扩展：低秩随机载荷扰动 + 自适应 RRR
+    # ------------------------------------------------------------------
+    if model_name == "lowrank_rrr_rp":
+        N, T, p, t = _N_LOWRANK, _T, _p, _t
+        gen = VARDataGenerator(seed=seed)
+        phi = gen.generate_lowrank_phi(N, p, rank=_LOWRANK_RANK, scale=0.3,
+                                       target_spectral_radius=_LOWRANK_TARGET_SR)
+        Sigma = np.eye(N) * 0.5
+        return {
+            "model": model_name, "N": N, "T": T, "p": p, "t": t,
+            "Sigma": Sigma, "phi": phi,
+            "extra_parameters": {"pvalue_method": "bootstrap_lr", "rank": _RRR_RANK,
+                                 "estimator": "adaptive_rrr", "perturbation": "random_loading"},
+            "mc_factory": _rrr_mc,
+            "type1_fn": lambda mc, phi_mat, sigma, alpha, _N=N, _T=T, _p=p, _t=t:
+                mc.evaluate_type1_error(_N, _T, _p, phi_mat, sigma, t=_t, test_alpha=alpha, verbose=False),
+            "power_fn": lambda mc, phi1, phi2, sigma, alpha, _N=N, _T=T, _p=p, _t=t:
+                mc.evaluate_power(_N, _T, _p, phi1, phi2, sigma, break_point=_t, t=_t, test_alpha=alpha, verbose=False),
+        }
+
+    # ------------------------------------------------------------------
+    # 第二层扩展：稀疏自由扰动（support-changing perturbation + adaptive support）
+    # ------------------------------------------------------------------
+    if model_name == "sparse_lasso_free":
+        N, T, p, t = _N_SPARSE, _T, _p, _t
+        gen = VARDataGenerator(seed=seed)
+        phi = gen.generate_stationary_phi(N, p, sparsity=_SPARSE_SPARSITY, scale=_dense_scale(N, p))
+        Sigma = np.eye(N) * 0.5
+        return {
+            "model": model_name, "N": N, "T": T, "p": p, "t": t,
+            "Sigma": Sigma, "phi": phi,
+            "extra_parameters": {"pvalue_method": "bootstrap_lr",
+                                 "estimator": "adaptive_lasso", "sparsity": _SPARSE_SPARSITY,
+                                 "lasso_alpha": "cv", "fixed_support": False},
+            "mc_factory": _lasso_free_mc,
+            "type1_fn": lambda mc, phi_mat, sigma, alpha, _N=N, _T=T, _p=p, _t=t:
+                mc.evaluate_type1_error(_N, _T, _p, phi_mat, sigma, t=_t, test_alpha=alpha, verbose=False),
+            "power_fn": lambda mc, phi1, phi2, sigma, alpha, _N=N, _T=T, _p=p, _t=t:
+                mc.evaluate_power(_N, _T, _p, phi1, phi2, sigma, break_point=_t, t=_t, test_alpha=alpha, verbose=False),
+        }
+
     raise ValueError(f"未知模型：{model_name}")
 
 
 def _get_perturbation_type(model_name: str) -> str:
+    if model_name == "sparse_lasso_free":
+        return "random"             # 全元素随机扰动：支撑集可变
+    if model_name == "sparse_lasso":
+        return "sparse_random"      # 支撑集内随机扰动：仅非零元素上高斯随机
     if "sparse" in model_name:
-        return "sparse"
+        return "sparse"             # 支撑集固定方向扰动（兜底）
+    if model_name in ("lowrank_rrr_fv", "lowrank_rrr_rp"):
+        return "lowrank_fixedV"     # 随机载荷矩阵扰动：保持 V_r 不变
     if "lowrank" in model_name:
-        return "lowrank"
+        return "lowrank"            # 子空间内扰动（原始方式）
     return "uniform"
 
 
-def _build_phi2(phi: np.ndarray, target_fro: float, perturbation_type: str) -> Tuple[np.ndarray, bool, int, float]:
+def _build_phi2(phi: np.ndarray, target_fro: float, perturbation_type: str,
+                rng: np.random.Generator | None = None) -> Tuple[np.ndarray, bool, int, float]:
+    if perturbation_type == "sparse_random":
+        return build_phi2_sparse_random(phi, target_fro, rng=rng)
     if perturbation_type == "sparse":
         return build_phi2_sparse(phi, target_fro)
     if perturbation_type == "lowrank":
         return build_phi2_lowrank(phi, target_fro, rank=_RRR_RANK)
+    if perturbation_type == "lowrank_fixedV":
+        return build_phi2_lowrank_fixedV(phi, target_fro, rank=_RRR_RANK, rng=rng)
+    if perturbation_type == "random":
+        return build_phi2_random(phi, target_fro, rng=rng)
     return build_phi2_uniform(phi, target_fro)
 
 
@@ -525,13 +698,14 @@ def run_model_for_seed(
     power_M = cfg.power_M
     if not cfg.skip_power:
         mc = setup["mc_factory"](power_M, cfg.B, seed, model_jobs, None)
+        perturbation_rng = np.random.default_rng(seed)  # 可复现的扰动随机数
         for base_delta in cfg.deltas:
             stage_name = f"power_delta_{base_delta:.2f}"
             target_fro = scale_base_delta_to_target_fro(phi, base_delta)
             if tracker is not None:
                 tracker.start_stage(seed, model_name, stage_name, task="power", M=int(power_M), base_delta=float(base_delta), target_fro=float(target_fro))
 
-            phi2, ok, shrinks, actual_fro = _build_phi2(phi, target_fro, perturbation_type)
+            phi2, ok, shrinks, actual_fro = _build_phi2(phi, target_fro, perturbation_type, rng=perturbation_rng)
             if not ok:
                 skipped = {
                     "M": int(power_M), "delta": float(base_delta),
@@ -688,8 +862,11 @@ def _agg_numeric(values: Sequence[float]) -> Dict[str, float]:
 
 
 def aggregate_results(seed_results: Dict[str, Dict[str, Any]], cfg: ExperimentConfig) -> Dict[str, Any]:
+    # Use models actually present in results, not the hardcoded execution order
+    first_seed = str(cfg.seeds[0])
+    run_models = [m for m in ALL_AVAILABLE_MODELS if m in seed_results[first_seed]["models"]]
     models: Dict[str, Any] = {}
-    for model_name in MODEL_EXECUTION_ORDER:
+    for model_name in run_models:
         type1_by_M = []
         if not cfg.skip_type1:
             for M in cfg.M_grid:
@@ -720,7 +897,8 @@ def aggregate_results(seed_results: Dict[str, Dict[str, Any]], cfg: ExperimentCo
                 })
 
         power_curve = []
-        for delta in cfg.deltas:
+        if not cfg.skip_power:
+          for delta in cfg.deltas:
             rows = [
                 next(r for r in seed_results[str(s)]["models"][model_name]["power_curve"] if abs(r["delta"] - delta) < 1e-12)
                 for s in cfg.seeds
@@ -757,7 +935,7 @@ def aggregate_results(seed_results: Dict[str, Dict[str, Any]], cfg: ExperimentCo
 def build_raw_rows(seed_results: Dict[str, Dict[str, Any]]) -> List[Dict[str, Any]]:
     rows = []
     for seed, sb in seed_results.items():
-        for model_name in MODEL_EXECUTION_ORDER:
+        for model_name in sb["models"]:
             block = sb["models"][model_name]
             for r in block["type1_error_by_M"]:
                 rows.append({
@@ -790,7 +968,7 @@ def build_raw_rows(seed_results: Dict[str, Dict[str, Any]]) -> List[Dict[str, An
 
 def build_aggregate_rows(agg: Dict[str, Any]) -> List[Dict[str, Any]]:
     rows = []
-    for model_name in MODEL_EXECUTION_ORDER:
+    for model_name in agg["models"]:
         block = agg["models"][model_name]
         for r in block["type1_error_by_M"]:
             rows.append({
@@ -878,7 +1056,10 @@ def write_markdown_report(results: Dict[str, Any], path: str) -> None:
         "baseline_ols_f": "第一层",
         "baseline_ols": "第一层",
         "sparse_lasso": "第二层",
+        "sparse_lasso_free": "第二层",
         "lowrank_rrr":  "第三层",
+        "lowrank_rrr_fv": "第三层",
+        "lowrank_rrr_rp": "第三层",
     }
     for m in MODEL_EXECUTION_ORDER:
         row = next((r for r in agg[m]["type1_error_by_M"] if r["M"] == size_M), None)
@@ -908,8 +1089,11 @@ def write_markdown_report(results: Dict[str, Any], path: str) -> None:
     role_map = {
         "baseline_ols_f": "普通多元时间序列 F 检验基准",
         "baseline_ols":   "LR+Bootstrap（与 F 检验对比）",
-        "sparse_lasso":   "高维稀疏 LR+Bootstrap",
-        "lowrank_rrr":    "高维低秩 RRR+LR+Bootstrap",
+        "sparse_lasso":   "高维稀疏 LR+Bootstrap（固定支撑）",
+        "sparse_lasso_free": "高维稀疏 LR+Bootstrap（自适应支撑）",
+        "lowrank_rrr":    "高维低秩 RRR+LR+Bootstrap（自适应空间）",
+        "lowrank_rrr_fv": "高维低秩 RRR+LR+Bootstrap（固定空间，随机载荷扰动）",
+        "lowrank_rrr_rp": "高维低秩 RRR+LR+Bootstrap（自适应空间，随机载荷扰动）",
     }
     for m in MODEL_EXECUTION_ORDER:
         pc = agg[m]["power_curve"]
@@ -921,9 +1105,13 @@ def write_markdown_report(results: Dict[str, Any], path: str) -> None:
             sr = next((r for r in t1_rows if r["M"] == size_M), t1_rows[-1])
             size_str = f"size@M={size_M}={sr['value_mean']:.4f}; "
         final = pc[-1] if pc else {}
+        if final:
+            power_str = f"power@δ={final.get('delta', float('nan')):.2f}={final.get('power_mean', float('nan')):.4f}; "
+        else:
+            power_str = "power=N/A (skipped); "
         lines.append(
             f"- **{m}** [{role_map.get(m, layer_map.get(m, '?'))}]: {size_str}"
-            f"power@δ={final.get('delta', '?'):.2f}={final.get('power_mean', math.nan):.4f}; "
+            f"{power_str}"
             f"power单调={'✓' if mono else '✗'}"
         )
 
@@ -967,12 +1155,11 @@ def main() -> None:
     )
 
     # 支持只跑部分模型（覆盖全局 MODEL_EXECUTION_ORDER）
-    _all_models = MODEL_EXECUTION_ORDER
-    active_models = tuple(args.models) if args.models else _all_models
+    active_models = tuple(args.models) if args.models else MODEL_EXECUTION_ORDER
     if args.models:
-        unknown = [m for m in args.models if m not in _all_models]
+        unknown = [m for m in args.models if m not in ALL_AVAILABLE_MODELS]
         if unknown:
-            parser.error(f"未知模型：{unknown}。可选：{list(_all_models)}")
+            parser.error(f"未知模型：{unknown}。可选：{list(ALL_AVAILABLE_MODELS)}")
     globals()["MODEL_EXECUTION_ORDER"] = active_models
 
     # 输出目录

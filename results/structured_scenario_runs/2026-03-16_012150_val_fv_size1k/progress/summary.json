@@ -1,0 +1,11 @@
+{
+  "updated_at": "2026-03-16 01:26:05",
+  "completed_stage_count": 2,
+  "total_stage_count": 2,
+  "progress_ratio": 1.0,
+  "active_stages": [],
+  "completed_stages": [
+    "seed_42/lowrank_rrr_fv/type1_M_1000",
+    "seed_2026/lowrank_rrr_fv/type1_M_1000"
+  ]
+}

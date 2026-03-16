@@ -20,7 +20,7 @@ def _iteration_seed(base_seed: Optional[int], iteration: int) -> Optional[int]:
 
 
 def _type1_worker(task):
-    seed, N, T, p, Phi, Sigma, t, test_alpha, B, estimator_type, alpha, post_lasso_ols = task
+    seed, N, T, p, Phi, Sigma, t, test_alpha, B, estimator_type, alpha, post_lasso_ols, fixed_support = task
     if seed is not None:
         np.random.seed(seed)
 
@@ -28,7 +28,8 @@ def _type1_worker(task):
     try:
         Y = generator.generate_var_series(T, N, p, Phi, Sigma)
         bootstrap = SparseBootstrapInference(B=B, estimator_type=estimator_type, alpha=alpha,
-                                             post_lasso_ols=post_lasso_ols)
+                                             post_lasso_ols=post_lasso_ols,
+                                             fixed_support=fixed_support)
         result = bootstrap.test(Y, p, t, alpha=test_alpha)
         return {'success': True, 'p_value': result['p_value'], 'reject_h0': result['reject_h0']}
     except Exception:
@@ -36,7 +37,7 @@ def _type1_worker(task):
 
 
 def _power_worker(task):
-    seed, N, T, p, Phi1, Phi2, Sigma, break_point, t, test_alpha, B, estimator_type, alpha, post_lasso_ols = task
+    seed, N, T, p, Phi1, Phi2, Sigma, break_point, t, test_alpha, B, estimator_type, alpha, post_lasso_ols, fixed_support = task
     if seed is not None:
         np.random.seed(seed)
 
@@ -44,7 +45,8 @@ def _power_worker(task):
     try:
         Y, _ = generator.generate_var_with_break(T, N, p, Phi1, Phi2, Sigma, break_point)
         bootstrap = SparseBootstrapInference(B=B, estimator_type=estimator_type, alpha=alpha,
-                                             post_lasso_ols=post_lasso_ols)
+                                             post_lasso_ols=post_lasso_ols,
+                                             fixed_support=fixed_support)
         result = bootstrap.test(Y, p, t, alpha=test_alpha)
         return {'success': True, 'p_value': result['p_value'], 'reject_h0': result['reject_h0']}
     except Exception:
@@ -56,7 +58,8 @@ class SparseMonteCarloSimulation:
 
     def __init__(self, M: int = 1000, B: int = 500, seed: Optional[int] = None,
                  estimator_type: str = 'lasso', alpha: Optional[float] = None,
-                 post_lasso_ols: bool = False, n_jobs: int = 1):
+                 post_lasso_ols: bool = False, fixed_support: bool = False,
+                 n_jobs: int = 1):
         """
         初始化蒙特卡洛仿真
 
@@ -73,7 +76,9 @@ class SparseMonteCarloSimulation:
         alpha : float, optional
             正则化参数
         post_lasso_ols : bool
-            是否使用Post-Lasso OLS残差做bootstrap（默认True，修正Lasso压缩偏差）
+            是否使用逐次 Post-Lasso OLS（已弃用，用 fixed_support 替代）
+        fixed_support : bool
+            固定支撑 Post-Lasso OLS：全样本选一次支撑，H0/H1/bootstrap 统一使用 OLS on S
         """
         self.M = M
         self.B = B
@@ -81,6 +86,7 @@ class SparseMonteCarloSimulation:
         self.estimator_type = estimator_type
         self.alpha = alpha
         self.post_lasso_ols = post_lasso_ols
+        self.fixed_support = fixed_support
         self.n_jobs = max(1, n_jobs)
 
     def _run_tasks(self, worker, tasks, verbose: bool):
@@ -140,7 +146,7 @@ class SparseMonteCarloSimulation:
         """
         tasks = [
             (_iteration_seed(self.seed, m), N, T, p, Phi, Sigma, t, test_alpha,
-             self.B, self.estimator_type, self.alpha, self.post_lasso_ols)
+             self.B, self.estimator_type, self.alpha, self.post_lasso_ols, self.fixed_support)
             for m in range(self.M)
         ]
         results = self._run_tasks(_type1_worker, tasks, verbose)
@@ -198,7 +204,7 @@ class SparseMonteCarloSimulation:
         """
         tasks = [
             (_iteration_seed(self.seed, m), N, T, p, Phi1, Phi2, Sigma, break_point,
-             t, test_alpha, self.B, self.estimator_type, self.alpha, self.post_lasso_ols)
+             t, test_alpha, self.B, self.estimator_type, self.alpha, self.post_lasso_ols, self.fixed_support)
             for m in range(self.M)
         ]
         results = self._run_tasks(_power_worker, tasks, verbose)

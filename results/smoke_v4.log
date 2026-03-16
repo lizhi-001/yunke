@@ -1,0 +1,17 @@
+输出目录：/Users/lizhi/Developer/python/yunke/results/structured_scenario_runs/2026-03-16_142606_smoke_v4
+模型：['sparse_lasso', 'lowrank_rrr_fv']
+seeds=[42, 2026]  B=100  power_M=300  jobs=10
+seeds=[42, 2026] | seed_workers=1 | job_split=[10]
+[seed 42] start (jobs=10, B=100, power_M=300)
+[seed 42] done in 739.48s
+[seed 2026] start (jobs=10, B=100, power_M=300)
+[seed 2026] done in 748.77s
+
+实验完成！耗时 1488.3s
+  JSON  ：/Users/lizhi/Developer/python/yunke/results/structured_scenario_runs/2026-03-16_142606_smoke_v4/structured_2026-03-16_142606_smoke_v4.json
+  CSV   ：/Users/lizhi/Developer/python/yunke/results/structured_scenario_runs/2026-03-16_142606_smoke_v4/structured_agg_2026-03-16_142606_smoke_v4.csv
+  报告  ：/Users/lizhi/Developer/python/yunke/results/structured_scenario_runs/2026-03-16_142606_smoke_v4/结构化场景仿真报告_2026-03-16_142606_smoke_v4.md
+
+=== Size@M=2000 / Power@δ=0.5 ===
+  sparse_lasso         size=0.0465  power=0.1417
+  lowrank_rrr_fv       size=0.0545  power=0.0733

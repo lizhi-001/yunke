@@ -1,0 +1,7 @@
+{"timestamp": "2026-03-15 00:23:44", "event": "run_started", "config": {"seeds": [42], "B": 100, "M_grid": [200], "power_M": 200, "alpha": 0.05, "deltas": [0.05, 0.1, 0.15, 0.2, 0.3, 0.5]}}
+{"timestamp": "2026-03-15 00:23:44", "event": "seed_started", "seed": 42, "jobs": 10}
+{"timestamp": "2026-03-15 00:23:44", "event": "model_started", "seed": 42, "model": "sparse_lasso", "jobs": 10}
+{"timestamp": "2026-03-15 00:23:44", "event": "stage_started", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_200", "task": "type1_error", "M": 200}
+{"timestamp": "2026-03-15 00:25:36", "event": "stage_finished", "seed": 42, "model": "sparse_lasso", "stage": "type1_M_200", "runtime_sec": 112.43399596214294, "task": "type1_error", "M": 200, "metric_value": 0.175}
+{"timestamp": "2026-03-15 00:25:36", "event": "model_finished", "seed": 42, "model": "sparse_lasso", "runtime_sec": 112.43618416786194}
+{"timestamp": "2026-03-15 00:25:36", "event": "seed_finished", "seed": 42, "runtime_sec": 112.43684983253479}

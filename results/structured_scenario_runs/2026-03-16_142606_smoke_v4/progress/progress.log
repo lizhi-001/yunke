@@ -1,0 +1,94 @@
+[2026-03-16 14:26:06] run started | seeds=[42, 2026] B=100 M_grid=[50, 100, 300, 500, 1000]
+[2026-03-16 14:26:06] seed 42 started | jobs=10
+[2026-03-16 14:26:06]   [42] sparse_lasso started
+[2026-03-16 14:26:06]   [42] sparse_lasso/type1_M_50 start
+[2026-03-16 14:26:16]   [42] sparse_lasso/type1_M_50 done | 9.82s val=0.1200  [1/40]
+[2026-03-16 14:26:16]   [42] sparse_lasso/type1_M_100 start
+[2026-03-16 14:26:33]   [42] sparse_lasso/type1_M_100 done | 16.62s val=0.0900  [2/40]
+[2026-03-16 14:26:33]   [42] sparse_lasso/type1_M_300 start
+[2026-03-16 14:27:19]   [42] sparse_lasso/type1_M_300 done | 46.27s val=0.0567  [3/40]
+[2026-03-16 14:27:19]   [42] sparse_lasso/type1_M_500 start
+[2026-03-16 14:28:35]   [42] sparse_lasso/type1_M_500 done | 76.22s val=0.0780  [4/40]
+[2026-03-16 14:28:35]   [42] sparse_lasso/type1_M_1000 start
+[2026-03-16 14:30:53]   [42] sparse_lasso/type1_M_1000 done | 137.42s val=0.0440  [5/40]
+[2026-03-16 14:30:53]   [42] sparse_lasso/power_delta_0.10 start
+[2026-03-16 14:31:38]   [42] sparse_lasso/power_delta_0.10 done | 45.56s val=0.0533  [6/40]
+[2026-03-16 14:31:38]   [42] sparse_lasso/power_delta_0.30 start
+[2026-03-16 14:32:24]   [42] sparse_lasso/power_delta_0.30 done | 45.82s val=0.0767  [7/40]
+[2026-03-16 14:32:24]   [42] sparse_lasso/power_delta_0.50 start
+[2026-03-16 14:33:10]   [42] sparse_lasso/power_delta_0.50 done | 45.58s val=0.1467  [8/40]
+[2026-03-16 14:33:10]   [42] sparse_lasso/power_delta_0.75 start
+[2026-03-16 14:33:57]   [42] sparse_lasso/power_delta_0.75 done | 47.11s val=0.3900  [9/40]
+[2026-03-16 14:33:57]   [42] sparse_lasso/power_delta_1.00 start
+[2026-03-16 14:34:44]   [42] sparse_lasso/power_delta_1.00 done | 47.42s val=0.7367  [10/40]
+[2026-03-16 14:34:44]   [42] sparse_lasso done | 517.87s
+[2026-03-16 14:34:44]   [42] lowrank_rrr_fv started
+[2026-03-16 14:34:44]   [42] lowrank_rrr_fv/type1_M_50 start
+[2026-03-16 14:34:49]   [42] lowrank_rrr_fv/type1_M_50 done | 4.73s val=0.0200  [11/40]
+[2026-03-16 14:34:49]   [42] lowrank_rrr_fv/type1_M_100 start
+[2026-03-16 14:34:56]   [42] lowrank_rrr_fv/type1_M_100 done | 7.51s val=0.0800  [12/40]
+[2026-03-16 14:34:56]   [42] lowrank_rrr_fv/type1_M_300 start
+[2026-03-16 14:35:17]   [42] lowrank_rrr_fv/type1_M_300 done | 20.37s val=0.1000  [13/40]
+[2026-03-16 14:35:17]   [42] lowrank_rrr_fv/type1_M_500 start
+[2026-03-16 14:35:49]   [42] lowrank_rrr_fv/type1_M_500 done | 32.59s val=0.0580  [14/40]
+[2026-03-16 14:35:49]   [42] lowrank_rrr_fv/type1_M_1000 start
+[2026-03-16 14:36:47]   [42] lowrank_rrr_fv/type1_M_1000 done | 57.93s val=0.0530  [15/40]
+[2026-03-16 14:36:47]   [42] lowrank_rrr_fv/power_delta_0.10 start
+[2026-03-16 14:37:07]   [42] lowrank_rrr_fv/power_delta_0.10 done | 20.20s val=0.0600  [16/40]
+[2026-03-16 14:37:07]   [42] lowrank_rrr_fv/power_delta_0.30 start
+[2026-03-16 14:37:27]   [42] lowrank_rrr_fv/power_delta_0.30 done | 19.66s val=0.0700  [17/40]
+[2026-03-16 14:37:27]   [42] lowrank_rrr_fv/power_delta_0.50 start
+[2026-03-16 14:37:47]   [42] lowrank_rrr_fv/power_delta_0.50 done | 19.62s val=0.0767  [18/40]
+[2026-03-16 14:37:47]   [42] lowrank_rrr_fv/power_delta_0.75 start
+[2026-03-16 14:38:06]   [42] lowrank_rrr_fv/power_delta_0.75 done | 19.43s val=0.0600  [19/40]
+[2026-03-16 14:38:06]   [42] lowrank_rrr_fv/power_delta_1.00 start
+[2026-03-16 14:38:26]   [42] lowrank_rrr_fv/power_delta_1.00 done | 19.54s val=0.2067  [20/40]
+[2026-03-16 14:38:26]   [42] lowrank_rrr_fv done | 221.61s
+[2026-03-16 14:38:26] seed 42 done | 739.48s
+[2026-03-16 14:38:26] seed 2026 started | jobs=10
+[2026-03-16 14:38:26]   [2026] sparse_lasso started
+[2026-03-16 14:38:26]   [2026] sparse_lasso/type1_M_50 start
+[2026-03-16 14:38:34]   [2026] sparse_lasso/type1_M_50 done | 8.75s val=0.0400  [21/40]
+[2026-03-16 14:38:34]   [2026] sparse_lasso/type1_M_100 start
+[2026-03-16 14:38:50]   [2026] sparse_lasso/type1_M_100 done | 15.80s val=0.0500  [22/40]
+[2026-03-16 14:38:50]   [2026] sparse_lasso/type1_M_300 start
+[2026-03-16 14:39:37]   [2026] sparse_lasso/type1_M_300 done | 46.37s val=0.0400  [23/40]
+[2026-03-16 14:39:37]   [2026] sparse_lasso/type1_M_500 start
+[2026-03-16 14:40:59]   [2026] sparse_lasso/type1_M_500 done | 82.00s val=0.0560  [24/40]
+[2026-03-16 14:40:59]   [2026] sparse_lasso/type1_M_1000 start
+[2026-03-16 14:43:20]   [2026] sparse_lasso/type1_M_1000 done | 141.15s val=0.0490  [25/40]
+[2026-03-16 14:43:20]   [2026] sparse_lasso/power_delta_0.10 start
+[2026-03-16 14:44:07]   [2026] sparse_lasso/power_delta_0.10 done | 46.82s val=0.0733  [26/40]
+[2026-03-16 14:44:07]   [2026] sparse_lasso/power_delta_0.30 start
+[2026-03-16 14:44:53]   [2026] sparse_lasso/power_delta_0.30 done | 46.57s val=0.0700  [27/40]
+[2026-03-16 14:44:53]   [2026] sparse_lasso/power_delta_0.50 start
+[2026-03-16 14:45:40]   [2026] sparse_lasso/power_delta_0.50 done | 46.82s val=0.1367  [28/40]
+[2026-03-16 14:45:40]   [2026] sparse_lasso/power_delta_0.75 start
+[2026-03-16 14:46:27]   [2026] sparse_lasso/power_delta_0.75 done | 46.83s val=0.3300  [29/40]
+[2026-03-16 14:46:27]   [2026] sparse_lasso/power_delta_1.00 start
+[2026-03-16 14:47:13]   [2026] sparse_lasso/power_delta_1.00 done | 45.84s val=0.7100  [30/40]
+[2026-03-16 14:47:13]   [2026] sparse_lasso done | 526.96s
+[2026-03-16 14:47:13]   [2026] lowrank_rrr_fv started
+[2026-03-16 14:47:13]   [2026] lowrank_rrr_fv/type1_M_50 start
+[2026-03-16 14:47:17]   [2026] lowrank_rrr_fv/type1_M_50 done | 4.48s val=0.0600  [31/40]
+[2026-03-16 14:47:17]   [2026] lowrank_rrr_fv/type1_M_100 start
+[2026-03-16 14:47:24]   [2026] lowrank_rrr_fv/type1_M_100 done | 7.02s val=0.1000  [32/40]
+[2026-03-16 14:47:24]   [2026] lowrank_rrr_fv/type1_M_300 start
+[2026-03-16 14:47:44]   [2026] lowrank_rrr_fv/type1_M_300 done | 19.74s val=0.0667  [33/40]
+[2026-03-16 14:47:44]   [2026] lowrank_rrr_fv/type1_M_500 start
+[2026-03-16 14:48:16]   [2026] lowrank_rrr_fv/type1_M_500 done | 32.33s val=0.0580  [34/40]
+[2026-03-16 14:48:16]   [2026] lowrank_rrr_fv/type1_M_1000 start
+[2026-03-16 14:49:15]   [2026] lowrank_rrr_fv/type1_M_1000 done | 58.52s val=0.0560  [35/40]
+[2026-03-16 14:49:15]   [2026] lowrank_rrr_fv/power_delta_0.10 start
+[2026-03-16 14:49:36]   [2026] lowrank_rrr_fv/power_delta_0.10 done | 20.83s val=0.0700  [36/40]
+[2026-03-16 14:49:36]   [2026] lowrank_rrr_fv/power_delta_0.30 start
+[2026-03-16 14:49:55]   [2026] lowrank_rrr_fv/power_delta_0.30 done | 19.87s val=0.0700  [37/40]
+[2026-03-16 14:49:55]   [2026] lowrank_rrr_fv/power_delta_0.50 start
+[2026-03-16 14:50:15]   [2026] lowrank_rrr_fv/power_delta_0.50 done | 19.70s val=0.0700  [38/40]
+[2026-03-16 14:50:15]   [2026] lowrank_rrr_fv/power_delta_0.75 start
+[2026-03-16 14:50:35]   [2026] lowrank_rrr_fv/power_delta_0.75 done | 19.66s val=0.0567  [39/40]
+[2026-03-16 14:50:35]   [2026] lowrank_rrr_fv/power_delta_1.00 start
+[2026-03-16 14:50:54]   [2026] lowrank_rrr_fv/power_delta_1.00 done | 19.63s val=0.1000  [40/40]
+[2026-03-16 14:50:54]   [2026] lowrank_rrr_fv done | 221.80s
+[2026-03-16 14:50:54] seed 2026 done | 748.77s
+[2026-03-16 14:50:54] run finished | runtime=1488.26s

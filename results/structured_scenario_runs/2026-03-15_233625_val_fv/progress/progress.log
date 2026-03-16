@@ -1,0 +1,30 @@
+[2026-03-15 23:36:25] run started | seeds=[42, 2026] B=100 M_grid=[100, 300]
+[2026-03-15 23:36:25] seed 42 started | jobs=4
+[2026-03-15 23:36:25]   [42] lowrank_rrr_fv started
+[2026-03-15 23:36:25]   [42] lowrank_rrr_fv/type1_M_100 start
+[2026-03-15 23:36:37]   [42] lowrank_rrr_fv/type1_M_100 done | 12.48s val=0.0800  [1/10]
+[2026-03-15 23:36:37]   [42] lowrank_rrr_fv/type1_M_300 start
+[2026-03-15 23:37:25]   [42] lowrank_rrr_fv/type1_M_300 done | 48.28s val=0.0500  [2/10]
+[2026-03-15 23:37:25]   [42] lowrank_rrr_fv/power_delta_0.10 start
+[2026-03-15 23:38:22]   [42] lowrank_rrr_fv/power_delta_0.10 done | 56.62s val=0.0700  [3/10]
+[2026-03-15 23:38:22]   [42] lowrank_rrr_fv/power_delta_0.30 start
+[2026-03-15 23:39:18]   [42] lowrank_rrr_fv/power_delta_0.30 done | 56.28s val=0.0733  [4/10]
+[2026-03-15 23:39:18]   [42] lowrank_rrr_fv/power_delta_0.50 start
+[2026-03-15 23:40:11]   [42] lowrank_rrr_fv/power_delta_0.50 done | 52.29s val=0.1100  [5/10]
+[2026-03-15 23:40:11]   [42] lowrank_rrr_fv done | 225.96s
+[2026-03-15 23:40:11] seed 42 done | 225.96s
+[2026-03-15 23:40:11] seed 2026 started | jobs=4
+[2026-03-15 23:40:11]   [2026] lowrank_rrr_fv started
+[2026-03-15 23:40:11]   [2026] lowrank_rrr_fv/type1_M_100 start
+[2026-03-15 23:40:30]   [2026] lowrank_rrr_fv/type1_M_100 done | 19.39s val=0.0900  [6/10]
+[2026-03-15 23:40:30]   [2026] lowrank_rrr_fv/type1_M_300 start
+[2026-03-15 23:41:24]   [2026] lowrank_rrr_fv/type1_M_300 done | 54.42s val=0.0467  [7/10]
+[2026-03-15 23:41:24]   [2026] lowrank_rrr_fv/power_delta_0.10 start
+[2026-03-15 23:42:15]   [2026] lowrank_rrr_fv/power_delta_0.10 done | 50.29s val=0.0467  [8/10]
+[2026-03-15 23:42:15]   [2026] lowrank_rrr_fv/power_delta_0.30 start
+[2026-03-15 23:43:08]   [2026] lowrank_rrr_fv/power_delta_0.30 done | 53.55s val=0.0833  [9/10]
+[2026-03-15 23:43:08]   [2026] lowrank_rrr_fv/power_delta_0.50 start
+[2026-03-15 23:44:03]   [2026] lowrank_rrr_fv/power_delta_0.50 done | 54.60s val=0.1167  [10/10]
+[2026-03-15 23:44:03]   [2026] lowrank_rrr_fv done | 232.27s
+[2026-03-15 23:44:03] seed 2026 done | 232.27s
+[2026-03-15 23:44:03] run finished | runtime=458.24s

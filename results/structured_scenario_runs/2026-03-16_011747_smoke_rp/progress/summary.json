@@ -1,0 +1,11 @@
+{
+  "updated_at": "2026-03-16 01:17:54",
+  "completed_stage_count": 2,
+  "total_stage_count": 2,
+  "progress_ratio": 1.0,
+  "active_stages": [],
+  "completed_stages": [
+    "seed_42/lowrank_rrr_rp/type1_M_50",
+    "seed_42/lowrank_rrr_rp/power_delta_0.30"
+  ]
+}
